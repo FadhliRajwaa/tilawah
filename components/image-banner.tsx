@@ -2,9 +2,13 @@
  * Berbeda dari AmbientImage (yang jadi tekstur samar), banner ini MENUNJUKKAN
  * fotonya — untuk memberi napas visual di antara seksi teks.
  *
- * Fotonya dipaku ke viewport (`fixed`): saat halaman menggulir, banner
- * bergerak di atas gambar yang diam — lapisan visual yang tenang, bukan
- * gambar yang ikut terbawa scroll.
+ * Fotonya bergerak lebih lambat dari halaman (`parallax`): saat halaman
+ * menggulir, banner meluncur di atas gambar yang tertinggal — lapisan visual
+ * yang tenang, bukan gambar yang ikut terbawa scroll.
+ *
+ * ⚠️ Dulu ini memakai `background-attachment: fixed`, dan itu TIDAK bekerja
+ * di Safari iOS (diabaikan) maupun di layar sempit (cover diukur terhadap
+ * viewport, bukan elemen). Sekarang `transform` — lihat parallax.tsx.
  */
 
 import Link from "next/link";
@@ -41,7 +45,7 @@ export function ImageBanner({
 }: Props) {
   return (
     <section className={`img-banner img-banner--${height} img-banner--${align}`}>
-      <AmbientImage variant={variant} mode="plate" intensity={1} position={position} fixed />
+      <AmbientImage variant={variant} mode="plate" intensity={1} position={position} parallax />
       <div className="img-banner__veil" aria-hidden="true" />
       <PhotoZoom variant={variant} caption={caption ?? title} position={position} />
       <div className="img-banner__body container-page">

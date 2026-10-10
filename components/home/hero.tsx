@@ -13,6 +13,7 @@ import { MihrabFrame, OrnamentStar } from "@/components/ornaments";
 import { AmbientImage } from "@/components/ambient-image";
 import { Orb } from "@/components/orb";
 import { PhotoZoom } from "@/components/photo-zoom";
+import { HeroScene } from "@/components/hero-scene";
 
 export function Hero({ totalSurah }: { totalSurah: number }) {
   return (
@@ -23,13 +24,18 @@ export function Hero({ totalSurah }: { totalSurah: number }) {
         mode="plate"
         intensity={0.85}
         position="center 38%"
-        fixed
+        parallax
         priority
       />
       {/* Fluid Orb — aksen hidup, mount ditunda 1.2s agar tidak berebut LCP */}
       <Orb size={520} color="#109BDA" className="orb-host--hero" delay={1200} />
       <div className="hero__veil" aria-hidden="true" />
       <div className="hero__bg" aria-hidden="true" />
+      {/* awan + cakrawala masjid + kafilah, tiga lapisan kedalaman.
+       * Diletakkan SETELAH veil supaya tidak ikut diredam olehnya — kalau
+       * ditaruh sebelum, veil 74–97% menelan seluruh adegan (terbukti di
+       * screenshot mobile: tidak ada satu pun siluet yang terlihat). */}
+      <HeroScene />
       <MihrabFrame className="hero__frame" />
       <PhotoZoom
         variant="hero-dome-gold"

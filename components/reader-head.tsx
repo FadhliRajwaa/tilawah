@@ -31,7 +31,7 @@ export function ReaderHead({
         mode="plate"
         intensity={intensity}
         position={position}
-        fixed
+        parallax
       />
       <div className="surah-head__veil" aria-hidden="true" />
       <CornerFlourish className="surah-head__corner surah-head__corner--tl" />

@@ -48,7 +48,7 @@ export function SiteFooter() {
           mode="plate"
           intensity={0.7}
           position="center 45%"
-          fixed
+          parallax
         />
         <div className="foot-cta__veil" aria-hidden="true" />
         <PhotoZoom

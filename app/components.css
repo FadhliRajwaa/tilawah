@@ -2820,45 +2820,43 @@ body:has(.audio-dock) main {
   opacity: 0.92;
 }
 
-/* ═══ mode tetap: foto dipaku ke viewport (efek latar diam) ═══
+/* ═══ kedalaman: foto bergerak lebih lambat dari halaman ═══
  *
- * `background-attachment: fixed` adalah satu-satunya cara yang benar untuk
- * ini. `position: fixed` TIDAK bisa dipakai: elemen fixed lolos dari
- * `overflow: hidden` milik `.ambient`, jadi fotonya menutupi seluruh layar.
- * Sementara `transform` pada leluhur memang mengurungnya, tapi sekaligus
- * memindahkan acuan sehingga efek "diam" hilang.
+ * Lihat components/parallax.tsx untuk mesinnya. Di sini hanya bentuk
+ * lapisannya:
  *
- * Dengan `background-attachment: fixed`, latar SELALU terpotong oleh kotak
- * elemennya (jadi aman di dalam header), tapi posisinya diacu ke viewport —
- * itulah efek yang diinginkan.
+ *   .ambient--px-host   wadah yang menerima transform dari JS
+ *   .ambient--px-shift  anak yang DIPERBESAR supaya tepi tidak terbuka
+ *   .ambient--px-host .ambient  kembali ke position: absolute agar <picture>
+ *                               menempel di kotak yang sudah diperbesar
  *
- * Varian responsif dipilih lewat media query, bukan atribut `sizes`:
- * peramban hanya mengunduh deklarasi yang menang, jadi tetap hemat.
- *
- * ⚠️ iOS Safari memperlakukan `fixed` sebagai `scroll` (batasan lama WebKit).
- * Itu degradasi yang wajar: fotonya tetap tampil, hanya ikut menggulir. */
-.ambient--fixed {
-  background-image: var(--amb-sm);
-  background-size: cover;
-  background-position: var(--amb-pos, center);
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  opacity: var(--ambient-opacity, 1);
-  -webkit-mask-image: var(--ambient-mask, none);
-  mask-image: var(--ambient-mask, none);
+ * Pembesaran dihitung dari `--px-travel` yang dipublikasikan mesin parallax:
+ * jangkauan gerak 0.6 × tinggi elemen, jadi skala 1 + 0.6 = 1.6 sudah lebih
+ * dari cukup. Diberi margin 1.02 supaya tidak ada celah 1px di tepi. */
+.ambient--px-host {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
 }
-@media (min-width: 700px) {
-  .ambient--fixed {
-    background-image: var(--amb-md);
-  }
+.ambient--px-shift {
+  position: absolute;
+  inset: 0;
+  display: block;
+  transform: scale(1.02);
+  /* tinggi ditambah dua kali jangkauan: sekali ke atas, sekali ke bawah */
+  height: calc(100% + var(--px-travel, 60vh) * 2);
+  top: calc(var(--px-travel, 60vh) * -1);
 }
-@media (min-resolution: 2dppx) and (min-width: 1300px) {
-  .ambient--fixed {
-    background-image: var(--amb-lg);
-  }
+.ambient--px-host .ambient {
+  position: absolute;
+  inset: 0;
 }
-/* di mode gelap foto diredam — sama seperti mode plate */
-[data-theme="dark"] .ambient--fixed {
+/* mode gelap: foto diredam, sama seperti mode plate */
+[data-theme="dark"] .ambient--px-host .ambient--plate img {
   opacity: calc(var(--ambient-opacity, 1) * 0.62);
 }
 
@@ -4431,6 +4429,155 @@ body:has(.audio-dock) main {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
+}
+
+/* ═══ adegan hero: awan + cakrawala + kafilah ═══
+ *
+ * Semua lapisan duduk di antara veil (z2) dan konten (z4), jadi tidak pernah
+ * menutupi teks — tapi juga tidak tenggelam di bawah veil.
+ *
+ * ⚠️ Cakrawala dan kafilah DIBATASI pada kaki hero (bukan `inset: 0`).
+ * Percobaan pertama memakai `inset: 0` + `bottom: 0` sehingga siluetnya
+ * tumbuh ke ATAS dari dasar — dan menabrak baris statistik "114 surah /
+ * 6.236 ayat" (terlihat jelas di screenshot desktop). Sekarang wadahnya
+ * dipatok setinggi pita bawah saja.
+ *
+ * Warnanya diambil dari token supaya ikut tema: di mode terang siluetnya biru
+ * tinta tipis (terbaca sebagai kabut jauh), di mode gelap memakai accent
+ * terang (terbaca sebagai siluet melawan langit malam). */
+.scene-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  overflow: hidden;
+}
+/* pita bawah: tempat cakrawala & kafilah berdiri.
+ *
+ * ⚠️ Dipatok PENDEK (≤132px) dan diberi mask gradien di tepi atas.
+ * Percobaan pertama memakai pita setinggi 190px tanpa mask: siluetnya tumbuh
+ * naik sampai menabrak baris statistik "114 surah / 6.236 ayat" dan mengganggu
+ * bacaan. Siluet yang bagus adalah yang terasa JAUH — dan yang jauh itu tipis,
+ * memudar di tepi atasnya, bukan blok padat bertepi keras. */
+.scene-layer--skyline,
+.scene-layer--caravan {
+  inset: auto 0 0 0;
+  height: clamp(78px, 12vw, 132px);
+  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 52%, transparent 100%);
+  mask-image: linear-gradient(to top, #000 0%, #000 52%, transparent 100%);
+}
+
+/* — awan — */
+.scene-clouds {
+  position: absolute;
+  inset: 0;
+}
+/* ⚠️ TIGA percobaan gagal sebelum ini — semuanya karena satu sebab yang sama:
+ * **awan putih tidak terlihat di atas foto hero yang juga terang.**
+ *   1. opacity 0.26–0.5, putih          → tak terlihat
+ *   2. opacity 0.38–0.72, putih         → tetap tak terlihat (putih di atas putih)
+ *   3. + belly biru 30%, blur 12px      → hanya segumpal kabut samar
+ *
+ * Yang akhirnya bekerja: awan dibuat BERWARNA, bukan putih. Warnanya biru
+ * langit (`--accent`) yang di-blend ke arah kertas — jadi ia lebih GELAP dari
+ * latar di beberapa bagian dan lebih terang di bagian lain. Kontras dua arah
+ * itulah yang membuat bentuknya terbaca, sama seperti awan sungguhan yang
+ * terlihat karena gradasi terang-gelapnya, bukan karena "putih".
+ *
+ * Blur juga diturunkan (12px → 7px): awan yang terlalu blur kehilangan tepi,
+ * dan tepi itulah yang dibaca mata sebagai bentuk. */
+.scene-cloud {
+  position: absolute;
+  display: block;
+  border-radius: 999px;
+  filter: blur(7px);
+  background:
+    /* puncak — paling terang, seperti sisi yang kena matahari */
+    radial-gradient(ellipse 46% 74% at 42% 24%, var(--cloud-top) 0%, transparent 78%),
+    radial-gradient(ellipse 38% 62% at 64% 20%, var(--cloud-top) 0%, transparent 80%),
+    /* badan — warna dasar awan */
+    radial-gradient(ellipse 56% 88% at 46% 52%, var(--cloud-body) 0%, transparent 78%),
+    radial-gradient(ellipse 44% 70% at 70% 48%, var(--cloud-body) 0%, transparent 80%),
+    /* perut — paling gelap, memberi bobot dan bentuk */
+    radial-gradient(ellipse 64% 40% at 50% 92%, var(--cloud-belly) 0%, transparent 74%);
+  /* ⚠️ Angka-angka ini ditentukan dari PENGUKURAN, bukan perkiraan.
+   *
+   * Diukur dengan canvas: awan versi sebelumnya menghasilkan rgb(231,248,253)
+   * sementara latar hero rgb(249,253,255) — selisih kanal biru hanya 2 dari
+   * 255. Itu sebabnya awan "ada di DOM tapi tak terlihat": secara matematis
+   * memang nyaris identik dengan latarnya.
+   *
+   * Sekarang perutnya memakai accent PEKAT (bukan transparan) sehingga
+   * menghasilkan selisih puluhan tingkat — cukup untuk terbaca sebagai bentuk
+   * tanpa terasa seperti noda. */
+  --cloud-top: color-mix(in oklab, var(--paper-3) 94%, var(--accent-soft));
+  --cloud-body: color-mix(in oklab, var(--paper-3) 58%, var(--accent-soft));
+  --cloud-belly: color-mix(in oklab, var(--accent) 52%, var(--paper-3));
+  animation-name: cloud-drift;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+[data-theme="dark"] .scene-cloud {
+  filter: blur(9px);
+  --cloud-top: color-mix(in oklab, var(--accent) 40%, transparent);
+  --cloud-body: color-mix(in oklab, var(--accent) 28%, transparent);
+  --cloud-belly: color-mix(in oklab, var(--accent) 54%, transparent);
+}
+/* geser halus bolak-balik — awan tidak berarak satu arah di layar diam */
+@keyframes cloud-drift {
+  from { translate: -6% 0; }
+  to   { translate: 6% 0; }
+}
+
+/* — cakrawala masjid — */
+.scene-skyline {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  /* Tipis — ini kabut cakrawala di kejauhan, bukan bangunan di depan mata.
+   * Dinaikkan sedikit dari 26% (terlalu pudar) tapi jauh di bawah 42%
+   * (menabrak teks). Mask gradien di atasnya yang menyelesaikan sisanya. */
+  color: color-mix(in oklab, var(--ink) 32%, transparent);
+}
+[data-theme="dark"] .scene-skyline {
+  color: color-mix(in oklab, var(--accent) 48%, transparent);
+}
+
+/* — kafilah — */
+.scene-caravan {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  color: color-mix(in oklab, var(--ink) 44%, transparent);
+}
+[data-theme="dark"] .scene-caravan {
+  color: color-mix(in oklab, var(--accent) 62%, transparent);
+}
+
+/* Di layar sempit adegan dirapatkan: awan besar akan memenuhi layar dan
+ * mengaburkan foto, dan kafilah setinggi 38px terlalu kecil untuk dikenali
+ * sehingga hanya jadi bercak. Yang dipertahankan: cakrawala (paling terbaca)
+ * dan awan yang diperkecil. */
+@media (max-width: 700px) {
+  .scene-cloud {
+    filter: blur(11px);
+    scale: 0.72;
+  }
+  .scene-layer--skyline,
+  .scene-layer--caravan {
+    height: clamp(62px, 17vw, 96px);
+  }
+}
+/* Di layar sangat sempit kafilah hanya jadi bercak gelap — lebih baik
+ * dihilangkan dan menyisakan cakrawala yang tetap terbaca. */
+@media (max-width: 420px) {
+  .scene-layer--caravan {
+    display: none;
+  }
 }
 
 /* ═══ perbaikan dari audit ═══

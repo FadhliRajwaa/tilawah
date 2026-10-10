@@ -49,7 +49,7 @@ export function PageHead({
         mode="plate"
         intensity={intensity}
         position={position}
-        fixed
+        parallax
         priority={priority}
       />
       {orb && <Orb size={440} color="#109BDA" className="orb-host--page" delay={900} />}

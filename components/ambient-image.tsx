@@ -4,23 +4,26 @@
  *  - "veil"   → tekstur latar (opacity rendah + veil warna) — untuk header & hero
  *  - "plate"  → foto tampil jelas sebagai panel/kartu (opacity tinggi, veil tipis)
  *  - "clean"  → foto apa adanya, tanpa veil (untuk thumbnail & galeri)
- *  - `fixed`  → foto DIAM di viewport, konten menggulir di atasnya (parallax)
+ *  - `parallax` → foto bergerak lebih lambat dari halaman (efek kedalaman)
  *
- * ⚠️ Kenapa mode `fixed` memakai background-image, bukan `<img>`:
- * `position: fixed` TIDAK bisa dipakai di sini — elemen fixed lolos dari
- * `overflow: hidden` milik `.ambient`, jadi fotonya akan menutupi seluruh
- * layar dan menutupi konten. Sementara `transform` pada leluhur memang
- * mengurungnya, tapi sekaligus mengubah acuannya sehingga efek "diam" hilang
- * (foto ikut menggulir). `background-attachment: fixed` adalah satu-satunya
- * cara yang benar: latar SELALU terpotong oleh kotak elemennya, tapi
- * posisinya diacu ke viewport.
+ * ═══ Kenapa `parallax` memakai <img> + ParallaxLayer ═══
  *
- * Konsekuensinya: varian responsif dipilih lewat media query di CSS
- * (variabel `--amb-sm/md/lg`), bukan atribut `sizes`. Berkas yang tidak
- * dipakai TIDAK diunduh — peramban hanya memuat deklarasi yang menang.
+ * Versi sebelumnya memakai `background-attachment: fixed`. Dua masalah nyata:
+ *  1. **Safari iOS mengabaikannya** (batasan WebKit) — di iPhone efeknya
+ *     tidak ada sama sekali.
+ *  2. `cover` diukur terhadap VIEWPORT, bukan elemen — di ponsel 390×844,
+ *     foto 21:9 jadi lebar 1.969px sehingga hanya ~20% tengah yang terlihat.
+ *     Karena itu efeknya lalu dimatikan di ≤700px, dan itulah yang membuat
+ *     pengguna melaporkan "fixed tidak jalan di mobile".
+ *
+ * Sekarang: `<img>` biasa yang digeser dengan `transform: translate3d()`.
+ * Bekerja identik di semua peramban, skalanya bisa dikendalikan persis, dan
+ * `object-fit: cover` mengukur terhadap ELEMEN (bukan viewport) sehingga
+ * foto tetap proporsional di layar sempit.
  */
 
 import type { CSSProperties } from "react";
+import { ParallaxLayer } from "./parallax";
 
 export type ArtVariant =
   // hero
@@ -84,8 +87,11 @@ interface Props {
   fade?: "bottom" | "sides" | "top" | "none";
   /** "veil" (default) = tekstur; "plate" = foto sebagai panel; "clean" = tanpa perlakuan */
   mode?: "veil" | "plate" | "clean";
-  /** foto diam di viewport saat halaman menggulir (efek latar tetap) */
-  fixed?: boolean;
+  /**
+   * Foto bergerak lebih lambat dari halaman (efek kedalaman).
+   * `true` = 0.6 (nyaris diam, untuk latar) · angka = kecepatan sendiri.
+   */
+  parallax?: boolean | number;
 }
 
 export function AmbientImage({
@@ -97,7 +103,7 @@ export function AmbientImage({
   style,
   fade = "none",
   mode = "veil",
-  fixed = false,
+  parallax = false,
 }: Props) {
   const v = (ALIAS[variant] ?? variant) as string;
   const [rw, rh] = RATIO[v] ?? [16, 9];
@@ -112,28 +118,7 @@ export function AmbientImage({
           ? "linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%)"
           : undefined;
 
-  /* — mode tetap: latar CSS yang dipaku ke viewport — */
-  if (fixed) {
-    return (
-      <div
-        className={`ambient ambient--fixed ${className}`.trim()}
-        style={
-          {
-            "--ambient-opacity": opacity,
-            "--amb-pos": position,
-            "--amb-sm": `url(/images/${v}-sm.webp)`,
-            "--amb-md": `url(/images/${v}-md.webp)`,
-            "--amb-lg": `url(/images/${v}-lg.webp)`,
-            ...(mask ? { "--ambient-mask": mask } : null),
-            ...style,
-          } as CSSProperties
-        }
-        aria-hidden="true"
-      />
-    );
-  }
-
-  return (
+  const img = (
     <picture
       className={`ambient ambient--${mode} ${className}`.trim()}
       style={
@@ -175,4 +160,16 @@ export function AmbientImage({
       />
     </picture>
   );
+
+  /* — mode kedalaman: gambar digeser lebih lambat dari halaman — */
+  if (parallax) {
+    const speed = parallax === true ? 0.6 : parallax;
+    return (
+      <ParallaxLayer speed={speed} className="ambient--px-host">
+        <span className="ambient--px-shift">{img}</span>
+      </ParallaxLayer>
+    );
+  }
+
+  return img;
 }
