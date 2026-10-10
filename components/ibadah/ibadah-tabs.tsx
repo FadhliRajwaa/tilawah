@@ -93,18 +93,35 @@ export function IbadahTabs({ asmaul, doa }: { asmaul: AsmaulHusnaItem[]; doa: Do
               </p>
             </div>
           ) : (
-            <div className="ah-grid">
+            /* ⚠️ Rombak: kartu kotak → medali bernomor.
+             *
+             * Versi lama adalah 99 kotak identik berisi empat baris teks
+             * bertumpuk. Bentuk itu datar dan melelahkan dipindai.
+             *
+             * Sekarang tiap nama adalah satu baris dalam daftar bernomor:
+             * nomor di medali bundar, nama Arab besar sebagai fokus, latin
+             * dan arti sebagai pendamping. Nomor ganjil diberi latar sangat
+             * tipis supaya mata bisa mengikuti baris — teknik "zebra" khas
+             * tabel cetak, bukan hiasan.
+             *
+             * Di layar lebar ia mengalir dua kolom: 99 nama jadi 50 baris,
+             * tidak perlu menggulir panjang. */
+            <ol className="asma" aria-label="99 Asmaul Husna">
               {filteredAsmaul.map((a) => (
-                <div key={a.index} className="ah-card">
-                  <p className="ah-card__no">{a.index}</p>
-                  <p className="ah-card__ar" lang="ar" dir="rtl">
-                    {a.arabic}
-                  </p>
-                  <p className="ah-card__latin">{a.latin}</p>
-                  <p className="ah-card__tr">{a.translation_id}</p>
-                </div>
+                <li key={a.index} className="asma__item">
+                  <span className="asma__no" aria-hidden="true">
+                    {a.index}
+                  </span>
+                  <span className="asma__body">
+                    <span className="asma__ar" lang="ar" dir="rtl">
+                      {a.arabic}
+                    </span>
+                    <span className="asma__latin">{a.latin}</span>
+                    <span className="asma__tr">{a.translation_id}</span>
+                  </span>
+                </li>
               ))}
-            </div>
+            </ol>
           )}
         </>
       )}
@@ -120,16 +137,21 @@ export function IbadahTabs({ asmaul, doa }: { asmaul: AsmaulHusnaItem[]; doa: Do
               </p>
             </div>
           ) : (
-            filteredDoa.map((d, i) => (
-              <article key={`${d.title}-${i}`} className="doa-item">
-                <h2 className="doa-item__title">{d.title}</h2>
-                <p className="arabic doa-item__ar" lang="ar" dir="rtl">
-                  {d.arabic}
-                </p>
-                <p className="doa-item__latin">{d.latin}</p>
-                <p className="doa-item__tr">{d.translation}</p>
-              </article>
-            ))
+            /* Doa: tiap doa adalah satu "halaman kecil" dengan judul sebagai
+             * kepala dan teks Arab sebagai badan. Tanpa kotak — dipisah
+             * garis rambut, sama seperti lembar mushaf di halaman baca. */
+            <div className="doa-list">
+              {filteredDoa.map((d, i) => (
+                <article key={`${d.title}-${i}`} className="doa">
+                  <h2 className="doa__title">{d.title}</h2>
+                  <p className="arabic doa__ar" lang="ar" dir="rtl">
+                    {d.arabic}
+                  </p>
+                  <p className="doa__latin">{d.latin}</p>
+                  <p className="doa__tr">{d.translation}</p>
+                </article>
+              ))}
+            </div>
           )}
         </>
       )}
