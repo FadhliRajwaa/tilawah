@@ -4,7 +4,7 @@ import { Hero } from "@/components/home/hero";
 import { PopularSurah } from "@/components/home/popular-surah";
 import { HomePrayer } from "@/components/home/home-prayer";
 import { LastReadCard } from "@/components/home/last-read-card";
-import { OrnamentDivider, MihrabFrame } from "@/components/ornaments";
+import { OrnamentDivider } from "@/components/ornaments";
 import { ArtDivider } from "@/components/art-divider";
 import { ImageBanner } from "@/components/image-banner";
 import { Gallery, type GalleryItem } from "@/components/gallery";
@@ -127,7 +127,20 @@ export default async function HomePage() {
 
       <ArtDivider variant="divider-star" />
 
-      {/* — fitur ibadah — */}
+      {/* — fitur ibadah ————————————————————————————————————————————
+       *
+       * ⚠️ Rombak dari grid 4 kartu identik (ikon + judul + deskripsi +
+       * "Buka →"), pola yang paling sering muncul di template.
+       *
+       * Bentuk barunya adalah DAFTAR ARAHAN BERNOMOR — seperti daftar isi
+       * dengan penjelasan. Nomornya besar dan rata, judulnya display, dan
+       * deskripsinya mengalir di sebelahnya. Empat item ini memang berurutan
+       * (dari yang paling sering dibuka), jadi penomoran bukan hiasan —
+       * ia menyampaikan urutan.
+       *
+       * Kuncinya: satu item jadi LEBIH BESAR dari yang lain (Asmaul Husna),
+       * supaya ada hierarki. Empat kartu sama besar tidak punya pendapat
+       * tentang mana yang penting. */}
       <section className="section container-page" aria-labelledby="fitur-title">
         <div className="section__head">
           <div>
@@ -139,48 +152,56 @@ export default async function HomePage() {
             </p>
           </div>
         </div>
-        <div className="feature-grid">
-          <Link href="/ibadah?tab=asmaulhusna" className="feature">
-            <AmbientImage variant="card-star-tile" mode="veil" intensity={0.1} />
-            <div className="feature__veil" aria-hidden="true" />
-            <MihrabFrame className="feature__icon" />
-            <h3 className="feature__title">Asmaul Husna</h3>
-            <p className="feature__desc">
-              99 nama Allah — teks Arab, latin, dan arti bahasa Indonesia.
-            </p>
-            <span className="feature__arrow" aria-hidden="true">Buka →</span>
-          </Link>
-          <Link href="/ibadah?tab=doa" className="feature">
-            <AmbientImage variant="card-bismillah" mode="veil" intensity={0.1} />
-            <div className="feature__veil" aria-hidden="true" />
-            <MihrabFrame className="feature__icon" />
-            <h3 className="feature__title">Doa Harian</h3>
-            <p className="feature__desc">
-              35 doa sehari-hari: makan, tidur, perjalanan, dan lainnya.
-            </p>
-            <span className="feature__arrow" aria-hidden="true">Buka →</span>
-          </Link>
-          <Link href="/ibadah?tab=sholat" className="feature">
-            <AmbientImage variant="card-menara-minar" mode="veil" intensity={0.1} />
-            <div className="feature__veil" aria-hidden="true" />
-            <MihrabFrame className="feature__icon" />
-            <h3 className="feature__title">Jadwal Sholat</h3>
-            <p className="feature__desc">
-              Waktu sholat akurat untuk kota Anda, lengkap hitung mundur.
-            </p>
-            <span className="feature__arrow" aria-hidden="true">Buka →</span>
-          </Link>
-          <Link href="/cari" className="feature">
-            <AmbientImage variant="card-quran-illum" mode="veil" intensity={0.1} />
-            <div className="feature__veil" aria-hidden="true" />
-            <MihrabFrame className="feature__icon" />
-            <h3 className="feature__title">Pencarian Ayat</h3>
-            <p className="feature__desc">
-              Cari kata dalam terjemahan Indonesia, langsung menuju ayatnya.
-            </p>
-            <span className="feature__arrow" aria-hidden="true">Buka →</span>
-          </Link>
-        </div>
+        <ol className="routes">
+          <li className="routes__item routes__item--lead">
+            <Link href="/ibadah?tab=asmaulhusna" className="route">
+              <span className="route__num" aria-hidden="true">01</span>
+              <span className="route__body">
+                <span className="route__title">Asmaul Husna</span>
+                <span className="route__desc">
+                  99 nama Allah — teks Arab, latin, dan arti bahasa Indonesia.
+                </span>
+              </span>
+              <span className="route__go" aria-hidden="true">→</span>
+            </Link>
+          </li>
+          <li className="routes__item">
+            <Link href="/ibadah?tab=doa" className="route">
+              <span className="route__num" aria-hidden="true">02</span>
+              <span className="route__body">
+                <span className="route__title">Doa Harian</span>
+                <span className="route__desc">
+                  35 doa sehari-hari: makan, tidur, perjalanan, dan lainnya.
+                </span>
+              </span>
+              <span className="route__go" aria-hidden="true">→</span>
+            </Link>
+          </li>
+          <li className="routes__item">
+            <Link href="/ibadah?tab=sholat" className="route">
+              <span className="route__num" aria-hidden="true">03</span>
+              <span className="route__body">
+                <span className="route__title">Jadwal Sholat</span>
+                <span className="route__desc">
+                  Waktu sholat akurat untuk kota Anda, lengkap hitung mundur.
+                </span>
+              </span>
+              <span className="route__go" aria-hidden="true">→</span>
+            </Link>
+          </li>
+          <li className="routes__item">
+            <Link href="/cari" className="route">
+              <span className="route__num" aria-hidden="true">04</span>
+              <span className="route__body">
+                <span className="route__title">Pencarian Ayat</span>
+                <span className="route__desc">
+                  Cari kata dalam terjemahan Indonesia, langsung menuju ayatnya.
+                </span>
+              </span>
+              <span className="route__go" aria-hidden="true">→</span>
+            </Link>
+          </li>
+        </ol>
       </section>
 
       {/* — banner penutup: ajakan tilawah — */}

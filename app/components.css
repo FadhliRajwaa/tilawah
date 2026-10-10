@@ -2469,98 +2469,123 @@ body:has(.audio-dock) main {
   font-variant-numeric: tabular-nums;
 }
 
-/* ═══ kartu ibadah beranda ═══ */
-.feature-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
-  gap: var(--space-4);
+/* ═══ arahan ibadah beranda: daftar bernomor, bukan grid kartu ═══
+ *
+ * ⚠️ Menggantikan grid 4 kartu identik (ikon + judul + deskripsi + "Buka →")
+ * — pola paling sering muncul di template, dan empat kartu sama besar tidak
+ * punya pendapat tentang mana yang penting.
+ *
+ * Sekarang daftar arahan bernomor. Nomornya besar dan rata kanan; judul
+ * display; deskripsi mengalir di sebelahnya. Nomor di sini bukan hiasan:
+ * keempat item memang berurutan dari yang paling sering dibuka.
+ *
+ * Satu item dibuat LEBIH BESAR (varian `--lead`) supaya ada hierarki —
+ * tanpa itu daftarnya rata dan mata tidak tahu harus mulai dari mana. */
+.routes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rule);
 }
-.feature {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius-md);
-  background: var(--paper-3);
-  padding: var(--space-6) var(--space-5) var(--space-5);
+.routes__item {
+  border-bottom: 1px solid var(--rule-2);
+}
+.route {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-4) var(--space-5);
+  padding: var(--space-5) var(--space-3);
   text-decoration: none;
   color: inherit;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  isolation: isolate;
-  transition: border-color var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
-}
-/* tekstur gambar halus di dalam kartu — terlihat sebagai "bahan", bukan polos */
-.feature .ambient img {
-  opacity: 0.22;
-  mix-blend-mode: multiply;
-}
-[data-theme="dark"] .feature .ambient img {
-  opacity: 0.26;
-  mix-blend-mode: screen;
-}
-.feature__veil {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background: linear-gradient(
-    160deg,
-    color-mix(in oklab, var(--paper-3) 62%, transparent) 0%,
-    color-mix(in oklab, var(--paper-3) 88%, transparent) 46%,
-    color-mix(in oklab, var(--paper-3) 99%, transparent) 100%
-  );
-}
-.feature > *:not(.ambient):not(.feature__veil) {
-  position: relative;
-  z-index: 2;
-}
-.feature:hover {
-  border-color: var(--accent);
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-2);
-}
-.feature:hover .ambient img {
-  opacity: 0.17;
-  transform: scale(1.05);
-}
-/* ikon dalam medali — bukan sekadar garis tipis */
-.feature__icon {
-  width: 46px;
-  height: 46px;
-  padding: 9px;
   border-radius: var(--radius-sm);
-  background: var(--accent-soft);
-  color: var(--accent);
-  flex-shrink: 0;
+  transition: background-color var(--dur-fast) var(--ease-out), padding-inline var(--dur-base) var(--ease-out);
 }
-.feature__title {
+.route:hover {
+  background: color-mix(in oklab, var(--accent-soft) 48%, transparent);
+  padding-inline: var(--space-4);
+}
+.route:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+.route__num {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3.2vw, 2.4rem);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: color-mix(in oklab, var(--accent) 34%, transparent);
+  transition: color var(--dur-base) var(--ease-out);
+  min-width: 2ch;
+  text-align: end;
+}
+.route:hover .route__num {
+  color: var(--accent);
+}
+.route__body {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.route__title {
   font-family: var(--font-display);
   font-size: var(--text-lg);
   font-weight: 600;
-  margin: 0;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
+  color: var(--ink);
 }
-.feature__desc {
+.route__desc {
   color: var(--ink-2);
   font-size: var(--text-sm);
-  line-height: 1.65;
-  margin: 0;
+  line-height: 1.6;
+  max-width: 62ch;
 }
-/* tautan teks di bawah kartu — isyarat "bisa diklik" yang jelas */
-.feature__arrow {
-  margin-top: auto;
-  padding-top: var(--space-2);
-  z-index: 2;
+.route__go {
+  font-size: var(--text-lg);
   color: var(--accent);
-  font-size: var(--text-xs);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  transition: gap var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out);
-  opacity: 0.75;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
 }
-.feature:hover .feature__arrow {
+.route:hover .route__go,
+.route:focus-visible .route__go {
   opacity: 1;
+  transform: none;
+}
+/* item utama: judul lebih besar + nomor ditebalkan */
+.routes__item--lead .route {
+  padding-block: var(--space-6);
+}
+.routes__item--lead .route__title {
+  font-size: var(--text-xl);
+}
+.routes__item--lead .route__num {
+  color: color-mix(in oklab, var(--accent) 62%, transparent);
+}
+@media (hover: none) {
+  /* di sentuh tidak ada hover — panah harus terlihat sejak awal */
+  .route__go {
+    opacity: 0.7;
+    transform: none;
+  }
+}
+@media (max-width: 560px) {
+  .route {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-2) var(--space-4);
+    padding: var(--space-4) var(--space-2);
+  }
+  .route__go {
+    display: none;
+  }
+  .route__num {
+    font-size: 1.5rem;
+    align-self: start;
+  }
+  .routes__item--lead .route__title {
+    font-size: var(--text-lg);
+  }
 }
 
 /* ═══ pencarian ═══ */
@@ -4042,9 +4067,6 @@ body:has(.audio-dock) main {
   }
   .modal__body {
     padding: var(--space-4);
-  }
-  .feature-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
   }
   .sholat-list {
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 132px), 1fr));
