@@ -38,3 +38,8 @@ pnpm-debug.log*
 # ── catatan kerja lokal (riset, coretan, screenshot) ──
 .research/
 *.local.md
+
+# ── artefak tool & coretan riset ──
+.impeccable/
+wb.html
+juz_meta.json
