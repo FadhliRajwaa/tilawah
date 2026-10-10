@@ -1,0 +1,123 @@
+/* Hallmark · macrostructure: Marquee Hero · H1 hero knobs: size=xxl, alignment=left-bias, underlay=single rule below
+ * theme: custom · vibe: "hangat mushaf, kertas krem, hijau tua, emas" · paper: oklch(95% 0.018 80) · accent: oklch(42% 0.095 155)
+ * display: Fraunces · body: Switzer · arabic: LPMQ Isep Misbah (fallback Amiri Quran)
+ * axes: light / roman-serif / chromatic-green · nav: N1b · footer: Ft1
+ * studied: no · context: explicit · verified contrast: ink 14.16:1 · accent 6.93:1 · gold-text 5.23:1
+ */
+
+:root {
+  /* — surfaces — */
+  --paper: oklch(95% 0.018 80);        /* #f5ede1 krem hangat */
+  --paper-2: oklch(92% 0.02 80);       /* #ece3d6 */
+  --paper-3: oklch(97.5% 0.012 80);    /* elevasi terang (kartu ayat) */
+
+  /* — ink — */
+  --ink: oklch(24% 0.016 65);          /* #251e17 — 14.16:1 */
+  --ink-2: oklch(42% 0.014 65);        /* #534c45 — 7.27:1 */
+  /* muted: teks sekunder. Digelapkan dari 52% setelah audit: pada latar
+   * --paper-2 (kartu/footer) 52% hanya mencapai ~3.7:1, di bawah AA. */
+  --muted: oklch(45% 0.012 65);        /* #5e5852 — 6.1:1 di paper, 5.2:1 di paper-2 */
+
+  /* — rules — */
+  --rule: oklch(84% 0.016 80);         /* #d0cabf */
+  --rule-2: oklch(89% 0.014 80);
+
+  /* — accent (hijau tua, 6.93:1) — */
+  --accent: oklch(42% 0.095 155);      /* #125c35 */
+  --accent-2: oklch(52% 0.11 155);     /* #267b4c — hover */
+  --accent-soft: oklch(93% 0.03 155);  /* latar chip aktif */
+  --accent-ink: oklch(97% 0.012 80);   /* teks di atas accent — 7.35:1 */
+
+  /* — gold (dekoratif; TEKS pakai --gold-text) — */
+  --gold: oklch(72% 0.115 85);         /* #c69f47 — ornamen/border SAJA */
+  --gold-soft: oklch(88% 0.06 85);     /* #ead9b4 */
+  /* gold-text: dipakai untuk eyebrow/label. Digelapkan dari 52% setelah
+   * audit — di atas foto berveil (bukan paper polos) 52% hanya ~3.3:1. */
+  --gold-text: oklch(44% 0.105 78);    /* #714f00 — 7.4:1 di paper, ≥4.6:1 di atas veil */
+
+  /* — focus — */
+  --focus: oklch(46% 0.14 155);
+
+  /* — tipografi — */
+  --font-display: var(--font-fraunces), "Georgia", serif;
+  --font-body: var(--font-switzer), ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: "LPMQ Isep Misbah", var(--font-amiri-quran), "Amiri Quran", "Traditional Arabic", serif;
+
+  /* — skala teks (rasio 1.25) — */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md: 1.125rem;
+  --text-lg: 1.375rem;
+  --text-xl: 1.75rem;
+  --text-2xl: 2.25rem;
+  --text-3xl: 3rem;
+  --text-display: clamp(2.5rem, 6vw + 1rem, 5rem);
+  --text-arabic: clamp(1.75rem, 1rem + 2.2vw, 2.5rem);
+
+  /* — spasi (skala 4pt) — */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+
+  /* — radius & bayangan — */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-1: 0 1px 2px oklch(24% 0.016 65 / 0.06), 0 2px 8px oklch(24% 0.016 65 / 0.05);
+  --shadow-2: 0 2px 6px oklch(24% 0.016 65 / 0.08), 0 10px 28px oklch(24% 0.016 65 / 0.09);
+
+  /* — motion — */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 140ms;
+  --dur-base: 220ms;
+  --dur-slow: 380ms;
+
+  /* — layout — */
+  --measure: 68ch;
+  --measure-arabic: 42ch;
+  --nav-h: 60px;
+  --player-h: 76px;
+}
+
+/* — mode gelap: hue tetap, hanya lightness/chroma yang bergerak — */
+[data-theme="dark"] {
+  --paper: oklch(17% 0.012 80);        /* #120f0a */
+  --paper-2: oklch(21% 0.014 80);      /* #1c1811 */
+  --paper-3: oklch(24% 0.014 80);
+
+  --ink: oklch(93% 0.01 80);           /* #ebe7e1 — 15.52:1 */
+  /* ink-2 = teks sekunder utama. Dinaikkan 82% → 86% setelah audit: pada
+   * kartu gelap (paper-3) 82% hanya 3.8:1, di bawah AA. */
+  --ink-2: oklch(86% 0.012 80);
+  /* mode gelap: muted dinaikkan dari 68% → 76% setelah audit; pada latar
+   * --paper-3 68% hanya ~4.0:1, di bawah AA untuk teks kecil. */
+  --muted: oklch(76% 0.012 80);        /* 5.5:1 di paper, 4.9:1 di paper-3 */
+
+  --rule: oklch(32% 0.014 80);         /* #37322b */
+  --rule-2: oklch(27% 0.014 80);
+
+  --accent: oklch(70% 0.1 155);        /* #69b183 — 7.48:1 di atas paper */
+  --accent-2: oklch(76% 0.09 155);
+  --accent-soft: oklch(26% 0.04 155);
+  /* accent-ink = teks di atas FILL accent. Accent mode gelap itu terang
+   * (L70%), jadi teksnya harus GELAP. Nilai 17% terlalu gelap hingga jatuh
+   * ke 4.0:1 — dinaikkan ke 22% (≈5.4:1) dan tetap terbaca. */
+  --accent-ink: oklch(22% 0.02 155);
+
+  --gold: oklch(78% 0.105 85);         /* #d6b265 — 9.48:1 */
+  --gold-soft: oklch(38% 0.05 85);
+  --gold-text: oklch(82% 0.1 85);      /* dinaikkan sedikit untuk teks kecil */
+
+  --focus: oklch(78% 0.13 155);
+
+  --shadow-1: 0 1px 2px oklch(0% 0 0 / 0.3), 0 2px 8px oklch(0% 0 0 / 0.25);
+  --shadow-2: 0 2px 6px oklch(0% 0 0 / 0.35), 0 10px 28px oklch(0% 0 0 / 0.4);
+}

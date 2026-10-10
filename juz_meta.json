@@ -1,0 +1,302 @@
+[
+ {
+  "nomor": 1,
+  "ayat": 148,
+  "surahAwal": 1,
+  "surahAwalNama": "Al-Faatiha",
+  "ayatAwal": 1,
+  "surahAkhir": 2,
+  "surahAkhirNama": "Al-Baqara",
+  "ayatAkhir": 141
+ },
+ {
+  "nomor": 2,
+  "ayat": 111,
+  "surahAwal": 2,
+  "surahAwalNama": "Al-Baqara",
+  "ayatAwal": 142,
+  "surahAkhir": 2,
+  "surahAkhirNama": "Al-Baqara",
+  "ayatAkhir": 252
+ },
+ {
+  "nomor": 3,
+  "ayat": 126,
+  "surahAwal": 2,
+  "surahAwalNama": "Al-Baqara",
+  "ayatAwal": 253,
+  "surahAkhir": 3,
+  "surahAkhirNama": "Aal-i-Imraan",
+  "ayatAkhir": 92
+ },
+ {
+  "nomor": 4,
+  "ayat": 131,
+  "surahAwal": 3,
+  "surahAwalNama": "Aal-i-Imraan",
+  "ayatAwal": 93,
+  "surahAkhir": 4,
+  "surahAkhirNama": "An-Nisaa",
+  "ayatAkhir": 23
+ },
+ {
+  "nomor": 5,
+  "ayat": 124,
+  "surahAwal": 4,
+  "surahAwalNama": "An-Nisaa",
+  "ayatAwal": 24,
+  "surahAkhir": 4,
+  "surahAkhirNama": "An-Nisaa",
+  "ayatAkhir": 147
+ },
+ {
+  "nomor": 6,
+  "ayat": 110,
+  "surahAwal": 4,
+  "surahAwalNama": "An-Nisaa",
+  "ayatAwal": 148,
+  "surahAkhir": 5,
+  "surahAkhirNama": "Al-Maaida",
+  "ayatAkhir": 81
+ },
+ {
+  "nomor": 7,
+  "ayat": 149,
+  "surahAwal": 5,
+  "surahAwalNama": "Al-Maaida",
+  "ayatAwal": 82,
+  "surahAkhir": 6,
+  "surahAkhirNama": "Al-An'aam",
+  "ayatAkhir": 110
+ },
+ {
+  "nomor": 8,
+  "ayat": 142,
+  "surahAwal": 6,
+  "surahAwalNama": "Al-An'aam",
+  "ayatAwal": 111,
+  "surahAkhir": 7,
+  "surahAkhirNama": "Al-A'raaf",
+  "ayatAkhir": 87
+ },
+ {
+  "nomor": 9,
+  "ayat": 159,
+  "surahAwal": 7,
+  "surahAwalNama": "Al-A'raaf",
+  "ayatAwal": 88,
+  "surahAkhir": 8,
+  "surahAkhirNama": "Al-Anfaal",
+  "ayatAkhir": 40
+ },
+ {
+  "nomor": 10,
+  "ayat": 127,
+  "surahAwal": 8,
+  "surahAwalNama": "Al-Anfaal",
+  "ayatAwal": 41,
+  "surahAkhir": 9,
+  "surahAkhirNama": "At-Tawba",
+  "ayatAkhir": 92
+ },
+ {
+  "nomor": 11,
+  "ayat": 151,
+  "surahAwal": 9,
+  "surahAwalNama": "At-Tawba",
+  "ayatAwal": 93,
+  "surahAkhir": 11,
+  "surahAkhirNama": "Hud",
+  "ayatAkhir": 5
+ },
+ {
+  "nomor": 12,
+  "ayat": 170,
+  "surahAwal": 11,
+  "surahAwalNama": "Hud",
+  "ayatAwal": 6,
+  "surahAkhir": 12,
+  "surahAkhirNama": "Yusuf",
+  "ayatAkhir": 52
+ },
+ {
+  "nomor": 13,
+  "ayat": 154,
+  "surahAwal": 12,
+  "surahAwalNama": "Yusuf",
+  "ayatAwal": 53,
+  "surahAkhir": 14,
+  "surahAkhirNama": "Ibrahim",
+  "ayatAkhir": 52
+ },
+ {
+  "nomor": 14,
+  "ayat": 227,
+  "surahAwal": 15,
+  "surahAwalNama": "Al-Hijr",
+  "ayatAwal": 1,
+  "surahAkhir": 16,
+  "surahAkhirNama": "An-Nahl",
+  "ayatAkhir": 128
+ },
+ {
+  "nomor": 15,
+  "ayat": 185,
+  "surahAwal": 17,
+  "surahAwalNama": "Al-Israa",
+  "ayatAwal": 1,
+  "surahAkhir": 18,
+  "surahAkhirNama": "Al-Kahf",
+  "ayatAkhir": 74
+ },
+ {
+  "nomor": 16,
+  "ayat": 269,
+  "surahAwal": 18,
+  "surahAwalNama": "Al-Kahf",
+  "ayatAwal": 75,
+  "surahAkhir": 20,
+  "surahAkhirNama": "Taa-Haa",
+  "ayatAkhir": 135
+ },
+ {
+  "nomor": 17,
+  "ayat": 190,
+  "surahAwal": 21,
+  "surahAwalNama": "Al-Anbiyaa",
+  "ayatAwal": 1,
+  "surahAkhir": 22,
+  "surahAkhirNama": "Al-Hajj",
+  "ayatAkhir": 78
+ },
+ {
+  "nomor": 18,
+  "ayat": 202,
+  "surahAwal": 23,
+  "surahAwalNama": "Al-Muminoon",
+  "ayatAwal": 1,
+  "surahAkhir": 25,
+  "surahAkhirNama": "Al-Furqaan",
+  "ayatAkhir": 20
+ },
+ {
+  "nomor": 19,
+  "ayat": 339,
+  "surahAwal": 25,
+  "surahAwalNama": "Al-Furqaan",
+  "ayatAwal": 21,
+  "surahAkhir": 27,
+  "surahAkhirNama": "An-Naml",
+  "ayatAkhir": 55
+ },
+ {
+  "nomor": 20,
+  "ayat": 171,
+  "surahAwal": 27,
+  "surahAwalNama": "An-Naml",
+  "ayatAwal": 56,
+  "surahAkhir": 29,
+  "surahAkhirNama": "Al-Ankaboot",
+  "ayatAkhir": 45
+ },
+ {
+  "nomor": 21,
+  "ayat": 178,
+  "surahAwal": 29,
+  "surahAwalNama": "Al-Ankaboot",
+  "ayatAwal": 46,
+  "surahAkhir": 33,
+  "surahAkhirNama": "Al-Ahzaab",
+  "ayatAkhir": 30
+ },
+ {
+  "nomor": 22,
+  "ayat": 169,
+  "surahAwal": 33,
+  "surahAwalNama": "Al-Ahzaab",
+  "ayatAwal": 31,
+  "surahAkhir": 36,
+  "surahAkhirNama": "Yaseen",
+  "ayatAkhir": 27
+ },
+ {
+  "nomor": 23,
+  "ayat": 357,
+  "surahAwal": 36,
+  "surahAwalNama": "Yaseen",
+  "ayatAwal": 28,
+  "surahAkhir": 39,
+  "surahAkhirNama": "Az-Zumar",
+  "ayatAkhir": 31
+ },
+ {
+  "nomor": 24,
+  "ayat": 175,
+  "surahAwal": 39,
+  "surahAwalNama": "Az-Zumar",
+  "ayatAwal": 32,
+  "surahAkhir": 41,
+  "surahAkhirNama": "Fussilat",
+  "ayatAkhir": 46
+ },
+ {
+  "nomor": 25,
+  "ayat": 246,
+  "surahAwal": 41,
+  "surahAwalNama": "Fussilat",
+  "ayatAwal": 47,
+  "surahAkhir": 45,
+  "surahAkhirNama": "Al-Jaathiya",
+  "ayatAkhir": 37
+ },
+ {
+  "nomor": 26,
+  "ayat": 195,
+  "surahAwal": 46,
+  "surahAwalNama": "Al-Ahqaf",
+  "ayatAwal": 1,
+  "surahAkhir": 51,
+  "surahAkhirNama": "Adh-Dhaariyat",
+  "ayatAkhir": 30
+ },
+ {
+  "nomor": 27,
+  "ayat": 399,
+  "surahAwal": 51,
+  "surahAwalNama": "Adh-Dhaariyat",
+  "ayatAwal": 31,
+  "surahAkhir": 57,
+  "surahAkhirNama": "Al-Hadid",
+  "ayatAkhir": 29
+ },
+ {
+  "nomor": 28,
+  "ayat": 137,
+  "surahAwal": 58,
+  "surahAwalNama": "Al-Mujaadila",
+  "ayatAwal": 1,
+  "surahAkhir": 66,
+  "surahAkhirNama": "At-Tahrim",
+  "ayatAkhir": 12
+ },
+ {
+  "nomor": 29,
+  "ayat": 431,
+  "surahAwal": 67,
+  "surahAwalNama": "Al-Mulk",
+  "ayatAwal": 1,
+  "surahAkhir": 77,
+  "surahAkhirNama": "Al-Mursalaat",
+  "ayatAkhir": 50
+ },
+ {
+  "nomor": 30,
+  "ayat": 564,
+  "surahAwal": 78,
+  "surahAwalNama": "An-Naba",
+  "ayatAwal": 1,
+  "surahAkhir": 114,
+  "surahAkhirNama": "An-Naas",
+  "ayatAkhir": 6
+ }
+]

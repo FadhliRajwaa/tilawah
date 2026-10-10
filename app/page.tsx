@@ -1,0 +1,198 @@
+import Link from "next/link";
+import { getSurahList } from "@/lib/api/equran";
+import { Hero } from "@/components/home/hero";
+import { PopularSurah } from "@/components/home/popular-surah";
+import { HomePrayer } from "@/components/home/home-prayer";
+import { LastReadCard } from "@/components/home/last-read-card";
+import { OrnamentDivider, MihrabFrame } from "@/components/ornaments";
+import { ArtDivider } from "@/components/art-divider";
+import { ImageBanner } from "@/components/image-banner";
+import { Gallery, type GalleryItem } from "@/components/gallery";
+import { AmbientImage } from "@/components/ambient-image";
+import type { SurahSummary } from "@/lib/types";
+
+export const revalidate = 86400;
+
+const POPULER = [
+  { nomor: 36, label: "Yasin" },
+  { nomor: 67, label: "Al-Mulk" },
+  { nomor: 55, label: "Ar-Rahman" },
+  { nomor: 56, label: "Al-Waqi'ah" },
+  { nomor: 18, label: "Al-Kahf" },
+  { nomor: 32, label: "As-Sajdah" },
+  { nomor: 2, label: "Al-Baqarah" },
+];
+
+/** Mosaik galeri: campuran potret masjid, mushaf, pola, dan suasana. */
+const GALERI: GalleryItem[] = [
+  { variant: "card-bismillah", caption: "Bismillah — pembuka setiap surah", wide: true, tall: true, position: "center" },
+  { variant: "card-menara-kudus", caption: "Masjid Menara Kudus — Indonesia" },
+  { variant: "card-dome-mosaic", caption: "Kubah bermotif — geometri tanpa akhir" },
+  { variant: "card-lamp-blue", caption: "Lampu masjid" },
+  { variant: "card-star-tile", caption: "Ubin bintang delapan" },
+  { variant: "card-garden", caption: "Taman islami" },
+  { variant: "card-menara-minar", caption: "Masjid saat fajar" },
+  { variant: "card-reflection", caption: "Refleksi di air" },
+  { variant: "card-prayer-hall", caption: "Ruang sholat" },
+  { variant: "card-muqarnas", caption: "Muqarnas" },
+  { variant: "card-arch-hall", caption: "Lengkung & arkade" },
+  { variant: "card-tile-green", caption: "Masjid di tepi air" },
+];
+
+export default async function HomePage() {
+  let surahList: SurahSummary[] = [];
+  try {
+    surahList = await getSurahList();
+  } catch {
+    surahList = [];
+  }
+
+  const find = (n: number) => surahList.find((s) => s.nomor === n);
+
+  return (
+    <>
+      <Hero totalSurah={surahList.length || 114} />
+
+      {/* — shortcut surah populer — */}
+      <section className="section container-page" aria-labelledby="populer-title">
+        <div className="section__head">
+          <div>
+            <h2 id="populer-title" className="section__title">
+              Sering dibaca
+            </h2>
+            <p className="section__sub">
+              Surah yang paling banyak dibuka — sekali ketuk langsung tilawah.
+            </p>
+          </div>
+          <Link href="/surat" className="section__link">
+            Semua 114 surah →
+          </Link>
+        </div>
+        <PopularSurah items={POPULER.map((p) => ({ ...p, surah: find(p.nomor) }))} />
+      </section>
+
+      <ArtDivider variant="divider-zellige" />
+
+      {/* — lanjut baca — */}
+      <LastReadCard />
+
+      {/* — banner: jadwal sholat (foto tampil jelas) — */}
+      <ImageBanner
+        variant="banner-prayer"
+        eyebrow="Ibadah harian"
+        title="Jadwal sholat 518 kota Indonesia"
+        desc="Waktu sholat akurat lengkap dengan hitung mundur, tabel bulanan, dan tanggal Hijriah."
+        cta={{ href: "/ibadah?tab=sholat", label: "Buka jadwal sholat" }}
+        height="md"
+        position="center 42%"
+      />
+
+      <div className="container-page">
+        <OrnamentDivider className="ornament-divider" />
+      </div>
+
+      {/* — galeri mosaik: inilah bagian yang "playful" — */}
+      <section className="section container-page" aria-labelledby="galeri-title">
+        <div className="section__head">
+          <div>
+            <h2 id="galeri-title" className="section__title">
+              Warisan visual Islam
+            </h2>
+            <p className="section__sub">
+              Kaligrafi, geometri, cahaya, dan arsitektur — keindahan yang menemani
+              tilawah.
+            </p>
+          </div>
+          <Link href="/kredit" className="section__link">
+            Kredit gambar →
+          </Link>
+        </div>
+        <Gallery items={GALERI} label="Galeri warisan visual Islam" />
+      </section>
+
+      {/* — banner: mushaf & tafsir — */}
+      <ImageBanner
+        variant="banner-nabawi"
+        eyebrow="Tafsir Kemenag"
+        title="Pahami makna setiap ayat"
+        desc="Tafsir resmi Kementerian Agama RI tersedia per ayat — buka langsung dari ayat yang sedang dibaca."
+        cta={{ href: "/surat/36", label: "Mulai dari Yasin" }}
+        height="sm"
+        position="center 55%"
+        align="left"
+      />
+
+      {/* — jadwal sholat ringkas — */}
+      <HomePrayer />
+
+      <ArtDivider variant="divider-star" />
+
+      {/* — fitur ibadah — */}
+      <section className="section container-page" aria-labelledby="fitur-title">
+        <div className="section__head">
+          <div>
+            <h2 id="fitur-title" className="section__title">
+              Ibadah harian
+            </h2>
+            <p className="section__sub">
+              Asmaul Husna, doa harian, dan jadwal sholat — semuanya dalam satu tempat.
+            </p>
+          </div>
+        </div>
+        <div className="feature-grid">
+          <Link href="/ibadah?tab=asmaulhusna" className="feature">
+            <AmbientImage variant="card-star-tile" mode="veil" intensity={0.1} />
+            <div className="feature__veil" aria-hidden="true" />
+            <MihrabFrame className="feature__icon" />
+            <h3 className="feature__title">Asmaul Husna</h3>
+            <p className="feature__desc">
+              99 nama Allah — teks Arab, latin, dan arti bahasa Indonesia.
+            </p>
+            <span className="feature__arrow" aria-hidden="true">Buka →</span>
+          </Link>
+          <Link href="/ibadah?tab=doa" className="feature">
+            <AmbientImage variant="card-bismillah" mode="veil" intensity={0.1} />
+            <div className="feature__veil" aria-hidden="true" />
+            <MihrabFrame className="feature__icon" />
+            <h3 className="feature__title">Doa Harian</h3>
+            <p className="feature__desc">
+              35 doa sehari-hari: makan, tidur, perjalanan, dan lainnya.
+            </p>
+            <span className="feature__arrow" aria-hidden="true">Buka →</span>
+          </Link>
+          <Link href="/ibadah?tab=sholat" className="feature">
+            <AmbientImage variant="card-menara-minar" mode="veil" intensity={0.1} />
+            <div className="feature__veil" aria-hidden="true" />
+            <MihrabFrame className="feature__icon" />
+            <h3 className="feature__title">Jadwal Sholat</h3>
+            <p className="feature__desc">
+              Waktu sholat akurat untuk kota Anda, lengkap hitung mundur.
+            </p>
+            <span className="feature__arrow" aria-hidden="true">Buka →</span>
+          </Link>
+          <Link href="/cari" className="feature">
+            <AmbientImage variant="card-quran-illum" mode="veil" intensity={0.1} />
+            <div className="feature__veil" aria-hidden="true" />
+            <MihrabFrame className="feature__icon" />
+            <h3 className="feature__title">Pencarian Ayat</h3>
+            <p className="feature__desc">
+              Cari kata dalam terjemahan Indonesia, langsung menuju ayatnya.
+            </p>
+            <span className="feature__arrow" aria-hidden="true">Buka →</span>
+          </Link>
+        </div>
+      </section>
+
+      {/* — banner penutup: ajakan tilawah — */}
+      <ImageBanner
+        variant="hero-night-gold"
+        eyebrow="Mulai sekarang"
+        title="Satu ayat hari ini lebih baik daripada seribu nanti"
+        desc="Buka Al-Qur'an, pilih surah, dan biarkan murottal menemani."
+        cta={{ href: "/surat", label: "Jelajahi 114 surah" }}
+        height="md"
+        position="center 50%"
+      />
+    </>
+  );
+}
