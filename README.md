@@ -4,7 +4,7 @@
 
 **Al-Qur'an digital lengkap — 114 surat, 30 juz, 6 qari, tafsir Kemenag, dan jadwal sholat.**
 
-[**🌐 Buka tilawah-peach.vercel.app →**](https://tilawah-peach.vercel.app)
+[**🌐 Buka tilawahsurah.my.id →**](https://www.tilawahsurah.my.id)
 
 Dibuat untuk memudahkan tilawah harian. Mengikuti **Mushaf Standar Indonesia** (Kemenag/LPMQ),
 bukan Mushaf Madinah — sama dengan mushaf yang dicetak dan dipakai di masjid serta pesantren Indonesia.
@@ -74,7 +74,7 @@ Terima kasih kepada penyedia layanan gratis berikut:
 | [alquran.cloud](https://alquran.cloud) | Pencarian terjemahan | 24 jam |
 
 **Gambar** — 42 aset dari Wikimedia Commons (lisensi CC BY / CC BY-SA / domain publik).
-Atribusi lengkap per gambar ada di halaman [`/kredit`](https://tilawah-peach.vercel.app/kredit).
+Atribusi lengkap per gambar ada di halaman [`/kredit`](https://www.tilawahsurah.my.id/kredit).
 
 **Font** — Fraunces (SIL OFL) · Switzer (Fontshare) · LPMQ Isep Misbah (Kemenag RI).
 
