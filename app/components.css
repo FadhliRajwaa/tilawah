@@ -2820,20 +2820,29 @@ body:has(.audio-dock) main {
   opacity: 0.92;
 }
 
-/* ═══ kedalaman: foto bergerak lebih lambat dari halaman ═══
+/* ═══ kedalaman foto — DUA mekanisme, dipisah lebar layar ═══
  *
- * Lihat components/parallax.tsx untuk mesinnya. Di sini hanya bentuk
- * lapisannya:
+ * Desktop (≥1025px): transform via JS (`.ambient--px-host`). Main thread
+ * lapang dan gulir rapat, jadi efeknya mulus.
  *
- *   .ambient--px-host   wadah yang menerima transform dari JS
- *   .ambient--px-shift  anak yang DIPERBESAR supaya tepi tidak terbuka
- *   .ambient--px-host .ambient  kembali ke position: absolute agar <picture>
- *                               menempel di kotak yang sudah diperbesar
+ * Mobile & tablet (<1025px): `background-attachment: fixed` (`.ambient--depth`).
+ * CSS murni yang dikerjakan COMPOSITOR — nol JS, jadi mulus di ponsel.
  *
- * Pembesaran dihitung dari `--px-travel` yang dipublikasikan mesin parallax:
- * jangkauan gerak 0.6 × tinggi elemen, jadi skala 1 + 0.6 = 1.6 sudah lebih
- * dari cukup. Diberi margin 1.02 supaya tidak ada celah 1px di tepi. */
+ * ⚠️ Kenapa tidak satu mekanisme saja?
+ *  · JS parallax di ponsel tersendat: gulir iOS berjalan di compositor
+ *    sementara `scroll` event sampai ke main thread yang sibuk → transform
+ *    selalu tertinggal 1–2 frame → terlihat "gemetar". Ditambah 8 lapisan
+ *    `will-change: transform` = 8 tekstur GPU, berat untuk memori ponsel.
+ *  · `background-attachment: fixed` di desktop kurang enak karena
+ *    `cover`-nya diukur terhadap VIEWPORT — di jendela pendek & lebar,
+ *    foto jadi ter-zoom berlebihan. Di ponsel (portrait) rasio viewport
+ *    justru dekat dengan rasio foto, jadi hasilnya bagus.
+ *
+ * Keduanya di-render; CSS yang memilih. Tidak ada ketergantungan JS. */
+
+/* — desktop: lapisan yang digeser JS — */
 .ambient--px-host {
+  display: none;
   position: absolute;
   inset: 0;
   z-index: 0;
@@ -2858,6 +2867,34 @@ body:has(.audio-dock) main {
 /* mode gelap: foto diredam, sama seperti mode plate */
 [data-theme="dark"] .ambient--px-host .ambient--plate img {
   opacity: calc(var(--ambient-opacity, 1) * 0.62);
+}
+
+/* — mobile & tablet: latar diam, CSS murni, compositor — */
+.ambient--depth {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: var(--amb-sm);
+  background-size: cover;
+  background-position: var(--amb-pos, center);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  opacity: var(--ambient-opacity, 1);
+}
+[data-theme="dark"] .ambient--depth {
+  opacity: calc(var(--ambient-opacity, 1) * 0.62);
+}
+
+@media (min-width: 1025px) {
+  .ambient--px-host {
+    display: block;
+  }
+  /* di desktop, latar CSS dilepas sama sekali — biar tidak ada dua gambar */
+  .ambient--depth {
+    display: none;
+  }
 }
 
 /* overlay penjamin kontras — selalu di atas foto, di bawah konten.

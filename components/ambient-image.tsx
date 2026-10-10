@@ -161,13 +161,46 @@ export function AmbientImage({
     </picture>
   );
 
-  /* — mode kedalaman: gambar digeser lebih lambat dari halaman — */
+  /* — mode kedalaman ————————————————————————————————————————————
+   *
+   * DUA mekanisme, dipilih per lebar layar, karena satu mekanisme tidak bisa
+   * bagus di keduanya:
+   *
+   *  ≥1025px  → `ParallaxLayer` (transform via JS). Di desktop main thread
+   *             lapang dan gulir rapat, jadi efeknya mulus.
+   *  <1025px  → `.ambient--depth` (`background-attachment: fixed`, CSS murni).
+   *             Di ponsel & tablet, JS parallax tersendat karena gulir
+   *             berjalan di compositor sementara JS di main thread. Latar CSS
+   *             `fixed` dikerjakan compositor → mulus, nol JS.
+   *
+   * Keduanya di-render; CSS yang menyembunyikan salah satunya. Jadi tidak ada
+   * ketergantungan pada JavaScript untuk memilih — dan tidak ada kedipan saat
+   * ukuran jendela berubah.
+   *
+   * ⚠️ Varian `depth` memakai background-image, jadi varian responsifnya
+   * dipilih lewat media query (variabel `--amb-*`), bukan atribut `sizes`.
+   * Berkas yang tidak dipakai tidak diunduh. */
   if (parallax) {
     const speed = parallax === true ? 0.6 : parallax;
     return (
-      <ParallaxLayer speed={speed} className="ambient--px-host">
-        <span className="ambient--px-shift">{img}</span>
-      </ParallaxLayer>
+      <>
+        <div
+          className={`ambient ambient--depth ${className}`.trim()}
+          style={
+            {
+              "--ambient-opacity": opacity,
+              "--amb-pos": position,
+              "--amb-sm": `url(/images/${v}-sm.webp)`,
+              "--amb-md": `url(/images/${v}-md.webp)`,
+              "--amb-lg": `url(/images/${v}-lg.webp)`,
+            } as CSSProperties
+          }
+          aria-hidden="true"
+        />
+        <ParallaxLayer speed={speed} className="ambient--px-host">
+          <span className="ambient--px-shift">{img}</span>
+        </ParallaxLayer>
+      </>
     );
   }
 

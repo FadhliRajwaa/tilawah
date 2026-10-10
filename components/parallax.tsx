@@ -1,23 +1,36 @@
 "use client";
 
-/* — Mesin parallax ————————————————————————————————————————————————
+/* — Mesin parallax — desktop saja ————————————————————————————————————
  *
- * Satu pendengar scroll untuk SEMUA lapisan (registry tingkat modul), bukan
- * satu listener per komponen. Dengan 8 lapisan di satu halaman, itu selisih
- * antara 1 dan 8 callback per frame — dan semuanya dibatasi satu rAF.
+ * ⚠️ KENAPA HANYA DESKTOP (≥1025px)
  *
- * ═══ Kenapa transform, bukan `background-attachment: fixed` ═══
+ * Percobaan pertama menjalankan ini di semua ukuran layar, dan hasilnya di
+ * ponsel JELEK: tersendat, gambar seperti tertinggal lalu menyusul.
+ * Penyebabnya bukan bug yang bisa ditambal — melainkan sifat platform:
  *
- * Versi sebelumnya memakai `background-attachment: fixed`. Dua masalah:
- *  1. Safari iOS MENGABAIKANNYA (batasan WebKit yang sudah lama) — jadi di
- *     iPhone efeknya tidak ada sama sekali.
- *  2. `cover` diukur terhadap VIEWPORT, bukan elemen. Di ponsel 390×844,
- *     foto 21:9 diskalakan ke tinggi 844px → lebar 1.969px, sehingga hanya
- *     ~20% bagian tengah yang terlihat. Itu sebabnya efeknya lalu dimatikan
- *     di ≤700px — dan itulah yang membuat "fixed tidak jalan di mobile".
+ *   · Di iOS, gulir berjalan di COMPOSITOR THREAD. Konten bergerak mulus
+ *     tanpa menunggu JS. Sementara itu `scroll` event disampaikan ke main
+ *     thread yang sibuk → transform kita selalu tertinggal 1–2 frame →
+ *     terlihat sebagai gambar yang "gemetar" mengikuti halaman.
+ *   · 8 lapisan dengan `will-change: transform` = 8 tekstur GPU besar. Di
+ *     ponsel dengan memori GPU terbatas, itu memicu penurunan frame rate.
  *
- * `transform: translate3d()` bekerja IDENTIK di semua peramban dan skalanya
- * bisa dikendalikan persis. Sekaligus membereskan kedua masalah di atas.
+ * Di desktop keduanya tidak berlaku: main thread lapang, dan gulir biasanya
+ * roda/trackpad yang eventnya rapat. Efeknya mulus di sana — dan memang di
+ * sana parallax layak dipakai.
+ *
+ * Di ponsel & tablet, efek "diam" diperoleh lewat `background-attachment:
+ * fixed` (murni CSS, dikerjakan compositor, nol JS) — lihat `.ambient--depth`
+ * di components.css. Itu sebabnya file ini punya gerbang lebar layar.
+ *
+ * ═══ Kenapa offset di-cache ═══
+ *
+ * Versi pertama memanggil `getBoundingClientRect()` untuk SETIAP lapisan di
+ * SETIAP frame. Itu memaksa peramban menghitung ulang tata letak (forced
+ * synchronous layout) 8× per frame — pemborosan besar yang ikut menyebabkan
+ * tersendat. Sekarang posisi diukur SEKALI (saat mount, saat ukuran berubah,
+ * dan setelah gambar selesai dimuat), lalu tiap frame hanya membaca
+ * `window.scrollY` yang murah.
  *
  * ═══ Rumus ═══
  *
@@ -25,60 +38,58 @@
  *   translate = (kemajuan − 0.5) × jarak
  *   jarak     = speed × min(vh, tinggi)
  *
- *   speed  0    → ikut menggulir normal            (paling dekat)
- *   speed  0.35 → lapisan jauh, gerak halus        (awan, cakrawala)
- *   speed  0.6  → nyaris diam, efek latar tetap    (foto latar)
- *
- * ⚠️ JANGAN pakai rumus naif `translate = −top × speed`. Jangkauannya
- * menjadi speed × (vh + tinggi) — di hero ponsel (vh 844 + tinggi 600)
- * dengan speed 0.9 itu 1.300px, sehingga lapisan harus diperbesar 3× agar
- * tepinya tidak terbuka. Terlalu ekstrem dan gambarnya jadi pecah.
- *
- * Dengan `min(vh, tinggi)` jangkauannya dibatasi oleh elemen TERPENDEK,
- * jadi pembesaran yang dibutuhkan tetap wajar (≈1,3–1,5×) dan hasilnya
- * justru lebih halus karena tidak pernah bergerak lebih cepat dari konten.
- *
- * `--px-travel` dipublikasikan ke CSS supaya lapisan bisa memperbesar
- * dirinya sendiri sesuai kebutuhan — lihat `.ambient--px` di components.css.
+ * `min(vh, tinggi)` membatasi jangkauan pada elemen TERPENDEK. Rumus naif
+ * `−top × speed` memberi jangkauan `speed × (vh + tinggi)` — di hero ponsel
+ * itu 1.300px, sehingga lapisan harus diperbesar 3× agar tepinya tidak
+ * terbuka. Terlalu ekstrem dan gambarnya pecah.
  */
 
 import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 
 interface Layer {
   el: HTMLElement;
+  host: HTMLElement;
   speed: number;
+  top: number;
+  height: number;
   visible: boolean;
 }
 
 const layers = new Set<Layer>();
 let raf = 0;
 let bound = false;
+let enabled = false;
+
+/** Ukur posisi & tinggi host. Dipanggil jarang — bukan tiap frame. */
+function measure(l: Layer) {
+  const r = l.host.getBoundingClientRect();
+  l.top = r.top + window.scrollY;
+  l.height = r.height;
+}
+
+function measureAll() {
+  for (const l of layers) measure(l);
+  schedule();
+}
 
 function update() {
   raf = 0;
+  if (!enabled) return;
+  const sy = window.scrollY;
   const vh = window.innerHeight;
+
   for (const l of layers) {
-    if (!l.visible) continue;
-    const host = l.el.parentElement;
-    if (!host) continue;
-    const r = host.getBoundingClientRect();
-    const h = r.height;
-    if (h <= 0) continue;
+    if (!l.visible || l.height <= 0) continue;
 
-    const travel = l.speed * Math.min(vh, h);
-    /* ⚠️ WAJIB di-clamp ke [0,1].
-     *
-     * Tanpa clamp, elemen yang sudah jauh di atas viewport terus menghasilkan
-     * progress besar — terukur awan bergeser 477px padahal jangkauan yang
-     * diinginkan hanya 204px. Akibatnya lapisan keluar dari wadahnya dan
-     * tepi gambar terbuka. IntersectionObserver TIDAK menolong di sini:
-     * elemen setinggi hero masih "terlihat" selama 1px-nya menyentuh layar. */
-    let progress = (vh - r.top) / (vh + h);
-    if (progress < 0) progress = 0;
-    else if (progress > 1) progress = 1;
-    const y = (progress - 0.5) * travel;
+    const travel = l.speed * Math.min(vh, l.height);
+    /* WAJIB di-clamp [0,1]: tanpa itu, elemen yang sudah jauh di atas
+     * viewport terus menghasilkan kemajuan besar (terukur: awan bergeser
+     * 477px padahal jangkauannya 204px) sehingga tepi gambar terbuka. */
+    let p = (vh - (l.top - sy)) / (vh + l.height);
+    if (p < 0) p = 0;
+    else if (p > 1) p = 1;
 
-    l.el.style.transform = `translate3d(0, ${y.toFixed(2)}px, 0)`;
+    l.el.style.transform = `translate3d(0, ${((p - 0.5) * travel).toFixed(2)}px, 0)`;
     l.el.style.setProperty("--px-travel", `${travel.toFixed(1)}px`);
   }
 }
@@ -91,35 +102,65 @@ function bind() {
   if (bound) return;
   bound = true;
   window.addEventListener("scroll", schedule, { passive: true });
-  window.addEventListener("resize", schedule, { passive: true });
+  window.addEventListener("resize", measureAll, { passive: true });
+  /* gambar yang selesai dimuat mengubah tinggi host → ukur ulang */
+  window.addEventListener("load", measureAll);
+}
+
+function unbindIfEmpty() {
+  if (layers.size > 0 || !bound) return;
+  bound = false;
+  window.removeEventListener("scroll", schedule);
+  window.removeEventListener("resize", measureAll);
+  window.removeEventListener("load", measureAll);
 }
 
 interface Props {
-  /** 0 = ikut menggulir · 0.3 = terasa jauh · 1 = diam (efek fixed) */
+  /** 0 = ikut menggulir · 0.35 = jauh · 0.6 = nyaris diam */
   speed?: number;
   className?: string;
-  style?: CSSProperties;
   children?: ReactNode;
 }
 
-export function ParallaxLayer({ speed = 0.35, className = "", style, children }: Props) {
+export function ParallaxLayer({ speed = 0.35, className = "", children }: Props) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    const host = el?.parentElement;
+    if (!el || !host) return;
 
-    /* Kalau pengguna minta kurangi gerak, lapisan cukup dipasang tanpa
-     * transform sama sekali — kontennya tetap tampil utuh. */
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    /* Gerbang lebar layar: di bawah 1025px mesin ini TIDAK dipasang sama
+     * sekali. Efek diam di ponsel/tablet ditangani CSS (`background-
+     * attachment: fixed`) yang jauh lebih mulus karena berjalan di
+     * compositor, bukan di main thread. */
+    const mq = window.matchMedia("(min-width: 1025px)");
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-    const layer: Layer = { el, speed, visible: false };
-    layers.add(layer);
-    bind();
+    const apply = () => {
+      const on = mq.matches && !reduce.matches;
+      if (on === enabled && layers.size > 0) {
+        /* sudah benar — tapi pastikan lapisan ini terdaftar */
+      }
+      enabled = on;
+      if (!on) {
+        el.style.transform = "";
+        el.style.removeProperty("--px-travel");
+        layers.delete(layer);
+        unbindIfEmpty();
+        return;
+      }
+      if (!layers.has(layer)) {
+        layers.add(layer);
+        measure(layer);
+      }
+      bind();
+      schedule();
+    };
 
-    /* Hanya lapisan yang terlihat yang dihitung — halaman beranda punya
-     * delapan lapisan, dan menghitung semuanya tiap frame itu pemborosan. */
-    const host = el.parentElement;
+    const layer: Layer = { el, host, speed, top: 0, height: 0, visible: false };
+
+    /* Hanya lapisan terlihat yang dihitung tiap frame. */
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
@@ -127,34 +168,27 @@ export function ParallaxLayer({ speed = 0.35, className = "", style, children }:
           if (e.isIntersecting) schedule();
         }
       },
-      { rootMargin: "200px 0px" },
+      { rootMargin: "240px 0px" },
     );
-    if (host) io.observe(host);
+    io.observe(host);
 
-    schedule();
+    apply();
+    mq.addEventListener("change", apply);
+    reduce.addEventListener("change", apply);
 
     return () => {
       io.disconnect();
+      mq.removeEventListener("change", apply);
+      reduce.removeEventListener("change", apply);
       layers.delete(layer);
       el.style.transform = "";
+      el.style.removeProperty("--px-travel");
+      unbindIfEmpty();
     };
   }, [speed]);
 
   return (
-    <div
-      ref={ref}
-      className={`px-layer ${className}`.trim()}
-      style={
-        {
-          "--px-speed": speed,
-          /* cadangan sebelum JS jalan: pembesaran 1.6× selalu cukup untuk
-           * jangkauan maksimum speed 0.6 pada elemen setinggi viewport */
-          "--px-travel": `${Math.round(speed * 100)}vh`,
-          ...style,
-        } as CSSProperties
-      }
-      aria-hidden="true"
-    >
+    <div ref={ref} className={`px-layer ${className}`.trim()} style={{ "--px-speed": speed } as CSSProperties}>
       {children}
     </div>
   );
