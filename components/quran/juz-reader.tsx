@@ -314,16 +314,16 @@ export function JuzReader({ juzNomor, ayat }: Props) {
                     />
                   )}
 
-                  <article id={`ayat-${key}`} className={cn("ayah-card", playingThis && "is-active")}>
-                    <header className="ayah-card__head">
+                  <article id={`ayat-${key}`} className={cn("ayah", playingThis && "is-active")}>
+                    <header className="ayah__head">
                       <AyahMedal nomor={a.nomorAyat} />
-                      <span className="ayah-card__meta">
+                      <span className="ayah__meta">
                         {a.surahNamaLatin} · Ayat {a.nomorAyat}
                       </span>
                     </header>
 
                     <p
-                      className="arabic ayah-card__arabic"
+                      className="arabic ayah__arabic"
                       lang="ar"
                       dir="rtl"
                       style={{ fontSize: `calc(var(--text-arabic) * ${prefs.arabicScale})` }}
@@ -331,9 +331,9 @@ export function JuzReader({ juzNomor, ayat }: Props) {
                       {a.teksArab}
                     </p>
 
-                    {prefs.showLatin && <p className="ayah-card__latin">{a.teksLatin}</p>}
+                    {prefs.showLatin && <p className="ayah__latin">{a.teksLatin}</p>}
                     {prefs.showTranslation && (
-                      <p className="ayah-card__translation">{a.teksIndonesia}</p>
+                      <p className="ayah__translation">{a.teksIndonesia}</p>
                     )}
 
                     {track && (
@@ -345,7 +345,7 @@ export function JuzReader({ juzNomor, ayat }: Props) {
                       />
                     )}
 
-                    <footer className="ayah-card__actions">
+                    <footer className="ayah__actions">
                       <button
                         type="button"
                         className={cn("ayah-action", playingThis && "is-on")}

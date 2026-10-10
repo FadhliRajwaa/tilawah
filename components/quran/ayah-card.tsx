@@ -137,20 +137,32 @@ export function AyahCard({
   };
 
   return (
+    /* ⚠️ Rombak: kartu berbingkai → LEMBAR MUSHAF.
+     *
+     * Versi lama membungkus tiap ayat dalam kotak putih berbingkai — untuk
+     * surah panjang (Al-Baqarah 286 ayat) itu 286 kotak bertumpuk, dan
+     * halaman terasa seperti daftar kartu, bukan bacaan. Mushaf sungguhan
+     * tidak begitu: ayat mengalir di satu lembar, dipisah nomor dan ruang.
+     *
+     * Sekarang: tanpa kotak, tanpa border. Pemisah antar ayat adalah
+     * nomor berhias (medali) dan jarak. Yang tersisa hanya garis rambut
+     * tipis di atas baris aksi — dan itu pun setengah transparan.
+     *
+     * Akibatnya halaman baca terasa tenang dan panjang napasnya benar. */
     <article
       id={`ayat-${ayah.nomorAyat}`}
-      className={cn("ayah-card", playingThis && "is-active", isTarget && "is-target")}
+      className={cn("ayah", playingThis && "is-active", isTarget && "is-target")}
       data-ayah={ayah.nomorAyat}
     >
-      <header className="ayah-card__head">
+      <header className="ayah__head">
         <AyahMedal nomor={ayah.nomorAyat} />
-        <span className="ayah-card__meta">
+        <span className="ayah__meta">
           {surahNama} · Ayat {ayah.nomorAyat}
         </span>
       </header>
 
       <p
-        className="arabic ayah-card__arabic"
+        className="arabic ayah__arabic"
         lang="ar"
         dir="rtl"
         style={{ fontSize: `calc(var(--text-arabic) * ${prefs.arabicScale})` }}
@@ -158,9 +170,9 @@ export function AyahCard({
         {ayah.teksArab}
       </p>
 
-      {prefs.showLatin && <p className="ayah-card__latin">{ayah.teksLatin}</p>}
+      {prefs.showLatin && <p className="ayah__latin">{ayah.teksLatin}</p>}
 
-      {prefs.showTranslation && <p className="ayah-card__translation">{ayah.teksIndonesia}</p>}
+      {prefs.showTranslation && <p className="ayah__translation">{ayah.teksIndonesia}</p>}
 
       {/* waveform per ayat — tersambung ke player global, bukan audio sendiri */}
       <AyahVoiceNote
@@ -170,7 +182,7 @@ export function AyahCard({
         seed={surahNomor * 1000 + ayah.nomorAyat}
       />
 
-      <footer className="ayah-card__actions">
+      <footer className="ayah__actions">
         <button
           type="button"
           className={cn("ayah-action", playingThis && "is-on")}

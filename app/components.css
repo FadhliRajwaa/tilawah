@@ -1559,74 +1559,82 @@ body:has(.audio-dock) main {
   }
 }
 
-/* ═══ kartu ayat ═══ */
-.ayah-card {
-  border: 1px solid var(--rule);
-  border-radius: var(--radius-md);
-  background: var(--paper-3);
-  padding: var(--space-5) var(--space-5) var(--space-4);
+/* ═══ ayat: lembar mushaf, BUKAN kartu ═══
+ *
+ * ⚠️ Dirombak dari kartu berbingkai. Untuk surah panjang (Al-Baqarah 286
+ * ayat), versi lama menghasilkan 286 kotak putih bertumpuk — halaman terasa
+ * seperti daftar kartu, bukan bacaan. Mushaf sungguhan tidak begitu: ayat
+ * mengalir di satu lembar, dipisah nomor dan ruang.
+ *
+ * Sekarang tanpa kotak & tanpa border. Pemisahnya jarak + nomor berhias.
+ * Hanya ada satu garis rambut (setengah transparan) di atas baris aksi. */
+.ayah {
+  position: relative;
+  padding-block: var(--space-6) var(--space-5);
   scroll-margin-top: calc(var(--nav-h) + 24px);
-  transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
 }
-.ayah-card:hover {
-  border-color: var(--rule);
-  box-shadow: var(--shadow-1);
+/* garis rambut pemisah antar ayat — muncul di semua ayat KECUALI yang
+ * pertama, supaya tidak ada garis menggantung di bawah judul surah */
+.ayah + .ayah {
+  border-top: 1px solid color-mix(in oklab, var(--rule) 62%, transparent);
 }
-.ayah-card.is-active {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent), var(--shadow-1);
+.ayah.is-active {
+  background: color-mix(in oklab, var(--accent-soft) 42%, transparent);
+  border-radius: var(--radius-sm);
+  box-shadow: inset 3px 0 0 var(--accent);
+  padding-inline: var(--space-4);
 }
-.ayah-card.is-target {
-  animation: target-pulse 1.6s var(--ease-out) 1;
+.ayah.is-target {
+  animation: target-pulse 1.8s var(--ease-out) 1;
 }
 @keyframes target-pulse {
   0% {
-    background: var(--accent-soft);
+    background: color-mix(in oklab, var(--accent-soft) 78%, transparent);
   }
   100% {
-    background: var(--paper-3);
+    background: transparent;
   }
 }
-.ayah-card__head {
+.ayah__head {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--space-4);
 }
-.ayah-card__meta {
+.ayah__meta {
   font-size: var(--text-xs);
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
-.ayah-card__arabic {
-  margin: 0 0 var(--space-3);
+.ayah__arabic {
+  margin: 0 0 var(--space-4);
 }
-.ayah-card__latin {
-  margin: 0 0 var(--space-2);
+.ayah__latin {
+  margin: 0 0 var(--space-3);
   color: var(--accent);
   font-size: var(--text-sm);
   font-style: italic;
   line-height: 1.7;
 }
-.ayah-card__translation {
+.ayah__translation {
   margin: 0;
   color: var(--ink-2);
   font-size: var(--text-base);
-  line-height: 1.75;
+  line-height: 1.8;
   max-width: var(--measure);
 }
-.ayah-card__actions {
+.ayah__actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-1);
-  margin-top: var(--space-4);
+  margin-top: var(--space-5);
   padding-top: var(--space-3);
-  border-top: 1px solid var(--rule-2);
+  border-top: 1px solid color-mix(in oklab, var(--rule) 55%, transparent);
 }
 /* mobile: 5 aksi dibagi rata 3+2 supaya rapi, bukan menggantung */
 @media (max-width: 560px) {
-  .ayah-card__actions {
+  .ayah__actions {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--space-1);
@@ -1635,12 +1643,11 @@ body:has(.audio-dock) main {
     justify-content: center;
     padding-inline: var(--space-2);
   }
-  .ayah-action:nth-child(4),
-  .ayah-action:nth-child(5) {
-    grid-column: span 1;
-  }
   .ayah-action:nth-child(4) {
     grid-column-start: 1;
+  }
+  .ayah {
+    padding-block: var(--space-5) var(--space-4);
   }
 }
 .ayah-action {
@@ -1971,75 +1978,159 @@ body:has(.audio-dock) main {
   transform: translateY(-2px);
 }
 
-/* ═══ grid katalog surat ═══ */
-.surah-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
-  gap: var(--space-3);
+/* ═══ indeks bertata huruf (katalog surat) ═══
+ *
+ * Bukan grid kartu. 114 kartu identik itu pola template, dan untuk daftar
+ * sepanjang itu justru menyulitkan dipindai. Bentuk indeks buku jauh lebih
+ * mudah dibaca: nomor rata, nama rata, meta rata — mata menelusuri satu
+ * kolom dengan cepat.
+ *
+ * Garis rambut pemisah baris, bukan kotak: halaman terasa seperti lembar
+ * cetak, bukan tumpukan kartu. */
+.index {
+  --idx-pad: clamp(0.75rem, 2vw, 1.15rem);
 }
-.surah-item {
+.index__head {
+  display: grid;
+  gap: var(--space-3);
+  padding-bottom: var(--space-5);
+  margin-bottom: var(--space-2);
+  border-bottom: 1px solid var(--rule);
+}
+@media (min-width: 700px) {
+  .index__head {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-4);
+  }
+}
+.index__search {
+  max-width: 34rem;
+}
+.index__filters {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-4);
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.index__filter {
+  min-height: 40px;
+  padding-inline: var(--space-4);
   border: 1px solid var(--rule);
-  border-radius: var(--radius-md);
-  background: var(--paper-3);
-  text-decoration: none;
-  color: inherit;
-  transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
-}
-.surah-item:hover {
-  border-color: var(--accent);
-  box-shadow: var(--shadow-1);
-  transform: translateY(-2px);
-}
-.surah-item__num {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
-  border-radius: var(--radius-sm);
-  background: var(--accent-soft);
-  color: var(--accent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--font-body);
   font-size: var(--text-sm);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-.surah-item__body {
-  min-width: 0;
-  flex: 1 1 0;
-  overflow: hidden;
-}
-.surah-item__name {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-/* sub-judul membungkus 2 baris — lebih informatif daripada dipotong ellipsis */
-.surah-item__sub {
-  display: block;
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-.surah-item__name {
   font-weight: 600;
-  font-size: var(--text-base);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
 }
-.surah-item__sub {
+.index__filter:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.index__filter.is-on {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.index__count {
+  margin-inline-start: auto;
   color: var(--muted);
   font-size: var(--text-xs);
-  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
-.surah-item__ar {
+
+/* — daftar — */
+.idx {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: idx;
+}
+.idx__row {
+  border-bottom: 1px solid var(--rule-2);
+}
+.idx__link {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--space-3) var(--space-4);
+  padding: var(--idx-pad) var(--space-2);
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--dur-fast) var(--ease-out), padding-inline var(--dur-base) var(--ease-out);
+}
+.idx__link:hover {
+  background: color-mix(in oklab, var(--accent-soft) 52%, transparent);
+  padding-inline: var(--space-3);
+}
+.idx__link:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+/* nomor: angka display besar, rata kanan supaya digit sejajar vertikal */
+.idx__num {
+  min-width: 2.4ch;
+  text-align: end;
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.idx__link:hover .idx__num {
+  color: var(--accent);
+}
+.idx__body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-3);
+  min-width: 0;
+}
+.idx__name {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.idx__meta {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.idx__dot {
+  margin-inline: 0.45em;
+  opacity: 0.6;
+}
+.idx__ar {
   font-family: var(--font-arabic);
-  direction: rtl;
   font-size: var(--text-lg);
+  line-height: 1.5;
   color: var(--ink-2);
-  flex-shrink: 0;
+  white-space: nowrap;
+}
+@media (max-width: 560px) {
+  /* nama Arab pindah ke baris kedua agar nama latin tidak terpotong */
+  .idx__link {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-1) var(--space-3);
+  }
+  .idx__ar {
+    grid-column: 2;
+    justify-self: start;
+    font-size: var(--text-md);
+    color: var(--muted);
+  }
+  .idx__name {
+    font-size: var(--text-base);
+  }
 }
 
 /* ═══ hero beranda (Marquee Hero) ═══ */
@@ -3874,10 +3965,6 @@ body:has(.audio-dock) main {
   .section__head {
     margin-bottom: var(--space-5);
   }
-  .ayah-card {
-    padding: var(--space-4);
-    border-radius: var(--radius-sm);
-  }
   .modal__body {
     padding: var(--space-4);
   }
@@ -3934,16 +4021,6 @@ body:has(.audio-dock) main {
 @media (max-width: 360px) {
   .container-page {
     padding-inline: 0.875rem;
-  }
-  .surah-item {
-    gap: var(--space-3);
-    padding: var(--space-3);
-  }
-  .surah-item__ar {
-    display: none;
-  }
-  .ayah-card__actions {
-    gap: 0;
   }
   .ayah-action {
     padding-inline: var(--space-2);
@@ -4360,9 +4437,7 @@ body:has(.audio-dock) main {
 .card,
 .ibadah-card,
 .credit-card,
-.surah-item,
-.juz-chip,
-.ayah-card {
+.juz-chip {
   box-shadow:
     0 1px 1px color-mix(in oklab, var(--ink) 4%, transparent),
     0 4px 12px color-mix(in oklab, var(--ink) 5%, transparent),
@@ -4373,8 +4448,7 @@ body:has(.audio-dock) main {
     transform var(--dur-base) var(--ease-out);
 }
 .card--link:hover,
-.ibadah-card:hover,
-.surah-item:hover {
+.ibadah-card:hover {
   box-shadow:
     0 1px 1px color-mix(in oklab, var(--ink) 5%, transparent),
     0 8px 20px color-mix(in oklab, var(--ink) 8%, transparent),
