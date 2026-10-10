@@ -57,17 +57,31 @@ const themes = {
    * Flap dibuat hampir opak seperti tema "white" bawaan. Kalau dibiarkan
    * tembus pandang, `backdropFilter: blur()` di bawahnya mem-blur kartu
    * hijau sehingga seluruh folder jadi gumpalan buram tanpa bentuk. */
+  /* Tema Tilawah: mengikuti palet "air" — badan folder biru muda seperti
+   * kertas yang dibasahi cat, kartu di dalamnya biru indigo sungai (#109BDA).
+   *
+   * ⚠️ Nilai lama di sini hijau (#125c35) + krem — sisa tema "mushaf hangat"
+   * sebelum overhaul. Di halaman /juz folder-nya jadi satu-satunya elemen
+   * hijau di antara semua yang biru, dan itu terlihat jelas di screenshot. */
   tilawah: {
-    backFill: "#f7efe2",
-    backInsetColor: "0 0 0 0 0.42 0 0 0 0 0.35 0 0 0 0 0.25 0 0 0 0.2 0",
-    backInsetShadow: "inset 0 0 6px 2px rgba(120,100,70,0.2)",
-    flapFill: "#efe4d2",
-    flapFillOpacity: 0.94,
-    flapStroke: "#c9b48a",
-    flapInsetColor: "0 0 0 0 0.35 0 0 0 0 0.3 0 0 0 0 0.2 0 0 0 0.12 0",
-    cardFill: "#125c35",
-    cardStroke: "#1c7a4a",
-    cardLineFill: "#8fc0a4",
+    /* Badan folder: biru pucat (terlihat di belakang kartu).
+     * Flap DEPAN: biru lebih pekat + garis tepi yang jelas.
+     *
+     * ⚠️ Percobaan pertama memakai flap #eaf6fd — hanya 1 tingkat lebih
+     * terang dari badan (#dceefa). Di screenshot keduanya menyatu jadi
+     * gumpalan putih dan folder kehilangan bentuknya. Sekarang flap lebih
+     * PEKAT dari badan, bukan lebih terang: bentuk folder jadi terbaca
+     * karena kontras, bukan karena bayangan tipis. */
+    backFill: "#cfe7f7",
+    backInsetColor: "0 0 0 0 0.35 0 0 0 0 0.62 0 0 0 0 0.82 0 0 0 0.2 0",
+    backInsetShadow: "inset 0 0 6px 2px rgba(16,155,218,0.22)",
+    flapFill: "#8fd4f0",
+    flapFillOpacity: 0.97,
+    flapStroke: "#3fa8d4",
+    flapInsetColor: "0 0 0 0 0.28 0 0 0 0 0.58 0 0 0 0 0.78 0 0 0 0.14 0",
+    cardFill: "#109bda",
+    cardStroke: "#19bbe3",
+    cardLineFill: "#c8ecfa",
     cardInsetColor: "0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.18 0",
   },
 } as const;
@@ -76,16 +90,16 @@ const themes = {
  * langsung dari <html data-theme> alih-alih lewat utility `dark:`. */
 const darkThemes = {
   tilawah: {
-    backFill: "#2b2419",
+    backFill: "#0f1d27",
     backInsetColor: "0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.14 0",
-    backInsetShadow: "inset 0 0 6px 2px rgba(255,240,210,0.12)",
-    flapFill: "#3a3122",
+    backInsetShadow: "inset 0 0 6px 2px rgba(111,200,232,0.14)",
+    flapFill: "#162936",
     flapFillOpacity: 0.96,
-    flapStroke: "#6f6244",
+    flapStroke: "#3d6a83",
     flapInsetColor: "0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.1 0",
-    cardFill: "#3f8f60",
-    cardStroke: "#5aa87a",
-    cardLineFill: "#bcdcc8",
+    cardFill: "#2f9fd4",
+    cardStroke: "#52d9e8",
+    cardLineFill: "#bfe9f8",
     cardInsetColor: "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.2 0",
   },
 } as const;

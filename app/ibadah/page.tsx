@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getAsmaulHusna, getDoaHarian } from "@/lib/api/ibadah";
 import { IbadahTabs } from "@/components/ibadah/ibadah-tabs";
-import { OrnamentDivider } from "@/components/ornaments";
-import { AmbientImage } from "@/components/ambient-image";
+import { PageHead } from "@/components/page-head";
 import { Gallery } from "@/components/gallery";
 import type { AsmaulHusnaItem, DoaItem } from "@/lib/types";
 
@@ -25,31 +24,17 @@ export default async function IbadahPage() {
 
   return (
     <>
-      {/* — header bergambar: kaligrafi tampil sebagai latar jelas — */}
-      <header className="page-head page-head--tall">
-        <AmbientImage
-          variant="tex-calligraphy"
-          mode="plate"
-          intensity={0.72}
-          position="center 44%"
-        />
-        <div className="page-head__veil" aria-hidden="true" />
-        <div className="container-page page-head__inner on-ambient">
-          <p className="surah-head__eyebrow">Amalan harian</p>
-          <h1 className="section__title" style={{ fontSize: "var(--text-3xl)", marginTop: "var(--space-3)" }}>
-            Ibadah
-          </h1>
-          <p className="section__sub" style={{ maxWidth: "52ch", marginInline: "auto" }}>
-            Asmaul Husna, doa sehari-hari, dan jadwal sholat — semuanya dalam satu
-            tempat, tanpa gangguan.
-          </p>
-          <div style={{ marginTop: "var(--space-5)" }}>
-            <OrnamentDivider className="ornament-divider" />
-          </div>
-        </div>
-      </header>
+      <PageHead
+        eyebrow="Amalan harian"
+        title="Ibadah"
+        desc="Asmaul Husna, doa sehari-hari, dan jadwal sholat — semuanya dalam satu tempat, tanpa gangguan."
+        variant="tex-calligraphy"
+        caption="Kaligrafi Islam"
+        position="center 44%"
+        intensity={0.9}
+      />
 
-      <div className="container-page" style={{ paddingBlock: "var(--space-7)" }}>
+      <div className="container-page section--tight">
         <Suspense fallback={<div className="skeleton" style={{ height: 320 }} aria-hidden="true" />}>
           <IbadahTabs asmaul={asmaul} doa={doa} />
         </Suspense>

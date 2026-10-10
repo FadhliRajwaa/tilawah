@@ -1,9 +1,23 @@
 /* — Lapisan gambar dekoratif: dari tekstur halus sampai foto yang tampil jelas.
  *
- * Tiga mode pakai:
+ * Empat mode pakai:
  *  - "veil"   → tekstur latar (opacity rendah + veil warna) — untuk header & hero
  *  - "plate"  → foto tampil jelas sebagai panel/kartu (opacity tinggi, veil tipis)
  *  - "clean"  → foto apa adanya, tanpa veil (untuk thumbnail & galeri)
+ *  - `fixed`  → foto DIAM di viewport, konten menggulir di atasnya (parallax)
+ *
+ * ⚠️ Kenapa mode `fixed` memakai background-image, bukan `<img>`:
+ * `position: fixed` TIDAK bisa dipakai di sini — elemen fixed lolos dari
+ * `overflow: hidden` milik `.ambient`, jadi fotonya akan menutupi seluruh
+ * layar dan menutupi konten. Sementara `transform` pada leluhur memang
+ * mengurungnya, tapi sekaligus mengubah acuannya sehingga efek "diam" hilang
+ * (foto ikut menggulir). `background-attachment: fixed` adalah satu-satunya
+ * cara yang benar: latar SELALU terpotong oleh kotak elemennya, tapi
+ * posisinya diacu ke viewport.
+ *
+ * Konsekuensinya: varian responsif dipilih lewat media query di CSS
+ * (variabel `--amb-sm/md/lg`), bukan atribut `sizes`. Berkas yang tidak
+ * dipakai TIDAK diunduh — peramban hanya memuat deklarasi yang menang.
  */
 
 import type { CSSProperties } from "react";
@@ -70,6 +84,8 @@ interface Props {
   fade?: "bottom" | "sides" | "top" | "none";
   /** "veil" (default) = tekstur; "plate" = foto sebagai panel; "clean" = tanpa perlakuan */
   mode?: "veil" | "plate" | "clean";
+  /** foto diam di viewport saat halaman menggulir (efek latar tetap) */
+  fixed?: boolean;
 }
 
 export function AmbientImage({
@@ -81,6 +97,7 @@ export function AmbientImage({
   style,
   fade = "none",
   mode = "veil",
+  fixed = false,
 }: Props) {
   const v = (ALIAS[variant] ?? variant) as string;
   const [rw, rh] = RATIO[v] ?? [16, 9];
@@ -94,6 +111,27 @@ export function AmbientImage({
         : fade === "sides"
           ? "linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%)"
           : undefined;
+
+  /* — mode tetap: latar CSS yang dipaku ke viewport — */
+  if (fixed) {
+    return (
+      <div
+        className={`ambient ambient--fixed ${className}`.trim()}
+        style={
+          {
+            "--ambient-opacity": opacity,
+            "--amb-pos": position,
+            "--amb-sm": `url(/images/${v}-sm.webp)`,
+            "--amb-md": `url(/images/${v}-md.webp)`,
+            "--amb-lg": `url(/images/${v}-lg.webp)`,
+            ...(mask ? { "--ambient-mask": mask } : null),
+            ...style,
+          } as CSSProperties
+        }
+        aria-hidden="true"
+      />
+    );
+  }
 
   return (
     <picture

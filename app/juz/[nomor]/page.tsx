@@ -4,8 +4,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getJuzAyah, getJuzInfo } from "@/lib/api/juz";
 import { JuzReader } from "@/components/quran/juz-reader";
-import { AmbientImage } from "@/components/ambient-image";
-import { CornerFlourish } from "@/components/ornaments";
+import { ReaderHead } from "@/components/reader-head";
 import { toArabicNumber } from "@/lib/utils";
 
 export const revalidate = 86400;
@@ -61,34 +60,28 @@ export default async function JuzDetailPage({ params }: Params) {
 
   return (
     <>
-      {/* — header juz — */}
-      <header className="surah-head">
-        <AmbientImage
-          variant="tex-dome-detail"
-          mode="plate"
-          intensity={0.5}
-          position="center 40%"
-        />
-        <div className="surah-head__veil" aria-hidden="true" />
-        <CornerFlourish className="surah-head__corner surah-head__corner--tl" />
-        <CornerFlourish className="surah-head__corner surah-head__corner--br" />
-        <div className="surah-head__inner container-page on-ambient">
-          <p className="surah-head__eyebrow">Pembagian mushaf</p>
-          <span className="surah-head__name-ar" lang="ar" dir="rtl" aria-hidden="true">
-            {toArabicNumber(n)}
+      {/* — header juz (latar dipaku ke viewport) — */}
+      <ReaderHead
+        variant="tex-dome-detail"
+        caption="Detail kubah — geometri Islam"
+        position="center 40%"
+        intensity={0.9}
+      >
+        <p className="surah-head__eyebrow">Pembagian mushaf</p>
+        <span className="surah-head__name-ar" lang="ar" dir="rtl" aria-hidden="true">
+          {toArabicNumber(n)}
+        </span>
+        <h1 className="surah-head__name">Juz {n}</h1>
+        <div className="surah-head__meta">
+          <span>
+            <b>{info.jumlahAyat}</b> ayat
           </span>
-          <h1 className="surah-head__name">Juz {n}</h1>
-          <div className="surah-head__meta">
-            <span>
-              <b>{info.jumlahAyat}</b> ayat
-            </span>
-            <span>
-              <b>{info.surahList.length}</b> surah
-            </span>
-            <span>{info.label}</span>
-          </div>
+          <span>
+            <b>{info.surahList.length}</b> surah
+          </span>
+          <span>{info.label}</span>
         </div>
-      </header>
+      </ReaderHead>
 
       {/* — navigasi antar juz — */}
       <nav className="surah-nav container-page" aria-label="Navigasi antar juz">

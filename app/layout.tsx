@@ -8,6 +8,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { AudioDock } from "@/components/player/audio-dock";
 import { ThemeScript } from "@/components/theme-script";
 import { WatercolorBg } from "@/components/watercolor-bg";
+import { LightboxProvider } from "@/components/image-lightbox";
 
 /* Catatan: shadcn init sempat menambahkan font Geist (--font-sans) + kelas
  * `font-sans` di <html>. Itu MENIMPA tipografi Tilawah (Fraunces + Switzer),
@@ -106,12 +107,16 @@ export default function RootLayout({
         <a href="#konten" className="skip-link">
           Lewati ke konten
         </a>
-        <PlayerProvider>
-          <SiteNav />
-          <main id="konten">{children}</main>
-          <SiteFooter />
-          <AudioDock />
-        </PlayerProvider>
+        {/* lightbox global: satu dialog untuk seluruh situs — banner, header
+            halaman, galeri, dan halaman kredit semuanya membuka ke sini */}
+        <LightboxProvider>
+          <PlayerProvider>
+            <SiteNav />
+            <main id="konten">{children}</main>
+            <SiteFooter />
+            <AudioDock />
+          </PlayerProvider>
+        </LightboxProvider>
       </body>
     </html>
   );

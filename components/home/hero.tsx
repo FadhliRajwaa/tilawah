@@ -1,22 +1,29 @@
 /* — Hero beranda: foto arsitektur islami sebagai latar + kartu ayat pilihan.
- * Foto memakai mode "plate" (tampil jelas) dengan veil gradien yang menjamin
- * teks tetap lolos kontras AA — bukan tekstur samar.
+ * Foto memakai mode "plate" dengan veil gradien yang menjamin teks tetap lolos
+ * kontras AA — bukan tekstur samar.
+ *
+ * Latarnya DIPAKU ke viewport: saat pengunjung menggulir dari hero ke seksi
+ * berikutnya, foto kubah tetap diam dan konten meluncur di atasnya. Ini yang
+ * membuat halaman terasa seperti satu lembar kertas panjang di atas meja
+ * bergambar — bukan tumpukan blok yang masing-masing membawa latarnya sendiri.
  */
 
 import Link from "next/link";
 import { MihrabFrame, OrnamentStar } from "@/components/ornaments";
 import { AmbientImage } from "@/components/ambient-image";
 import { Orb } from "@/components/orb";
+import { PhotoZoom } from "@/components/photo-zoom";
 
 export function Hero({ totalSurah }: { totalSurah: number }) {
   return (
     <section className="hero" aria-labelledby="hero-title">
-      {/* foto kubah geometris emas — LCP, priority */}
+      {/* foto kubah geometris emas — LCP, priority, diam saat scroll */}
       <AmbientImage
         variant="hero-dome-gold"
         mode="plate"
         intensity={0.85}
         position="center 38%"
+        fixed
         priority
       />
       {/* Fluid Orb — aksen hidup, mount ditunda 1.2s agar tidak berebut LCP */}
@@ -24,6 +31,12 @@ export function Hero({ totalSurah }: { totalSurah: number }) {
       <div className="hero__veil" aria-hidden="true" />
       <div className="hero__bg" aria-hidden="true" />
       <MihrabFrame className="hero__frame" />
+      <PhotoZoom
+        variant="hero-dome-gold"
+        caption="Kubah bermotif geometris — keindahan arsitektur Islam"
+        position="center 38%"
+        className="hero__zoom"
+      />
 
       <div className="hero__inner container-page on-ambient">
         <div>

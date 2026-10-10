@@ -5,8 +5,7 @@ import { notFound } from "next/navigation";
 import { getSurah, getSurahList, getTafsir } from "@/lib/api/equran";
 import { SurahReader } from "@/components/quran/surah-reader";
 import { SurahHeadActions } from "@/components/quran/surah-head-actions";
-import { CornerFlourish } from "@/components/ornaments";
-import { AmbientImage } from "@/components/ambient-image";
+import { ReaderHead } from "@/components/reader-head";
 import type { SurahDetail, TafsirItem } from "@/lib/types";
 
 export const revalidate = 86400;
@@ -92,49 +91,42 @@ export default async function SurahPage({ params }: Params) {
 
   return (
     <>
-      {/* — header surat: marquee mushaf — */}
-      <header className="surah-head">
-        {/* mushaf manuskrip tampil jelas sebagai latar header surat */}
-        <AmbientImage
-          variant="tex-manuscript"
-          mode="plate"
-          intensity={0.55}
-          position="center 42%"
-        />
-        <div className="surah-head__veil" aria-hidden="true" />
-        <CornerFlourish className="surah-head__corner surah-head__corner--tl" />
-        <CornerFlourish className="surah-head__corner surah-head__corner--br" />
-        <div className="surah-head__inner container-page on-ambient">
-          <p className="surah-head__eyebrow">Surah ke-{surah.nomor}</p>
-          <span className="surah-head__name-ar" lang="ar" dir="rtl">
-            {surah.nama}
+      {/* — header surat: marquee mushaf (latar dipaku ke viewport) — */}
+      <ReaderHead
+        variant="tex-manuscript"
+        caption="Manuskrip mushaf — tulisan tangan lama"
+        position="center 42%"
+        intensity={0.9}
+      >
+        <p className="surah-head__eyebrow">Surah ke-{surah.nomor}</p>
+        <span className="surah-head__name-ar" lang="ar" dir="rtl">
+          {surah.nama}
+        </span>
+        <h1 className="surah-head__name">{surah.namaLatin}</h1>
+        <div className="surah-head__meta">
+          <span>
+            Arti: <b>{surah.arti}</b>
           </span>
-          <h1 className="surah-head__name">{surah.namaLatin}</h1>
-          <div className="surah-head__meta">
-            <span>
-              Arti: <b>{surah.arti}</b>
-            </span>
-            <span>
-              <b>{surah.jumlahAyat}</b> ayat
-            </span>
-            <span>
-              Turun di <b>{isMekah ? "Mekah" : "Madinah"}</b>
-            </span>
-            <span>{isMekah ? "Makkiyah" : "Madaniyah"}</span>
-          </div>
-
-          <SurahHeadActions surah={surah} />
-
-          {surah.deskripsi && (
-            <p
-              className="t-sm t-muted"
-              style={{ maxWidth: "62ch", marginInline: "auto", marginTop: "var(--space-5)", lineHeight: 1.75 }}
-            >
-              {cleanDeskripsi(surah.deskripsi)}
-            </p>
-          )}
+          <span>
+            <b>{surah.jumlahAyat}</b> ayat
+          </span>
+          <span>
+            Turun di <b>{isMekah ? "Mekah" : "Madinah"}</b>
+          </span>
+          <span>{isMekah ? "Makkiyah" : "Madaniyah"}</span>
         </div>
-      </header>
+
+        <SurahHeadActions surah={surah} />
+
+        {surah.deskripsi && (
+          <p
+            className="t-sm t-muted"
+            style={{ maxWidth: "62ch", marginInline: "auto", marginTop: "var(--space-5)", lineHeight: 1.75 }}
+          >
+            {cleanDeskripsi(surah.deskripsi)}
+          </p>
+        )}
+      </ReaderHead>
 
       {/* — navigasi surat — */}
       <nav className="surah-nav container-page" aria-label="Navigasi antar surah">

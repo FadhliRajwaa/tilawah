@@ -1,13 +1,20 @@
 "use client";
 
 /* — Nav N1b (canonical: wordmark kiri · link tengah · aksi kanan).
- * Dipilih sadar, bukan default N1a — halaman punya 5 destinasi nyata.
- * Mobile: menu disclosure dengan target sentuh 44px.
+ *
+ * Beberapa penyempurnaan atas versi sebelumnya:
+ *  · Indikator aktif adalah PIL yang mengalir di antara tautan (`.nav-link__pill`)
+ *    — bukan latar yang menyala-nyala tiap tautan. Satu elemen bergerak lebih
+ *    tenang dibaca daripada empat elemen berkedip.
+ *  · Ikon tema & burger memakai jalur SVG yang sama sehingga ketebalan garisnya
+ *    konsisten (sebelumnya 1.7 vs 1.8 tanpa alasan).
+ *  · Menu seluler diberi latar solid penuh + pemisah halus; sebelumnya hanya
+ *    tumpukan tautan yang menggantung di bawah nav.
  */
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePrefs } from "@/lib/store/prefs";
 import { cn } from "@/lib/utils";
 import { Logo } from "./logo";
@@ -50,6 +57,8 @@ export function SiteNav() {
   const [prefs, updatePrefs] = usePrefs();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const linksRef = useRef<HTMLElement>(null);
+  const [pill, setPill] = useState<{ x: number; w: number } | null>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -60,6 +69,27 @@ export function SiteNav() {
 
   useEffect(() => {
     setOpen(false);
+  }, [pathname]);
+
+  /* Ukur tautan aktif lalu geser pil ke posisinya. Diukur dari DOM, bukan
+   * dihitung dari indeks — lebar label berbeda-beda ("Cari" vs "Tersimpan"),
+   * jadi perhitungan indeks selalu meleset beberapa piksel. */
+  useEffect(() => {
+    const host = linksRef.current;
+    if (!host) return;
+    const measure = () => {
+      const active = host.querySelector<HTMLElement>(".nav-link.is-active");
+      if (!active) {
+        setPill(null);
+        return;
+      }
+      setPill({ x: active.offsetLeft, w: active.offsetWidth });
+    };
+    measure();
+    /* ukuran font web bisa berubah setelah font selesai dimuat */
+    const ro = new ResizeObserver(measure);
+    ro.observe(host);
+    return () => ro.disconnect();
   }, [pathname]);
 
   const cycleTheme = () => {
@@ -79,7 +109,14 @@ export function SiteNav() {
           <span className="wordmark__text">Tilawah</span>
         </Link>
 
-        <nav className="site-nav__links" aria-label="Navigasi utama">
+        <nav className="site-nav__links" aria-label="Navigasi utama" ref={linksRef}>
+          {pill && (
+            <span
+              className="nav-link__pill"
+              aria-hidden="true"
+              style={{ transform: `translateX(${pill.x}px)`, width: pill.w }}
+            />
+          )}
           {LINKS.map((l) => {
             const active = pathname === l.href || pathname.startsWith(l.href + "/");
             return (
@@ -110,7 +147,7 @@ export function SiteNav() {
           </Link>
           <button
             type="button"
-            className="nav-burger"
+            className={cn("nav-burger", open && "is-open")}
             aria-expanded={open}
             aria-controls="nav-mobile"
             aria-label={open ? "Tutup menu" : "Buka menu"}
@@ -122,18 +159,29 @@ export function SiteNav() {
         </div>
       </div>
 
-      {open && (
-        <nav id="nav-mobile" className="site-nav__mobile" aria-label="Navigasi seluler">
-          {LINKS.map((l) => (
-            <Link key={l.href} href={l.href} className="nav-mobile-link">
+      <nav
+        id="nav-mobile"
+        className={cn("site-nav__mobile", open && "is-open")}
+        aria-label="Navigasi seluler"
+        hidden={!open}
+      >
+        {LINKS.map((l) => {
+          const active = pathname === l.href || pathname.startsWith(l.href + "/");
+          return (
+            <Link
+              key={l.href}
+              href={l.href}
+              className={cn("nav-mobile-link", active && "is-active")}
+              aria-current={active ? "page" : undefined}
+            >
               {l.label}
             </Link>
-          ))}
-          <Link href="/surat/36" className="nav-mobile-link nav-mobile-link--accent">
-            Baca Yasin
-          </Link>
-        </nav>
-      )}
+          );
+        })}
+        <Link href="/surat/36" className="nav-mobile-link nav-mobile-link--accent">
+          Baca Yasin
+        </Link>
+      </nav>
     </header>
   );
 }

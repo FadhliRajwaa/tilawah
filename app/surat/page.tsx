@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { getSurahList } from "@/lib/api/equran";
 import { SurahCatalog } from "@/components/quran/surah-catalog";
-import { OrnamentDivider } from "@/components/ornaments";
-import { AmbientImage } from "@/components/ambient-image";
+import { PageHead } from "@/components/page-head";
 import { Gallery } from "@/components/gallery";
 import type { SurahSummary } from "@/lib/types";
 
@@ -25,32 +24,18 @@ export default async function SurahIndexPage() {
 
   return (
     <>
-      {/* — header bergambar: kubah geometris sebagai latar — */}
-      <header className="page-head page-head--tall">
-        <AmbientImage
-          variant="hero-dome-glass"
-          mode="plate"
-          intensity={0.62}
-          position="center 40%"
-          priority
-        />
-        <div className="page-head__veil" aria-hidden="true" />
-        <div className="container-page page-head__inner on-ambient">
-          <p className="surah-head__eyebrow">Katalog</p>
-          <h1 className="section__title" style={{ fontSize: "var(--text-3xl)", marginTop: "var(--space-3)" }}>
-            114 Surah
-          </h1>
-          <p className="section__sub" style={{ maxWidth: "52ch", marginInline: "auto" }}>
-            Seluruh Al-Qur&rsquo;an — 30 juz, 114 surah, 6.236 ayat. Pilih surah untuk
-            membaca dengan teks mushaf, terjemahan Kemenag, dan tafsir per ayat.
-          </p>
-          <div style={{ marginTop: "var(--space-5)" }}>
-            <OrnamentDivider className="ornament-divider" />
-          </div>
-        </div>
-      </header>
+      <PageHead
+        eyebrow="Katalog"
+        title="114 Surah"
+        desc="Seluruh Al-Qur'an — 30 juz, 114 surah, 6.236 ayat. Pilih surah untuk membaca dengan teks mushaf, terjemahan Kemenag, dan tafsir per ayat."
+        variant="hero-dome-glass"
+        caption="Kubah kaca bermotif geometris"
+        position="center 40%"
+        intensity={0.9}
+        priority
+      />
 
-      <div className="container-page" style={{ paddingBlock: "var(--space-7)" }}>
+      <div className="container-page section--tight">
         {error ? (
           <div className="error-banner" role="alert">
             Gagal memuat daftar surah. Server sumber data sedang tidak dapat diakses —

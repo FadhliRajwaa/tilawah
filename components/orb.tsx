@@ -45,7 +45,7 @@ function canRunShader(): boolean {
 
 interface Props {
   size?: number;
-  /** warna orb (hex) — default hijau mushaf */
+  /** warna orb (hex) — default biru indigo sungai, tema "air" */
   color?: string;
   className?: string;
   /** delay mount (ms) agar tidak berebut dengan LCP */
@@ -54,7 +54,7 @@ interface Props {
 
 export function Orb({
   size = 420,
-  color = "#125c35",
+  color = "#109bda",
   className,
   delay = 0,
 }: Props) {

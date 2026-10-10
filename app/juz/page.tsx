@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import { getJuzList, type JuzInfo } from "@/lib/api/juz";
 import { JuzFolder } from "@/components/quran/juz-folder";
 import { JuzSummary, JuzNote } from "@/components/quran/juz-summary";
-import { AmbientImage } from "@/components/ambient-image";
-import { Orb } from "@/components/orb";
-import { OrnamentDivider } from "@/components/ornaments";
+import { PageHead } from "@/components/page-head";
 
 export const revalidate = 604800;
 
@@ -25,37 +23,25 @@ export default async function JuzPage() {
 
   return (
     <>
-      <header className="page-head page-head--tall">
-        <AmbientImage
-          variant="hero-arch-blue"
-          mode="plate"
-          intensity={0.6}
-          position="center 42%"
-          priority
-        />
-        <Orb size={440} color="#109BDA" className="orb-host--page" delay={900} />
-        <div className="page-head__veil" aria-hidden="true" />
-        <div className="container-page page-head__inner on-ambient">
-          <p className="surah-head__eyebrow">Pembagian mushaf</p>
-          <h1 className="section__title" style={{ fontSize: "var(--text-3xl)", marginTop: "var(--space-3)" }}>
-            30 Juz
-          </h1>
-          <p className="section__sub" style={{ maxWidth: "56ch", marginInline: "auto" }}>
-            Al-Qur&rsquo;an dibagi menjadi 30 juz agar mudah dibaca bertahap — satu juz
-            per hari menyelesaikan khatam dalam sebulan.
-          </p>
-          <p className="juz-acuan">Mengikuti Mushaf Standar Indonesia (Kemenag/LPMQ)</p>
-          <div style={{ marginTop: "var(--space-5)" }}>
-            <OrnamentDivider className="ornament-divider" />
-          </div>
-        </div>
-      </header>
+      <PageHead
+        eyebrow="Pembagian mushaf"
+        title="30 Juz"
+        desc="Al-Qur'an dibagi menjadi 30 juz agar mudah dibaca bertahap — satu juz per hari menyelesaikan khatam dalam sebulan."
+        variant="hero-arch-blue"
+        caption="Lengkung arkade masjid"
+        position="center 42%"
+        intensity={0.9}
+        orb
+        priority
+      >
+        <p className="juz-acuan">Mengikuti Mushaf Standar Indonesia (Kemenag/LPMQ)</p>
+      </PageHead>
 
-      <div className="container-page" style={{ paddingBlock: "var(--space-7)" }}>
+      <div className="container-page section--tight">
         {error ? (
           <div className="error-banner" role="alert">
             Gagal memuat daftar juz. Sumber data sedang tidak dapat diakses — coba
-            muat ulang sebentar lagi.
+            muat ulang halaman sebentar lagi.
           </div>
         ) : list.length === 0 ? (
           <div className="empty">

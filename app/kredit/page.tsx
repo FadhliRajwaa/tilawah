@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { OrnamentDivider } from "@/components/ornaments";
+import { CreditThumb } from "@/components/credit-thumb";
 import { CREDITS } from "@/lib/data/credits";
 
 export const metadata: Metadata = {
@@ -98,15 +99,7 @@ export default function KreditPage() {
           <div className="credit-grid">
             {credits.map((c) => (
               <article key={c.name} className="credit-card">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={`/images/${c.files.sm?.webp ?? Object.values(c.files)[0].webp}`}
-                  alt=""
-                  width={320}
-                  height={180}
-                  loading="lazy"
-                  className="credit-card__thumb"
-                />
+                <CreditThumb credit={c} />
                 <div className="credit-card__body">
                   <p className="credit-card__note">{c.note}</p>
                   <p className="credit-card__title">{c.title}</p>
