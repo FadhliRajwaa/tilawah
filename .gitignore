@@ -43,3 +43,5 @@ pnpm-debug.log*
 .impeccable/
 wb.html
 juz_meta.json
+
+.vercel
