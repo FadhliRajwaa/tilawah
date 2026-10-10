@@ -1,7 +1,7 @@
 /* — Footer Ft1 (mast-headed): wordmark + tagline satu band, link kecil di samping. */
 
 import Link from "next/link";
-import { OrnamentStar } from "./ornaments";
+import { Logo } from "./logo";
 
 export function SiteFooter() {
   return (
@@ -9,7 +9,7 @@ export function SiteFooter() {
       <div className="site-footer__inner container-page">
         <div className="site-footer__brand">
           <div className="site-footer__mark">
-            <OrnamentStar className="footer-star" />
+            <Logo className="footer-star" />
             <span className="site-footer__wordmark">Tilawah</span>
           </div>
           <p className="site-footer__tagline">

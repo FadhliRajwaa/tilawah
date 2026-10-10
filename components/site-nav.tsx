@@ -10,7 +10,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { usePrefs } from "@/lib/store/prefs";
 import { cn } from "@/lib/utils";
-import { OrnamentStar } from "./ornaments";
+import { Logo } from "./logo";
 
 const LINKS = [
   { href: "/surat", label: "Surah" },
@@ -75,7 +75,7 @@ export function SiteNav() {
     <header className={cn("site-nav", scrolled && "is-scrolled")}>
       <div className="site-nav__inner container-page">
         <Link href="/" className="wordmark" aria-label="Tilawah — beranda">
-          <OrnamentStar className="wordmark__mark" />
+          <Logo className="wordmark__mark" />
           <span className="wordmark__text">Tilawah</span>
         </Link>
 
