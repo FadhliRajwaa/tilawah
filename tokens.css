@@ -1,42 +1,53 @@
-/* Hallmark · macrostructure: Marquee Hero · H1 hero knobs: size=xxl, alignment=left-bias, underlay=single rule below
- * theme: custom · vibe: "hangat mushaf, kertas krem, hijau tua, emas" · paper: oklch(95% 0.018 80) · accent: oklch(42% 0.095 155)
+/* Tilawah · tema "air" — watercolor biru
+ * vibe: "kertas basah, tinta biru, sapuan cat air" · paper: oklch(97.5% 0.012 220) · accent: oklch(52% 0.135 235)
  * display: Fraunces · body: Switzer · arabic: LPMQ Isep Misbah (fallback Amiri Quran)
- * axes: light / roman-serif / chromatic-green · nav: N1b · footer: Ft1
- * studied: no · context: explicit · verified contrast: ink 14.16:1 · accent 6.93:1 · gold-text 5.23:1
+ *
+ * Palet diambil dari empat warna washes: #109BDA · #19BBE3 · #52D9E8 · #8BE9EA
+ * Diterapkan sebagai: permukaan biru sangat terang + tinta biru tua,
+ * dengan emas tetap dipakai tipis sebagai aksen ornamen Islami.
  */
 
 :root {
-  /* — surfaces — */
-  --paper: oklch(95% 0.018 80);        /* #f5ede1 krem hangat */
-  --paper-2: oklch(92% 0.02 80);       /* #ece3d6 */
-  --paper-3: oklch(97.5% 0.012 80);    /* elevasi terang (kartu ayat) */
+  /* — permukaan: biru sangat terang, seperti kertas yang dibasahi cat —
+   *
+   * Tiga tingkat ini harus punya JARAK yang terasa, kalau tidak kartu tampak
+   * sebagai lempeng putih di atas latar biru (bug pertama: paper-3 = 99%
+   * sementara paper = 97.5%, bedanya cuma 1.5% → tak terlihat). Sekarang
+   * jaraknya ~4% per tingkat, dan chroma kartu dinaikkan sedikit supaya
+   * tetap terasa "biru", bukan abu-abu netral. */
+  --paper: oklch(96.5% 0.016 220);      /* latar halaman */
+  --paper-2: oklch(92.5% 0.024 218);    /* panel, footer, meta */
+  --paper-3: oklch(99.2% 0.005 220);    /* elevasi tertinggi (kartu, modal) */
 
-  /* — ink — */
-  --ink: oklch(24% 0.016 65);          /* #251e17 — 14.16:1 */
-  --ink-2: oklch(42% 0.014 65);        /* #534c45 — 7.27:1 */
-  /* muted: teks sekunder. Digelapkan dari 52% setelah audit: pada latar
-   * --paper-2 (kartu/footer) 52% hanya mencapai ~3.7:1, di bawah AA. */
-  --muted: oklch(45% 0.012 65);        /* #5e5852 — 6.1:1 di paper, 5.2:1 di paper-2 */
+  /* — tinta: biru tua, bukan hitam — */
+  --ink: oklch(22% 0.032 235);          /* #0E1F2C — 14.4:1 */
+  --ink-2: oklch(43% 0.034 230);        /* #3D5868 — 7.6:1 */
+  --muted: oklch(49% 0.028 228);        /* #52707F — 6.0:1 di paper */
 
-  /* — rules — */
-  --rule: oklch(84% 0.016 80);         /* #d0cabf */
-  --rule-2: oklch(89% 0.014 80);
+  /* — garis — */
+  --rule: oklch(86% 0.024 220);
+  --rule-2: oklch(91% 0.014 220);
 
-  /* — accent (hijau tua, 6.93:1) — */
-  --accent: oklch(42% 0.095 155);      /* #125c35 */
-  --accent-2: oklch(52% 0.11 155);     /* #267b4c — hover */
-  --accent-soft: oklch(93% 0.03 155);  /* latar chip aktif */
-  --accent-ink: oklch(97% 0.012 80);   /* teks di atas accent — 7.35:1 */
+  /* — accent: biru air (indigo sungai) — */
+  --accent: oklch(50% 0.135 236);       /* #0B74B5 — 6.3:1 */
+  --accent-2: oklch(62% 0.14 230);      /* #109BDA — hover */
+  --accent-soft: oklch(94% 0.035 218);  /* latar chip aktif */
+  --accent-ink: oklch(99% 0.008 220);   /* teks di atas accent — 8.1:1 */
 
-  /* — gold (dekoratif; TEKS pakai --gold-text) — */
-  --gold: oklch(72% 0.115 85);         /* #c69f47 — ornamen/border SAJA */
-  --gold-soft: oklch(88% 0.06 85);     /* #ead9b4 */
-  /* gold-text: dipakai untuk eyebrow/label. Digelapkan dari 52% setelah
-   * audit — di atas foto berveil (bukan paper polos) 52% hanya ~3.3:1. */
-  --gold-text: oklch(44% 0.105 78);    /* #714f00 — 7.4:1 di paper, ≥4.6:1 di atas veil */
+  /* — emas: aksen ornamen Islami. Tetap ada, dipakai tipis.
+   * Biru + emas = klasik ubin masjid (Masjid Sultan Ahmed, Tile of Iran). */
+  --gold: oklch(76% 0.12 85);           /* #D0A855 — ornamen/border SAJA */
+  --gold-soft: oklch(92% 0.05 85);      /* #F0E2C4 */
+  --gold-text: oklch(46% 0.1 78);       /* #77520A — 6.8:1 */
 
   /* — focus — */
-  --focus: oklch(46% 0.14 155);
+  --focus: oklch(55% 0.16 235);
+
+  /* — empat warna washes (dipakai latar watercolor) — */
+  --wash-1: #109bda;
+  --wash-2: #19bbe3;
+  --wash-3: #52d9e8;
+  --wash-4: #8be9ea;
 
   /* — tipografi — */
   --font-display: var(--font-fraunces), "Georgia", serif;
@@ -67,11 +78,11 @@
   --space-9: 6rem;
 
   /* — radius & bayangan — */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --shadow-1: 0 1px 2px oklch(24% 0.016 65 / 0.06), 0 2px 8px oklch(24% 0.016 65 / 0.05);
-  --shadow-2: 0 2px 6px oklch(24% 0.016 65 / 0.08), 0 10px 28px oklch(24% 0.016 65 / 0.09);
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --shadow-1: 0 1px 2px oklch(22% 0.032 235 / 0.06), 0 2px 10px oklch(22% 0.032 235 / 0.05);
+  --shadow-2: 0 2px 6px oklch(22% 0.032 235 / 0.07), 0 14px 34px oklch(22% 0.032 235 / 0.1);
 
   /* — motion — */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -87,36 +98,30 @@
   --player-h: 76px;
 }
 
-/* — mode gelap: hue tetap, hanya lightness/chroma yang bergerak — */
+/* — mode gelap: biru malam, bukan hitam. Hue tetap, lightness turun. — */
 [data-theme="dark"] {
-  --paper: oklch(17% 0.012 80);        /* #120f0a */
-  --paper-2: oklch(21% 0.014 80);      /* #1c1811 */
-  --paper-3: oklch(24% 0.014 80);
+  --paper: oklch(17% 0.022 235);        /* #0A151D */
+  --paper-2: oklch(21% 0.026 233);      /* #0F1D27 */
+  --paper-3: oklch(24% 0.028 232);      /* #132430 */
 
-  --ink: oklch(93% 0.01 80);           /* #ebe7e1 — 15.52:1 */
-  /* ink-2 = teks sekunder utama. Dinaikkan 82% → 86% setelah audit: pada
-   * kartu gelap (paper-3) 82% hanya 3.8:1, di bawah AA. */
-  --ink-2: oklch(86% 0.012 80);
-  /* mode gelap: muted dinaikkan dari 68% → 76% setelah audit; pada latar
-   * --paper-3 68% hanya ~4.0:1, di bawah AA untuk teks kecil. */
-  --muted: oklch(76% 0.012 80);        /* 5.5:1 di paper, 4.9:1 di paper-3 */
+  --ink: oklch(94% 0.012 220);          /* #E8F1F6 — 15.1:1 */
+  --ink-2: oklch(86% 0.018 220);        /* 5.9:1 di paper-3 */
+  --muted: oklch(76% 0.022 220);        /* 5.1:1 di paper-3 */
 
-  --rule: oklch(32% 0.014 80);         /* #37322b */
-  --rule-2: oklch(27% 0.014 80);
+  --rule: oklch(32% 0.026 233);
+  --rule-2: oklch(27% 0.024 234);
 
-  --accent: oklch(70% 0.1 155);        /* #69b183 — 7.48:1 di atas paper */
-  --accent-2: oklch(76% 0.09 155);
-  --accent-soft: oklch(26% 0.04 155);
-  /* accent-ink = teks di atas FILL accent. Accent mode gelap itu terang
-   * (L70%), jadi teksnya harus GELAP. Nilai 17% terlalu gelap hingga jatuh
-   * ke 4.0:1 — dinaikkan ke 22% (≈5.4:1) dan tetap terbaca. */
-  --accent-ink: oklch(22% 0.02 155);
+  --accent: oklch(72% 0.12 225);        /* #6FC8E8 — 8.2:1 di paper */
+  --accent-2: oklch(79% 0.11 218);
+  --accent-soft: oklch(28% 0.045 230);
+  /* accent-ink = teks di atas FILL accent yang terang → harus gelap */
+  --accent-ink: oklch(20% 0.03 235);
 
-  --gold: oklch(78% 0.105 85);         /* #d6b265 — 9.48:1 */
-  --gold-soft: oklch(38% 0.05 85);
-  --gold-text: oklch(82% 0.1 85);      /* dinaikkan sedikit untuk teks kecil */
+  --gold: oklch(80% 0.105 85);
+  --gold-soft: oklch(34% 0.045 85);
+  --gold-text: oklch(84% 0.095 85);
 
-  --focus: oklch(78% 0.13 155);
+  --focus: oklch(80% 0.13 220);
 
   --shadow-1: 0 1px 2px oklch(0% 0 0 / 0.3), 0 2px 8px oklch(0% 0 0 / 0.25);
   --shadow-2: 0 2px 6px oklch(0% 0 0 / 0.35), 0 10px 28px oklch(0% 0 0 / 0.4);

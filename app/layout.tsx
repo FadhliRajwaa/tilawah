@@ -7,6 +7,7 @@ import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
 import { AudioDock } from "@/components/player/audio-dock";
 import { ThemeScript } from "@/components/theme-script";
+import { WatercolorBg } from "@/components/watercolor-bg";
 
 /* Catatan: shadcn init sempat menambahkan font Geist (--font-sans) + kelas
  * `font-sans` di <html>. Itu MENIMPA tipografi Tilawah (Fraunces + Switzer),
@@ -67,8 +68,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f5ede1" },
-    { media: "(prefers-color-scheme: dark)", color: "#120f0a" },
+    { media: "(prefers-color-scheme: light)", color: "#F5FAFD" },
+    { media: "(prefers-color-scheme: dark)", color: "#0A151D" },
   ],
 };
 
@@ -100,6 +101,8 @@ export default function RootLayout({
         />
       </head>
       <body>
+        {/* latar watercolor: fixed di viewport, konten menggulir di atasnya */}
+        <WatercolorBg />
         <a href="#konten" className="skip-link">
           Lewati ke konten
         </a>

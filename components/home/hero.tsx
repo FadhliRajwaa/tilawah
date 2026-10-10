@@ -20,7 +20,7 @@ export function Hero({ totalSurah }: { totalSurah: number }) {
         priority
       />
       {/* Fluid Orb — aksen hidup, mount ditunda 1.2s agar tidak berebut LCP */}
-      <Orb size={520} color="#125c35" className="orb-host--hero" delay={1200} />
+      <Orb size={520} color="#109BDA" className="orb-host--hero" delay={1200} />
       <div className="hero__veil" aria-hidden="true" />
       <div className="hero__bg" aria-hidden="true" />
       <MihrabFrame className="hero__frame" />

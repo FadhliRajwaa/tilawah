@@ -33,7 +33,7 @@ export default async function JuzPage() {
           position="center 42%"
           priority
         />
-        <Orb size={460} color="#125c35" className="orb-host--page" delay={900} />
+        <Orb size={440} color="#109BDA" className="orb-host--page" delay={900} />
         <div className="page-head__veil" aria-hidden="true" />
         <div className="container-page page-head__inner on-ambient">
           <p className="surah-head__eyebrow">Pembagian mushaf</p>
