@@ -1,11 +1,23 @@
-/* — Hero beranda: foto arsitektur islami sebagai latar + kartu ayat pilihan.
- * Foto memakai mode "plate" dengan veil gradien yang menjamin teks tetap lolos
- * kontras AA — bukan tekstur samar.
+/* — Hero beranda.
  *
- * Latarnya DIPAKU ke viewport: saat pengunjung menggulir dari hero ke seksi
- * berikutnya, foto kubah tetap diam dan konten meluncur di atasnya. Ini yang
- * membuat halaman terasa seperti satu lembar kertas panjang di atas meja
- * bergambar — bukan tumpukan blok yang masing-masing membawa latarnya sendiri.
+ * Latarnya foto arsitektur Islami dalam mode "plate" — foto tampil jelas,
+ * bukan tekstur samar. Keterbacaan teks dijamin oleh dua lapis veil
+ * (`.hero__veil` diagonal + `.hero__bg` radial) yang membuat sisi kiri
+ * pekat dan sisi kanan terbuka. Jadi foto tetap terlihat sebagai foto,
+ * sementara teks tetap lolos AA di atasnya.
+ *
+ * ⚠️ Yang DIHAPUS dari versi lama: adegan awan + siluet cakrawala + kafilah.
+ *
+ * Adegan itu digambar dengan CSS dan SVG (nol byte, niatnya baik), tapi
+ * hasilnya di layar tidak seperti yang dibayangkan: lima awan blur adalah
+ * biaya paint yang nyata, dan siluet cakrawala — setinggi 132px di desktop —
+ * terbaca sebagai blok abu-abu datar yang menempel di kaki hero, bukan
+ * sebagai kabut di kejauhan. Ia juga menabrak baris statistik sebelum
+ * padding-nya diperbaiki.
+ *
+ * Yang tersisa sekarang: foto, veil, bingkai mihrab emas, orb cahaya, dan
+ * konten. Lima lapisan, semuanya punya alasan. Hero yang tenang jauh lebih
+ * cocok untuk aplikasi baca daripada hero yang ramai.
  */
 
 import Link from "next/link";
@@ -13,12 +25,11 @@ import { MihrabFrame, OrnamentStar } from "@/components/ornaments";
 import { AmbientImage } from "@/components/ambient-image";
 import { Orb } from "@/components/orb";
 import { PhotoZoom } from "@/components/photo-zoom";
-import { HeroScene } from "@/components/hero-scene";
 
 export function Hero({ totalSurah }: { totalSurah: number }) {
   return (
     <section className="hero" aria-labelledby="hero-title">
-      {/* foto kubah geometris emas — LCP, priority, diam saat scroll */}
+      {/* Foto kubah geometris emas — LCP, dimuat lebih dulu, diam saat scroll */}
       <AmbientImage
         variant="hero-dome-gold"
         mode="plate"
@@ -27,15 +38,12 @@ export function Hero({ totalSurah }: { totalSurah: number }) {
         parallax
         priority
       />
-      {/* Fluid Orb — aksen hidup, mount ditunda 1.2s agar tidak berebut LCP */}
+
+      {/* Orb cahaya — ditunda 1.2s agar tidak berebut LCP */}
       <Orb size={520} color="#109BDA" className="orb-host--hero" delay={1200} />
+
       <div className="hero__veil" aria-hidden="true" />
       <div className="hero__bg" aria-hidden="true" />
-      {/* awan + cakrawala masjid + kafilah, tiga lapisan kedalaman.
-       * Diletakkan SETELAH veil supaya tidak ikut diredam olehnya — kalau
-       * ditaruh sebelum, veil 74–97% menelan seluruh adegan (terbukti di
-       * screenshot mobile: tidak ada satu pun siluet yang terlihat). */}
-      <HeroScene />
       <MihrabFrame className="hero__frame" />
       <PhotoZoom
         variant="hero-dome-gold"
@@ -65,7 +73,7 @@ export function Hero({ totalSurah }: { totalSurah: number }) {
             <Link href="/surat/36" className="btn btn--primary">
               Mulai dari Yasin
             </Link>
-            <Link href="/surat" className="btn btn--outline">
+            <Link href="/surat" className="btn btn--outline btn--on-photo">
               Jelajahi 114 surah
             </Link>
           </div>

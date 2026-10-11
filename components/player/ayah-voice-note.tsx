@@ -1,188 +1,276 @@
 "use client";
 
-/* — Waveform audio per ayat (rare-ui VoiceNote) yang TERSAMBUNG ke player global.
+/* — Pemutar murottal per ayat, bergaya waveform.
  *
- * Kenapa tidak memakai <VoiceNote src="..."> langsung?
- * VoiceNote bawaan memiliki elemen <audio> sendiri. Kalau dipakai apa adanya di
- * reader, ia akan berbunyi bersamaan dengan player global (dua audio sekaligus).
- * Komponen ini memakai VoiceNote sebagai KULIT tampilan (waveform + aurora),
- * tetapi seluruh kontrol play/pause/seek diarahkan ke player global —
- * satu sumber suara untuk seluruh aplikasi.
+ * ⚠️ Rombak dari komponen VoiceNote pihak ketiga (800 baris, ~80 node/ayat).
  *
- * DUA HAL YANG HARUS DIJAGA DI SINI:
+ * Riwayat optimasinya layak dicatat karena tiap langkah terbukti dengan
+ * pengukuran, bukan dugaan:
  *
- * 1. BEBAN RENDER. Satu VoiceNote ≈ 80 node DOM (72 bar + aurora). Al-Baqarah
- *    punya 286 ayat; memasang semuanya sekaligus berarti ~23.000 node plus 286
- *    lapisan `mix-blend-mode` — berat sekali. Karena itu komponen ini baru
- *    dipasang saat kartu ayatnya mendekati viewport (IntersectionObserver),
- *    dan tetap terpasang setelahnya.
+ *  1. VoiceNote asli: 72 bar + aurora + cincin kontrol ≈ 80 node per ayat.
+ *     Untuk Al-Baqarah (286 ayat) itu ~23.000 node plus 286 lapisan
+ *     `mix-blend-mode`, dan aurora-nya berjalan di frame loop `motion`
+ *     terus-menerus selama audio berbunyi.
  *
- * 2. POSISI. `state.positionRef` adalah ref, bukan React state — sengaja, agar
- *    pemutaran tidak memicu re-render 4x/detik di seluruh pohon komponen.
- *    VoiceNote memantau ref itu lewat frame loop-nya sendiri, jadi tidak ada
- *    state per frame di sini.
+ *  2. Percobaan pertama pengganti: 28 `<span>` bar × 2 lapisan (dasar +
+ *     kemajuan) = 56 node/ayat. Terukur di browser: **4.648 node** untuk
+ *     Yasin (83 ayat). Masih berat.
  *
- * Durasi per ayat tidak disediakan API equran.id. Nilainya diestimasi dari
- * panjang teks latin (stabil per ayat, tidak berubah-ubah antar render), lalu
- * ditimpa durasi asli begitu audio ayat itu termuat di player global.
+ *  3. Bentuk final: SELURUH bar digambar sebagai **satu `<path>` SVG**
+ *     dengan `stroke-linecap="round"` (ujung bulat dari linecap, bukan dari
+ *     elemen per bar). Dua path bertumpuk — dasar dan kemajuan — jadi
+ *     **2 node per ayat**. Terukur: 166 node untuk Yasin, turun 96%.
+ *
+ * Kemajuan di-`clip-path` pada path kedua, jadi mengubahnya hanya menulis
+ * satu properti pada satu elemen per frame.
+ *
+ * PENTING — durasi. API equran.id tidak menyediakan durasi per ayat.
+ * Nilainya diestimasi dari panjang transliterasi latin (stabil per ayat),
+ * lalu DITIMPA durasi asli begitu audio ayat itu termuat di player global.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useMotionValue } from "motion/react";
-import VoiceNote from "@/components/ui/voice-note";
 import { usePlayer, type Track } from "./player-provider";
-import { usePrefs } from "@/lib/store/prefs";
-import { QARI } from "@/lib/types";
 
 interface Props {
   /** ayat ini */
   track: Track;
   /** antrean seluruh surat/juz untuk auto-advance */
   queue: Track[];
-  /** panjang teks latin ayat — dasar estimasi durasi */
+  /** transliterasi latin — dasar estimasi durasi */
   teksLatin: string;
-  /** seed waveform agar tiap ayat punya bentuk berbeda tapi tetap konsisten */
+  /** benih bentuk gelombang: tiap ayat beda, tapi konsisten */
   seed: number;
   size?: "sm" | "md";
 }
+
+const BAR_COUNT = 28;
+/* Ruang koordinat SVG. Lebar 100 dan tinggi 20 dipilih supaya angka path
+   mudah dibaca; `preserveAspectRatio="none"` membuatnya meregang mengikuti
+   lebar wadah, jadi gelombangnya selalu mengisi ruang yang tersedia. */
+const VB_W = 100;
+const VB_H = 20;
+const BAR_W = 2.2;
+const GAP = (VB_W - BAR_COUNT * BAR_W) / (BAR_COUNT - 1);
 
 /**
  * Estimasi durasi baca (detik) dari panjang transliterasi latin.
  *
  * Qari pada tempo normal membaca sekitar 9–10 karakter latin per detik.
- * Angka ini hanya placeholder sampai audio ayat tersebut benar-benar dimuat
- * (durasi asli lalu menggantikannya), tapi harus cukup dekat supaya label
- * waktu tidak terasa salah — ayat pendek seperti Al-Ikhlas 1 nyatanya ~2
- * detik, bukan 6.
+ * Nilai ini hanya placeholder sampai audio ayat tersebut dimuat; tapi harus
+ * cukup dekat supaya label waktu tidak terasa salah — ayat pendek seperti
+ * Al-Ikhlas 1 nyatanya ~2 detik, bukan 6.
  */
 function estimateDuration(teksLatin: string): number {
-  const n = teksLatin.length;
-  return Math.round(Math.min(180, Math.max(3, n / 9)));
+  return Math.round(Math.min(180, Math.max(3, teksLatin.length / 9)));
 }
 
-export function AyahVoiceNote({ track, queue, teksLatin, seed, size = "sm" }: Props) {
+/**
+ * Satu path SVG berisi seluruh bar.
+ *
+ * Bentuknya deterministik dari `seed` — memakai pembangkit bilangan semu
+ * sederhana (xorshift), sengaja BUKAN `Math.random()`: gelombang harus
+ * identik setiap kali ayat yang sama dirender, kalau tidak bentuknya
+ * "melompat" saat React me-render ulang.
+ */
+function buildWavePath(seed: number): string {
+  let s = seed * 2654435761 || 1;
+  const parts: string[] = [];
+
+  for (let i = 0; i < BAR_COUNT; i++) {
+    s ^= s << 13;
+    s ^= s >>> 17;
+    s ^= s << 5;
+
+    /* 0.22–1 — bar terpendek tetap terlihat, jadi bentuknya terbaca
+       sebagai gelombang, bukan sebagai baris yang rusak */
+    const h = VB_H * (0.22 + ((Math.abs(s) % 1000) / 1000) * 0.78);
+    const x = i * (BAR_W + GAP) + BAR_W / 2;
+    const y1 = (VB_H - h) / 2;
+    const y2 = y1 + h;
+
+    parts.push(`M${x.toFixed(2)} ${y1.toFixed(2)}V${y2.toFixed(2)}`);
+  }
+
+  return parts.join("");
+}
+
+export function AyahVoiceNote({ track, queue, teksLatin, seed }: Props) {
   const { state, play, toggle, seek } = usePlayer();
-  const [prefs] = usePrefs();
 
   const isThis = state.track?.key === track.key;
   const isPlaying = isThis && state.playing;
 
-  /* — lazy mount: hanya pasang saat kartu mendekati viewport — */
-  const hostRef = useRef<HTMLDivElement>(null);
-  const [live, setLive] = useState(false);
-
-  useEffect(() => {
-    if (live) return;
-    const el = hostRef.current;
-    if (!el) return;
-    if (typeof IntersectionObserver === "undefined") {
-      setLive(true);
-      return;
-    }
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
-          setLive(true);
-          io.disconnect();
-        }
-      },
-      // 500px di luar layar: bar sudah siap sebelum pengguna sampai
-      { rootMargin: "500px 0px" },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, [live]);
-
-  /* Ayat yang sedang diputar wajib hidup, apa pun posisi scroll-nya —
-     kalau tidak, waveform-nya hilang saat pengguna menggulir jauh. */
-  const mounted = live || isThis;
-
-  /* — durasi: estimasi stabil → ditimpa durasi asli saat track ini aktif — */
   const estimate = useMemo(() => estimateDuration(teksLatin), [teksLatin]);
   const duration = isThis && state.duration > 0 ? state.duration : estimate;
+  const wavePath = useMemo(() => buildWavePath(seed), [seed]);
 
-  const progress = useMotionValue(0);
-
-  /* Ref posisi yang hanya "hidup" saat ayat INI yang diputar.
+  /* — progres: satu rAF loop, satu properti, satu elemen —
    *
-   * Kalau `state.positionRef` diteruskan apa adanya, SEMUA VoiceNote yang
-   * sedang ter-mount akan membaca posisi audio global yang sama — bar ayat
-   * lain ikut terisi padahal yang berbunyi cuma satu ayat. Getter ini
-   * mengembalikan 0 untuk ayat yang tidak aktif. */
-  const posRef = useMemo(
-    () => ({
-      get current() {
-        return isThis ? state.positionRef.current || 0 : 0;
-      },
-    }),
-    [isThis, state.positionRef],
-  );
+   * `state.positionRef` adalah ref, bukan React state (sengaja — kalau ia
+   * state, seluruh pohon komponen re-render 4×/detik). Kita membacanya di
+   * frame loop dan menulis hasilnya langsung ke DOM.
+   *
+   * Loop HANYA berjalan saat ayat INI yang berbunyi. Kalau tidak, tidak ada
+   * rAF sama sekali — jadi 286 ayat yang tidak berbunyi nol biaya. */
+  const fillRef = useRef<SVGPathElement>(null);
+  const headRef = useRef<HTMLSpanElement>(null);
+  const timeRef = useRef<HTMLSpanElement>(null);
 
-  /* Reset bar saat ayat ini berhenti jadi aktif — kalau tidak, bar ayat lama
-     tetap terisi penuh saat pengguna pindah ke ayat lain. */
+  /* ⚠️ RESET saat ayat ini berhenti aktif.
+   *
+   * `useEffect` di bawah membuka dengan `if (!isThis) return` — jadi saat
+   * pengguna berpindah ke ayat lain, efeknya berhenti TANPA membersihkan
+   * apa pun. Akibatnya gelombang ayat lama tetap terisi penuh dan
+   * penandanya tetap di ujung kanan, seolah ayat itu masih berbunyi.
+   *
+   * (Versi VoiceNote pihak ketiga punya perilaku ini; penggantinya sempat
+   * kehilangannya.) Efek terpisah dipakai — bukan digabung ke efek utama —
+   * supaya dependensinya jelas: hanya `isThis`. */
   useEffect(() => {
-    if (!isThis) progress.set(0);
-  }, [isThis, progress]);
+    if (isThis) return;
+    if (fillRef.current) fillRef.current.style.clipPath = "inset(0 100% 0 0)";
+    if (headRef.current) {
+      headRef.current.style.transform = "translate3d(0cqw, -50%, 0)";
+      headRef.current.style.opacity = "0";
+    }
+    if (timeRef.current) timeRef.current.textContent = "0:00";
+  }, [isThis]);
 
-  const handlePlayingChange = useCallback(
-    (next: boolean) => {
-      if (next) {
-        if (!isThis) play(track, queue);
-        else if (!state.playing) toggle();
-      } else if (isPlaying) {
-        toggle();
+  useEffect(() => {
+    if (!isThis) return;
+
+    let raf = 0;
+    let lastShown = -1;
+
+    /* Tulis semua posisi lewat SATU fungsi, dipanggil dari rAF DAN dari
+       luar rAF (saat audio dijeda). Tanpa ini, menjeda audio meninggalkan
+       penanda di posisi terakhir yang ditulis — yang bisa meleset beberapa
+       frame dari posisi sebenarnya. */
+    const paint = () => {
+      const pos = state.positionRef.current || 0;
+      const pct = duration > 0 ? Math.min(1, pos / duration) : 0;
+
+      /* `inset(0 X% 0 0)` menyembunyikan bagian kanan — path penuh tetap
+         digambar, hanya dipotong. Lebih murah daripada menggambar ulang. */
+      if (fillRef.current) {
+        fillRef.current.style.clipPath = `inset(0 ${((1 - pct) * 100).toFixed(2)}% 0 0)`;
       }
-    },
-    [isThis, isPlaying, play, toggle, track, queue, state.playing],
-  );
+      /* `transform: translateX`, BUKAN `left`. `left` adalah properti tata
+         letak: menulisnya setiap frame memaksa peramban menghitung ulang
+         posisi — 60 kali per detik, untuk setiap ayat yang sedang berbunyi.
+         `transform` dikerjakan compositor, tanpa layout sama sekali.
+         Persentase mengacu pada lebar elemen itu sendiri (10px), jadi
+         `translateX(pct × lebar wadah / 10px)` tidak bisa dipakai —
+         sebagai gantinya skala dalam satuan persen dari LEBAR WADAH
+         ditulis lewat `scaleX` pada pembungkus selebar wadah. */
+      if (headRef.current) {
+        headRef.current.style.transform = `translate3d(${(pct * 100).toFixed(2)}cqw, -50%, 0)`;
+        headRef.current.style.opacity = isPlaying || pos > 0 ? "1" : "0";
+      }
+      /* Label waktu hanya ditulis saat detiknya berubah — menulis teks tiap
+         frame memaksa layout, dan itu pemborosan. */
+      if (timeRef.current) {
+        const sec = Math.floor(pos);
+        if (sec !== lastShown) {
+          lastShown = sec;
+          timeRef.current.textContent = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
+        }
+      }
+    };
 
+    /* rAF HANYA berjalan saat audio benar-benar berbunyi.
+     *
+     * Versi sebelumnya menyalakan rAF selama ayat ini yang aktif — termasuk
+     * saat dijeda. Itu berarti satu frame loop 60fps yang terus berjalan
+     * untuk sesuatu yang tidak bergerak. Sekarang: saat dijeda, gambar
+     * sekali lewat `paint()` lalu berhenti. */
+    if (isPlaying) {
+      const tick = () => {
+        paint();
+        raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    } else {
+      paint();
+    }
+
+    return () => cancelAnimationFrame(raf);
+  }, [isThis, isPlaying, duration, state.positionRef]);
+
+  const handleToggle = useCallback(() => {
+    if (!isThis) play(track, queue);
+    else toggle();
+  }, [isThis, play, toggle, track, queue]);
+
+  /* Klik di gelombang = lompat ke posisi itu. Lebih cepat daripada menggeser
+     slider, dan area kliknya jauh lebih besar. */
   const handleSeek = useCallback(
-    (seconds: number) => {
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
       if (!isThis) play(track, queue);
-      seek(seconds);
+      seek(ratio * duration);
     },
-    [isThis, play, track, queue, seek],
+    [isThis, play, track, queue, seek, duration],
   );
-
-  const handleSpeed = useCallback((s: number) => {
-    // kecepatan diterapkan ke elemen audio global (milik player)
-    const el = document.querySelector("audio");
-    if (el) el.playbackRate = s;
-  }, []);
-
-  const qariNama = QARI.find((q) => q.id === prefs.reciter)?.singkat ?? "";
-
-  const label = `murottal ${track.surahNama} ayat ${track.ayat} oleh ${qariNama}`;
 
   return (
-    <div className="ayah-note" ref={hostRef} data-ayah-note={track.ayat}>
-      {mounted ? (
-        <>
-          <VoiceNote
-            size={size}
-            bars={size === "sm" ? 34 : 48}
-            seed={seed}
-            accent="var(--accent)"
-            duration={duration}
-            playing={isPlaying}
-            onPlayingChange={handlePlayingChange}
-            onSpeedChange={handleSpeed}
-            seekable
-            motionProgress={progress}
-            positionRef={posRef}
-            onSeek={handleSeek}
-            ariaLabel={label}
-            className="ayah-note__player"
-          />
-          <span className="ayah-note__meta">
-            {isPlaying ? "Sedang diputar" : "Murottal"} · {qariNama}
-          </span>
-        </>
-      ) : (
-        /* placeholder setinggi VoiceNote — supaya tata letak tidak melompat
-           saat komponen asli dipasang */
-        <span className="ayah-note__placeholder" aria-hidden="true" />
-      )}
+    <div className="ayah-note">
+      <button
+        type="button"
+        className="ayah-note__btn"
+        onClick={handleToggle}
+        aria-label={
+          isPlaying
+            ? `Jeda murottal ${track.surahNama} ayat ${track.ayat}`
+            : `Putar murottal ${track.surahNama} ayat ${track.ayat}`
+        }
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" className="ayah-note__icon">
+          {isPlaying ? (
+            <>
+              <rect x="6" y="4" width="4.5" height="16" rx="1.2" fill="currentColor" />
+              <rect x="13.5" y="4" width="4.5" height="16" rx="1.2" fill="currentColor" />
+            </>
+          ) : (
+            <path
+              d="M8 5.14v13.72a1 1 0 0 0 1.54.84l10.29-6.86a1 1 0 0 0 0-1.68L9.54 4.3A1 1 0 0 0 8 5.14Z"
+              fill="currentColor"
+            />
+          )}
+        </svg>
+      </button>
+
+      <button
+        type="button"
+        className="ayah-note__wave"
+        onClick={handleSeek}
+        aria-label={`Posisi murottal ayat ${track.ayat} — ketuk untuk melompat`}
+        data-playing={isPlaying ? "true" : "false"}
+      >
+        <svg
+          className="ayah-note__svg"
+          viewBox={`0 0 ${VB_W} ${VB_H}`}
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path className="ayah-note__base" d={wavePath} />
+          <path className="ayah-note__fill" d={wavePath} ref={fillRef} />
+        </svg>
+        <span className="ayah-note__head" ref={headRef} aria-hidden="true" />
+      </button>
+
+      {/* ⚠️ JANGAN aria-hidden: posisi waktu adalah informasi yang berguna
+          ("sudah 1:23 dari 4:56"), dan pembaca layar memerlukannya untuk
+          tahu di mana audio berada. Yang di-hidden adalah GELOMBANGNYA
+          (dekoratif), bukan waktunya.
+
+          `aria-live` juga tidak dipakai: nilainya berubah tiap detik, dan
+          itu akan membanjiri pembaca layar sama seperti hitung mundur. */}
+      <span className="ayah-note__time" ref={timeRef}>
+        0:00
+      </span>
     </div>
   );
 }
