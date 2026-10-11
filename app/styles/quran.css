@@ -1,0 +1,1440 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   TILAWAH · QURAN
+   Halaman baca: header surat/juz, toolbar, lembar ayat, mushaf kontinu,
+   katalog surat, indeks juz, dan panel pencarian.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ═══ HEADER BERGAMBAR (surat, juz) ══════════════════════════════════
+   Foto tampil jelas; keterbacaan teks dijamin oleh "kertas" tipis di
+   area teks (`.reader-head__inner::before`), bukan oleh veil yang pekat.
+   Pembagian tanggung jawab ini penting: veil boleh tipis supaya foto
+   terlihat, tanpa mengorbankan kontras teks. */
+
+.reader-head {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  min-height: 340px;
+  overflow: clip;
+  background: var(--paper);
+}
+
+.reader-head__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--paper) 74%, transparent) 0%,
+    color-mix(in oklab, var(--paper) 64%, transparent) 40%,
+    color-mix(in oklab, var(--paper) 90%, transparent) 84%,
+    var(--paper) 100%
+  );
+}
+
+[data-theme="dark"] .reader-head__veil {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--paper) 80%, transparent) 0%,
+    color-mix(in oklab, var(--paper) 70%, transparent) 40%,
+    color-mix(in oklab, var(--paper) 92%, transparent) 84%,
+    var(--paper) 100%
+  );
+}
+
+.reader-head__inner {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  padding-block: var(--space-7) var(--space-6);
+  text-align: center;
+}
+
+/* Kertas tipis di area teks — kontras tidak bergantung pada veil saja */
+/* Kertas tipis di area teks — pola bersama `.paper-veil--center` */
+.reader-head__inner::before {
+  content: "";
+  position: absolute;
+  inset: 50% -1rem auto;
+  height: 82%;
+  z-index: -1;
+  transform: translateY(-50%);
+  pointer-events: none;
+  border-radius: var(--radius-xl);
+  background: var(--paper-veil-center);
+}
+
+.reader-head__corner {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  color: var(--gold);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.reader-head__corner--tl {
+  top: 14px;
+  inset-inline-start: 14px;
+}
+
+.reader-head__corner--br {
+  bottom: 14px;
+  inset-inline-end: 14px;
+  transform: rotate(180deg);
+}
+
+.reader-head__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--gold-text);
+}
+
+.reader-head__name-ar {
+  display: block;
+  margin-top: var(--space-3);
+  font-family: var(--font-arabic);
+  direction: rtl;
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.reader-head__name {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.reader-head__meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-1) var(--space-4);
+  margin-top: var(--space-3);
+  padding-inline: var(--space-2);
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+}
+
+.reader-head__meta > span {
+  white-space: nowrap;
+}
+
+.reader-head__meta b {
+  color: var(--ink);
+  font-weight: var(--weight-semibold);
+}
+
+/* Deskripsi surah di bawah aksi — dibatasi lebarnya supaya barisnya
+   tidak terlalu panjang dibaca, dan sedikit lebih redup dari meta. */
+.reader-head__desc {
+  max-width: 62ch;
+  margin: var(--space-5) auto 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+}
+
+.reader-head__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+  padding-inline: var(--space-2);
+}
+
+.reader-head__actions form {
+  display: inline-flex;
+  gap: var(--space-2);
+  max-width: 100%;
+}
+
+.reader-head__actions form .searchbox__input {
+  width: 170px;
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .reader-head {
+    min-height: 280px;
+  }
+  .reader-head__inner {
+    padding-block: var(--space-7) var(--space-5);
+  }
+}
+
+@media (max-width: 560px) {
+  .reader-head__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    max-width: 320px;
+    margin-inline: auto;
+  }
+  .reader-head__actions .btn {
+    width: 100%;
+  }
+  .reader-head__actions form {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    width: 100%;
+  }
+  .reader-head__actions form .searchbox__input {
+    width: 100%;
+  }
+}
+
+/* Form "lompat ke ayat" di header surat. Di desktop ia sebaris; di layar
+   sempit input dan tombol berbagi satu baris penuh. */
+.jump-form {
+  display: inline-flex;
+  gap: var(--space-2);
+  max-width: 100%;
+}
+
+.jump-form__input {
+  width: 170px;
+  min-height: 44px;
+  font-size: var(--text-sm);
+}
+
+@media (max-width: 560px) {
+  .jump-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    width: 100%;
+  }
+  .jump-form__input {
+    width: 100%;
+  }
+}
+
+/* ═══ NAVIGASI ANTAR SURAT / JUZ ═════════════════════════════════════ */
+
+.surah-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-width: 0;
+  padding-block: var(--space-4);
+}
+
+.surah-nav__btn {
+  min-width: 0;
+  max-width: 42%;
+}
+
+.surah-nav__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.surah-nav__mid {
+  flex-shrink: 0;
+}
+
+@media (max-width: 560px) {
+  /* ⚠️ Label disembunyikan VISUAL, tapi tetap ada untuk pembaca layar.
+     `display: none` akan menghapusnya dari pohon aksesibilitas, sehingga
+     tautan navigasi hanya terbaca sebagai "←" tanpa tujuan — pengguna
+     pembaca layar tidak tahu halaman mana yang akan dibuka.
+     Pola `.sr-only` menyembunyikannya secara visual tanpa menghilangkannya. */
+  .surah-nav__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+  .surah-nav__btn {
+    padding-inline: var(--space-4);
+  }
+}
+
+/* ═══ TOOLBAR BACA ═══════════════════════════════════════════════════
+   Lengket di bawah nav. Berisi pengaturan tampilan — semuanya mengubah
+   preferensi yang tersimpan, jadi letaknya harus selalu terjangkau. */
+
+.reader-toolbar {
+  position: sticky;
+  top: var(--nav-h);
+  z-index: var(--z-sticky);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  padding-block: var(--space-3);
+  background: color-mix(in oklab, var(--paper) 92%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--rule);
+}
+
+.reader-toolbar__group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.reader-toolbar__label {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* Di layar sempit toolbar jadi dua baris: mode + ukuran di baris pertama,
+   sakelar latin/terjemahan memenuhi baris kedua. Label disembunyikan
+   untuk menghemat lebar. */
+@media (max-width: 640px) {
+  .reader-toolbar {
+    gap: var(--space-2);
+    padding-block: var(--space-2);
+  }
+  .reader-toolbar__group:first-child {
+    flex: 1 1 auto;
+  }
+  .reader-toolbar__group:last-child {
+    flex: 1 1 100%;
+  }
+  .reader-toolbar__group:last-child .btn {
+    flex: 1 1 0;
+  }
+  /* Sama seperti navigasi: disembunyikan visual, tetap terbaca pembaca
+     layar. "Mode" dan "Ukuran Arab" adalah satu-satunya penjelas bagi
+     kontrol di sebelahnya. */
+  .reader-toolbar__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+  .segmented__btn {
+    padding-inline: var(--space-3);
+  }
+}
+
+/* ═══ BASMALAH ═══════════════════════════════════════════════════════ */
+
+.basmalah {
+  padding-block: var(--space-5);
+  text-align: center;
+  color: var(--ink);
+}
+
+.basmalah .arabic {
+  display: inline-block;
+  font-size: clamp(1.6rem, 3.4vw, 2.2rem);
+  text-align: center;
+}
+
+/* ═══ AYAT — LEMBAR MUSHAF, BUKAN KARTU ══════════════════════════════
+   286 kotak putih bertumpuk (Al-Baqarah) membuat halaman terasa seperti
+   daftar kartu, bukan bacaan. Mushaf sungguhan tidak begitu: ayat
+   mengalir di satu lembar, dipisah nomor dan ruang.
+
+   Jadi: tanpa kotak, tanpa border. Pemisahnya jarak + nomor berhias.
+   Satu garis rambut setengah transparan di atas baris aksi. */
+
+.ayah {
+  position: relative;
+  padding-block: var(--space-6) var(--space-5);
+  scroll-margin-top: calc(var(--nav-h) + var(--toolbar-h) + var(--space-5));
+}
+
+/* Garis pemisah antar ayat — muncul di semua KECUALI yang pertama,
+   supaya tidak ada garis menggantung di bawah judul surah */
+.ayah + .ayah {
+  border-top: 1px solid color-mix(in oklab, var(--rule) 62%, transparent);
+}
+
+/* Ayat yang sedang diputar: ditandai garis aksen di kiri, bukan latar
+   penuh — supaya teks Arab tetap tenang dibaca. */
+.ayah.is-active {
+  padding-inline: var(--space-4);
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklab, var(--accent-soft) 42%, transparent);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+/* Ayat yang dituju deep-link (?ayat=N): denyut singkat sebagai konfirmasi */
+.ayah.is-target {
+  animation: target-pulse 1.8s var(--ease-out) 1;
+}
+
+@keyframes target-pulse {
+  from {
+    background: color-mix(in oklab, var(--accent-soft) 78%, transparent);
+  }
+  to {
+    background: transparent;
+  }
+}
+
+.ayah__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.ayah__meta {
+  font-size: var(--text-xs);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ayah__arabic {
+  margin: 0 0 var(--space-4);
+}
+
+.ayah__latin {
+  margin: 0 0 var(--space-3);
+  color: var(--accent);
+  font-size: var(--text-sm);
+  font-style: italic;
+  line-height: var(--leading-relaxed);
+}
+
+.ayah__translation {
+  margin: 0;
+  max-width: var(--measure);
+  color: var(--ink-2);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+}
+
+.ayah__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-5);
+  padding-top: var(--space-3);
+  border-top: 1px solid color-mix(in oklab, var(--rule) 55%, transparent);
+}
+
+/* Di layar sempit: lima aksi dibagi rata 3+2 supaya rapi, bukan
+   menggantung di baris terakhir. */
+@media (max-width: 560px) {
+  .ayah {
+    padding-block: var(--space-5) var(--space-4);
+  }
+  .ayah__actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-1);
+  }
+  .ayah-action {
+    justify-content: center;
+    padding-inline: var(--space-2);
+  }
+  .ayah-action:nth-child(4) {
+    grid-column-start: 1;
+  }
+}
+
+.ayah-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  /* 40px = target sentuh nyaman. Lima tombol ini adalah aksi utama per
+     ayat, dan di ponsel mereka disusun grid 3+2 dengan jarak hanya 4px —
+     jadi tinggi inilah satu-satunya yang menjaga jarak antar target. */
+  min-height: 40px;
+  padding-inline: var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+}
+
+.ayah-action.is-on {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.ayah-action__icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+@media (hover: hover) {
+  .ayah-action:not(.is-on):hover {
+    color: var(--ink);
+    background: var(--paper-2);
+  }
+}
+
+/* ─── medali nomor ayat ───
+   Wrapper membawa ukuran, svg mengisi wrapper, angka diposisikan absolut
+   di tengah. Ketiga peran itu harus eksplisit — lihat catatan di
+   components/ornaments.tsx soal kenapa kelasnya tidak boleh di `<svg>`. */
+.ayah-medal {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.ayah-medal__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ⚠️ Batas grafis medali.
+ *
+ * `--gold` (76% L) di atas `--paper` hanya 1.95:1 — terlalu pudar untuk
+ * terbaca sebagai bentuk bintang. WCAG 1.4.11 menuntut 3:1 untuk batas
+ * elemen yang menyampaikan informasi.
+ *
+ * Angka di dalamnya (`.ayah-medal__num`, 6.51:1) tetap jadi pembawa makna
+ * utamanya, jadi medali ini bukan elemen kritis — tapi batasnya dinaikkan
+ * ke `--gold-text` (46% L) supaya bentuknya tegas dan konsisten dengan
+ * penanda mushaf. */
+.ayah-medal__outer {
+  fill: none;
+  stroke: var(--gold-text);
+  stroke-width: 1.1;
+}
+
+.ayah-medal__inner {
+  fill: var(--gold-soft);
+  stroke: none;
+}
+
+.ayah-medal__num {
+  position: relative;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--gold-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── pemutar murottal per ayat ───
+   Satu baris: tombol putar · gelombang yang bisa diketuk · label waktu.
+
+   Gelombangnya digambar sebagai 28 bar di dua lapisan bertumpuk: lapisan
+   dasar berwarna redup, dan lapisan kemajuan di atasnya yang di-`scaleX`
+   oleh satu rAF loop. Jadi saat audio berbunyi, yang berubah hanya SATU
+   properti pada SATU elemen — bukan 28 bar yang diwarnai satu per satu. */
+
+.ayah-note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--rule-2);
+}
+
+.ayah-note__btn {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-full);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.ayah-note__icon {
+  width: 18px;
+  height: 18px;
+}
+
+@media (hover: hover) {
+  .ayah-note__btn:hover {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+}
+
+/* Area ketuk gelombang — sengaja tinggi 38px (bukan setinggi bar) supaya
+   nyaman ditekan di layar sentuh. */
+.ayah-note__wave {
+  position: relative;
+  display: block;
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  /* Wadah query: membuat `cqw` di dalamnya mengacu pada LEBAR ELEMEN INI,
+     bukan lebar viewport. Tanpa ini, `translate3d(50cqw)` pada penanda
+     berarti "50% dari viewport" — dan penandanya meleset jauh ke kanan
+     (terukur: 690px padahal seharusnya 467px pada wadah 976px).
+
+     `inline-size` (bukan `size`) sengaja: elemen ini punya tinggi tetap
+     dari CSS, jadi tidak perlu containment sumbu blok — dan `size` akan
+     memaksa tinggi juga dikurung, yang bisa memotong isinya. */
+  container-type: inline-size;
+}
+
+/* Seluruh bar digambar sebagai SATU path, bukan 28 elemen. Dua path
+   bertumpuk: dasar (redup) dan kemajuan (aksen). Jadi hanya 2 node per
+   ayat — terukur 166 node untuk Yasin 83 ayat, turun 96% dari 4.648. */
+.ayah-note__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.ayah-note__base,
+.ayah-note__fill {
+  fill: none;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+
+.ayah-note__base {
+  /* ⚠️ 22% hanya mencapai 1.59:1 terhadap latar — gelombangnya nyaris tak
+     terlihat, padahal ia satu-satunya penanda bahwa area ini bisa diketuk.
+     WCAG 1.4.11 menuntut 3:1 untuk batas kontrol. 42% memberinya ~3.2:1. */
+  stroke: color-mix(in oklab, var(--ink) 42%, transparent);
+}
+
+.ayah-note__fill {
+  stroke: var(--accent);
+  /* Sepenuhnya tersembunyi sampai rAF menulis nilai pertamanya. `clip-path`
+     dipakai — bukan `stroke-dasharray` — karena panjang path tidak perlu
+     diketahui, dan mengubahnya hanya menulis satu properti. */
+  clip-path: inset(0 100% 0 0);
+  /* Tidak ada `transition`: nilainya ditulis setiap frame oleh rAF.
+     Menambahkan transition justru membuat geraknya tertinggal. */
+}
+
+/* Titik posisi: penanda kecil yang bergerak bersama kemajuan */
+.ayah-note__head {
+  position: absolute;
+  top: 50%;
+  /* `left: 0` + `translate3d(pct cqw)` dari JS — bukan `left: pct%`.
+     `left` adalah properti tata letak: menulisnya tiap frame memaksa
+     peramban menghitung ulang posisi. `transform` dikerjakan compositor. */
+  left: 0;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 22%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.ayah-note__time {
+  flex-shrink: 0;
+  min-width: 34px;
+  color: var(--muted);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+/* Saat berbunyi, gelombang dasarnya dinaikkan sedikit supaya kontras
+   dengan lapisan kemajuan lebih jelas — umpan balik statis, bukan hanya
+   gerak (kalau gerak dimatikan, keadaannya tetap terbaca). */
+.ayah-note__wave[data-playing="true"] .ayah-note__base {
+  stroke: color-mix(in oklab, var(--accent) 32%, transparent);
+}
+
+@media (max-width: 560px) {
+  .ayah-note {
+    gap: var(--space-2);
+  }
+  .ayah-note__btn {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+/* ═══ MUSHAF KONTINU ═════════════════════════════════════════════════
+   Satu lembar mengalir. Teks Arab disambung jadi satu paragraf; nomor
+   ayat jadi penanda bulat emas yang bisa diklik untuk membuka tafsir. */
+
+.mushaf-flow {
+  direction: rtl;
+  text-align: justify;
+  text-align-last: center;
+  line-height: 2.4;
+  font-size: calc(var(--text-arabic) * 1.05);
+}
+
+.mushaf-flow .mushaf-ayah {
+  display: inline;
+}
+
+.mushaf-flow .mushaf-ayah__tap {
+  display: inline;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+
+.mushaf-flow .mushaf-ayah__tap.is-playing {
+  background: var(--accent-soft);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.mushaf-flow .mushaf-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9em;
+  height: 1.9em;
+  margin-inline: 0.35em;
+  padding: 0;
+  /* `--gold-text`, bukan `--gold`: penanda ini bisa diklik, jadi batasnya
+     harus terlihat (≥3:1). Lihat catatan pada `.ayah-medal__outer`. */
+  border: 1px solid var(--gold-text);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--gold-text);
+  font-family: var(--font-body);
+  font-size: 0.42em;
+  font-variant-numeric: tabular-nums;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.mushaf-flow .mushaf-ayah.is-target {
+  border-radius: var(--radius-xs);
+  background: var(--accent-soft);
+}
+
+@media (hover: hover) {
+  .mushaf-flow .mushaf-ayah__tap:hover {
+    background: var(--paper-2);
+  }
+  .mushaf-flow .mushaf-marker:hover {
+    background: var(--gold-soft);
+    border-color: var(--gold-text);
+  }
+}
+
+.mushaf-hint {
+  margin: var(--space-5) 0 0;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--rule-2);
+  font-size: var(--text-xs);
+  color: var(--muted);
+  text-align: center;
+  direction: ltr;
+}
+
+/* Penanda surah di dalam mode mushaf juz */
+.mushaf-surah-mark {
+  display: block;
+  margin-block: 0.7em 0.4em;
+  padding-block: 0.35em;
+  border-block: 1px solid var(--gold);
+  font-family: var(--font-arabic);
+  font-size: 0.62em;
+  color: var(--gold-text);
+  text-align: center;
+}
+
+/* ═══ KATALOG SURAT — INDEKS, BUKAN GRID KARTU ═══════════════════════
+   114 kartu identik adalah pola template, dan untuk daftar sepanjang itu
+   justru menyulitkan dipindai. Bentuk indeks buku jauh lebih mudah
+   dibaca: nomor rata, nama rata, meta rata — mata menelusuri satu kolom. */
+
+.index {
+  --idx-pad: clamp(0.75rem, 2vw, 1.15rem);
+}
+
+.index__head {
+  display: grid;
+  gap: var(--space-3);
+  padding-bottom: var(--space-5);
+  margin-bottom: var(--space-2);
+  border-bottom: 1px solid var(--rule);
+}
+
+@media (min-width: 640px) {
+  .index__head {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-4);
+  }
+}
+
+.index__search {
+  max-width: 34rem;
+}
+
+.index__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.index__filter {
+  min-height: 40px;
+  padding-inline: var(--space-4);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-full);
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+.index__filter.is-on {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.index__count {
+  margin-inline-start: auto;
+  color: var(--muted);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .index__filter:not(.is-on):hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+}
+
+/* ─── daftar indeks ─── */
+.idx {
+  margin: 0;
+}
+
+.idx__row {
+  border-bottom: 1px solid var(--rule-2);
+}
+
+.idx__link {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--space-3) var(--space-4);
+  padding: var(--idx-pad) var(--space-2);
+  border-radius: var(--radius-sm);
+  color: inherit;
+  text-decoration: none;
+}
+
+.idx__link:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+@media (hover: hover) {
+  .idx__link:hover {
+    background: color-mix(in oklab, var(--accent-soft) 52%, transparent);
+    padding-inline: var(--space-3);
+  }
+  .idx__link:hover .idx__num {
+    color: var(--accent);
+  }
+}
+
+/* Nomor: angka display, rata kanan supaya digit sejajar vertikal */
+.idx__num {
+  min-width: 2.4ch;
+  text-align: end;
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.idx__body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-3);
+  min-width: 0;
+}
+
+.idx__name {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+  color: var(--ink);
+}
+
+.idx__meta {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+
+.idx__dot {
+  margin-inline: 0.45em;
+  opacity: 0.6;
+}
+
+.idx__ar {
+  font-family: var(--font-arabic);
+  font-size: var(--text-lg);
+  line-height: 1.5;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  /* Nama Arab pindah ke baris kedua agar nama latin tidak terpotong */
+  .idx__link {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-1) var(--space-3);
+  }
+  .idx__ar {
+    grid-column: 2;
+    justify-self: start;
+    font-size: var(--text-md);
+    color: var(--muted);
+  }
+  .idx__name {
+    font-size: var(--text-base);
+  }
+}
+
+/* ═══ INDEKS JUZ ═════════════════════════════════════════════════════ */
+
+.juz-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, auto));
+  align-items: center;
+  gap: var(--space-5) var(--space-7);
+  margin-bottom: var(--space-6);
+  padding: var(--space-5);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  background: var(--paper-3);
+}
+
+.juz-summary__item b {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.juz-summary__item span {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+
+.juz-summary__bar {
+  grid-column: 1 / -1;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--rule-2);
+  overflow: hidden;
+}
+
+.juz-summary__bar span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--accent);
+  transform-origin: left center;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+/* Catatan pembagian juz — latar berwarna + border penuh sudah cukup
+   menandai ini catatan. Border kiri tebal adalah pola yang terlalu
+   sering dipakai dan justru melemahkan. */
+.juz-note {
+  margin-bottom: var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-md);
+  background: color-mix(in oklab, var(--accent-soft) 60%, var(--paper-3));
+}
+
+.juz-note__title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+}
+
+.juz-note__body {
+  margin: 0;
+  max-width: 74ch;
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+}
+
+.juz-note__body b {
+  color: var(--ink);
+  font-weight: var(--weight-semibold);
+}
+
+/* ─── pemilih kelompok juz ─── */
+.juz-folder {
+  min-width: 0;
+}
+
+.juz-folder__row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.juz-folder__pick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-4);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  background: var(--paper-3);
+  color: var(--ink-2);
+  text-align: center;
+}
+
+/* Angka besar sebagai jangkar visual — menggantikan ilustrasi folder
+   yang berat (593 baris komponen + 3D) tapi tetap memberi bobot. */
+.juz-folder__pick-num {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: color-mix(in oklab, var(--accent) 45%, transparent);
+  transition: color var(--dur-base) var(--ease-out);
+}
+
+.juz-folder__pick.is-active .juz-folder__pick-num {
+  color: var(--accent);
+}
+
+.juz-folder__pick-label {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+}
+
+.juz-folder__pick-count {
+  font-size: var(--text-xs);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.juz-folder__pick.is-active {
+  border-color: var(--accent);
+  background: color-mix(in oklab, var(--accent-soft) 46%, var(--paper-3));
+}
+
+@media (hover: hover) {
+  .juz-folder__pick:not(.is-active):hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+}
+
+/* ─── daftar juz dalam kelompok ─── */
+.juz-folder__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: var(--space-2);
+}
+
+.juz-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-3);
+  color: inherit;
+  text-decoration: none;
+  box-shadow: var(--shadow-1);
+}
+
+.juz-chip.is-done {
+  border-color: var(--accent);
+  background: color-mix(in oklab, var(--accent-soft) 38%, var(--paper-3));
+}
+
+@media (hover: hover) {
+  .juz-chip:hover {
+    border-color: var(--accent);
+    transform: translateX(3px);
+    box-shadow: var(--shadow-2);
+  }
+}
+
+.juz-chip__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* 36px: angka ini sendiri bukan target ketuk (seluruh baris `.juz-chip`
+     yang bisa diklik), tapi ia menentukan tinggi minimum baris tersebut. */
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.juz-chip.is-done .juz-chip__num {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.juz-chip__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.juz-chip__label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+}
+
+.juz-chip__range {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.juz-chip__ar {
+  flex-shrink: 0;
+  font-family: var(--font-arabic);
+  font-size: var(--text-md);
+  color: var(--gold-text);
+}
+
+/* Label acuan mushaf di header halaman juz */
+.juz-acuan {
+  display: inline-block;
+  margin-top: var(--space-4);
+  padding: 5px 14px;
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-full);
+  background: color-mix(in oklab, var(--accent-soft) 70%, transparent);
+  color: var(--gold-text);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.04em;
+}
+
+/* ─── pembatas antar surah di dalam juz ─── */
+.juz-surah-divider {
+  margin-block: var(--space-6) var(--space-4);
+  text-align: center;
+}
+
+.juz-surah-divider__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-3);
+}
+
+/* Label "Lanjutan" saat juz mulai di tengah surah. Penting: tanpa ini
+   pembaca mengira juz memuat surah itu dari awal. */
+.juz-surah-divider__tag {
+  display: inline-block;
+  margin-bottom: var(--space-2);
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  background: var(--gold-soft);
+  color: var(--gold-text);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.juz-surah-divider__ar {
+  font-family: var(--font-arabic);
+  font-size: var(--text-2xl);
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.juz-surah-divider__name {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.juz-surah-divider__arti {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+
+/* ─── penutup halaman juz ─── */
+.juz-foot {
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--rule);
+  text-align: center;
+}
+
+.juz-foot__label {
+  margin: var(--space-4) 0 var(--space-5);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--ink-2);
+}
+
+.juz-foot__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+@media (max-width: 640px) {
+  .juz-folder__row {
+    gap: var(--space-2);
+  }
+  .juz-folder__pick {
+    padding: var(--space-4) var(--space-3);
+  }
+  .juz-folder__pick-num {
+    font-size: var(--text-2xl);
+  }
+  .juz-folder__pick-label {
+    font-size: var(--text-sm);
+  }
+}
+
+@media (max-width: 560px) {
+  /* Tiga pilihan berdampingan jadi terlalu sempit — tumpuk vertikal
+     dengan angka di samping labelnya. */
+  .juz-folder__row {
+    grid-template-columns: 1fr;
+  }
+  .juz-folder__pick {
+    flex-direction: row;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    text-align: start;
+  }
+  .juz-folder__pick-num {
+    font-size: var(--text-2xl);
+    min-width: 3.5ch;
+  }
+  .juz-folder__pick-label {
+    margin-inline-end: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .juz-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
+    padding: var(--space-4);
+  }
+  .juz-summary__item b {
+    font-size: var(--text-xl);
+  }
+}
+
+/* ═══ PENCARIAN ══════════════════════════════════════════════════════ */
+
+.result-item {
+  display: block;
+  margin-bottom: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-3);
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .result-item:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-1);
+  }
+}
+
+.result-item__ref {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.result-item__text {
+  margin: var(--space-2) 0 0;
+  color: var(--ink-2);
+  line-height: var(--leading-relaxed);
+}
+
+.result-item__text mark {
+  padding-inline: 2px;
+  border-radius: 2px;
+  background: var(--gold-soft);
+  color: inherit;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+/* ═══ DAFTAR AYAT TERSIMPAN ══════════════════════════════════════════ */
+
+.bm-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-3);
+  box-shadow: var(--shadow-1);
+}
+
+.bm-item__body {
+  min-width: 0;
+}
+
+.bm-item__ref {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.bm-item__snippet {
+  margin: var(--space-2) 0 0;
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+}
+
+.bm-item__time {
+  margin-top: var(--space-1);
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+
+.bm-item__remove {
+  flex-shrink: 0;
+}
+
+@media (max-width: 560px) {
+  .bm-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .bm-item__remove {
+    align-self: flex-start;
+  }
+}
+
+/* ═══ KARTU "LANJUT BACA" ════════════════════════════════════════════ */
+
+.resume {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.resume__label {
+  margin: 0;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.resume__title {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+}
+
+.resume__time {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-xs);
+  color: var(--muted);
+}

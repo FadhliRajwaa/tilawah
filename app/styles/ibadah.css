@@ -1,0 +1,668 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   TILAWAH · IBADAH
+   Tab, Asmaul Husna, doa harian, jadwal sholat, dan halaman kredit.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ═══ ASMAUL HUSNA — DAFTAR BERNOMOR ═════════════════════════════════
+   99 kartu identik itu pola template dan melelahkan dipindai. Bentuk
+   daftar bernomor jauh lebih terbaca: nomor di medali, nama Arab jadi
+   fokus, meta sebagai pendamping.
+
+   Nomor ganjil berlatar sangat tipis (zebra) supaya mata bisa mengikuti
+   baris — teknik tabel cetak, bukan hiasan. Di ≥900px mengalir DUA kolom:
+   99 nama jadi ~50 baris, tidak perlu menggulir panjang. */
+
+.asma {
+  margin: 0;
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--rule);
+}
+
+@media (min-width: 900px) {
+  .asma {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-6);
+  }
+}
+
+.asma__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-3);
+  border-bottom: 1px solid var(--rule-2);
+}
+
+/* Zebra: hanya di kolom pertama saat dua kolom, supaya polanya tidak
+   terputus di tengah. */
+.asma__item:nth-child(odd) {
+  background: color-mix(in oklab, var(--accent-soft) 26%, transparent);
+}
+
+@media (min-width: 900px) {
+  .asma__item:nth-child(odd) {
+    background: transparent;
+  }
+  .asma__item:nth-child(4n + 1),
+  .asma__item:nth-child(4n + 2) {
+    background: color-mix(in oklab, var(--accent-soft) 26%, transparent);
+  }
+}
+
+@media (hover: hover) {
+  .asma__item:hover {
+    background: color-mix(in oklab, var(--accent-soft) 52%, transparent);
+  }
+}
+
+.asma__no {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border: 1px solid color-mix(in oklab, var(--gold) 60%, transparent);
+  border-radius: var(--radius-full);
+  background: color-mix(in oklab, var(--gold-soft) 42%, transparent);
+  color: var(--gold-text);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.asma__body {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0 var(--space-4);
+  min-width: 0;
+}
+
+/* Nama Arab jadi fokus utama — ia yang dibaca, latin dan arti mendampingi */
+.asma__ar {
+  grid-row: span 2;
+  font-family: var(--font-arabic);
+  font-size: clamp(1.4rem, 3.4vw, 1.9rem);
+  line-height: 1.6;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.asma__latin {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.asma__tr {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+@media (max-width: 560px) {
+  .asma__item {
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-2);
+  }
+  .asma__no {
+    width: 32px;
+    height: 32px;
+    font-size: var(--text-2xs);
+  }
+  /* Di layar sangat sempit, nama Arab turun ke baris sendiri — kalau
+     dipaksa berdampingan, latin dan artinya terpotong. */
+  .asma__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .asma__ar {
+    grid-row: auto;
+    font-size: 1.5rem;
+  }
+}
+
+/* ═══ DOA HARIAN — HALAMAN KECIL, BUKAN KOTAK ════════════════════════
+   Tiap doa adalah satu "halaman kecil": judul sebagai kepala, teks Arab
+   sebagai badan, dipisah garis rambut — sama seperti lembar mushaf. */
+
+.doa-list {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.doa {
+  max-width: 74ch;
+  padding-block: var(--space-6);
+  border-bottom: 1px solid var(--rule-2);
+}
+
+.doa__title {
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+  color: var(--ink);
+}
+
+.doa__ar {
+  margin: 0 0 var(--space-4);
+}
+
+.doa__latin {
+  margin: 0 0 var(--space-3);
+  color: var(--accent);
+  font-size: var(--text-sm);
+  font-style: italic;
+  line-height: var(--leading-relaxed);
+}
+
+.doa__tr {
+  margin: 0;
+  color: var(--ink-2);
+  line-height: var(--leading-relaxed);
+}
+
+@media (max-width: 640px) {
+  .doa {
+    padding-block: var(--space-5);
+  }
+}
+
+/* ═══ JADWAL SHOLAT ══════════════════════════════════════════════════ */
+
+.sholat-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+/* Hitung mundur — elemen paling penting di halaman ini, jadi ia yang
+   paling besar. Angka display dengan angka tabular supaya tidak goyang
+   saat detik berubah. */
+.countdown {
+  padding: var(--space-5);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-xl);
+  background: color-mix(in oklab, var(--accent-soft) 55%, var(--paper-3));
+  text-align: center;
+}
+
+.countdown__label {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--gold-text);
+}
+
+.countdown__time {
+  margin-block: var(--space-2);
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.1;
+}
+
+.countdown__next {
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+}
+
+.countdown__next b {
+  color: var(--ink);
+}
+
+/* Daftar waktu: kartu kecil yang bisa dibandingkan sekali pandang */
+.sholat-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: var(--space-2);
+}
+
+.sholat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-3);
+}
+
+.sholat-row.is-next {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.sholat-row__name {
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+
+.sholat-row.is-next .sholat-row__name {
+  color: var(--accent);
+  font-weight: var(--weight-semibold);
+}
+
+.sholat-row__time {
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── pemilih kota ─── */
+.city-picker {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+}
+
+.city-picker__list {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(100% + 4px);
+  z-index: var(--z-raised);
+  max-height: 260px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-3);
+  box-shadow: var(--shadow-3);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.city-picker__item {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--rule-2);
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  text-align: start;
+}
+
+.city-picker__item.is-active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* Sorotan keyboard (panah) — berbeda dari `.is-active` yang menandai kota
+   TERPILIH. Keduanya bisa ada di item yang sama; sorotan keyboard diberi
+   garis tepi supaya tetap terlihat di atas latar terpilih. */
+.city-picker__item.is-highlight {
+  background: var(--paper-2);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+@media (hover: hover) {
+  .city-picker__item:not(.is-active):hover {
+    background: var(--paper-2);
+  }
+}
+
+@media (max-width: 640px) {
+  .sholat-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .city-picker {
+    max-width: 100%;
+  }
+  .countdown {
+    padding: var(--space-4);
+  }
+  .countdown__time {
+    font-size: clamp(1.7rem, 9vw, 2.4rem);
+  }
+  .sholat-list {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 132px), 1fr));
+  }
+}
+
+/* ═══ HALAMAN KREDIT ═════════════════════════════════════════════════ */
+
+.credit-list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.credit-list li {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-3);
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+}
+
+.credit-list strong {
+  color: var(--ink);
+}
+
+.credit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: var(--space-4);
+}
+
+.credit-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  background: var(--paper-3);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+}
+
+/* Thumbnail: seluruh bidang bisa diklik untuk melihat versi besar */
+.credit-card__tap {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper-2);
+  overflow: hidden;
+  cursor: zoom-in;
+}
+
+.credit-card__tap:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -3px;
+}
+
+.credit-card__thumb {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  transition:
+    transform var(--dur-slow) var(--ease-out),
+    filter var(--dur-slow) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .credit-card__tap:hover .credit-card__thumb,
+  .credit-card__tap:focus-visible .credit-card__thumb {
+    transform: scale(1.05);
+    filter: saturate(1.08);
+  }
+  .credit-card__tap:hover .credit-card__zoom,
+  .credit-card__tap:focus-visible .credit-card__zoom {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.credit-card__zoom {
+  position: absolute;
+  top: var(--space-2);
+  inset-inline-end: var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: color-mix(in oklab, oklch(15% 0.02 235) 66%, transparent);
+  backdrop-filter: blur(4px);
+  color: oklch(98% 0 0);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    opacity var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+}
+
+@media (hover: none) {
+  .credit-card__zoom {
+    opacity: 0.92;
+    transform: none;
+  }
+}
+
+.credit-card__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4) var(--space-5);
+}
+
+.credit-card__note {
+  margin: 0;
+  color: var(--accent);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.credit-card__title {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  line-height: 1.45;
+}
+
+.credit-card__meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-xs);
+  line-height: var(--leading-normal);
+}
+
+.credit-badge {
+  display: inline-block;
+  padding: 1px 7px;
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-full);
+  color: var(--gold-text);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semibold);
+}
+
+.credit-card__link {
+  margin-top: auto;
+  padding-top: var(--space-2);
+  color: var(--accent);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .credit-card__link:hover {
+    text-decoration: underline;
+  }
+}
+
+/* ═══ LIGHTBOX GAMBAR (satu untuk seluruh situs) ═════════════════════
+   Panggung SELALU gelap di kedua tema, karena foto bertepi terang
+   (kaligrafi di atas kertas putih) butuh bingkai gelap agar terbaca
+   sebagai karya yang dipajang — bukan menyatu dengan latar.
+
+   ⚠️ Jangan pakai color-mix(--ink, ...) di sini: di mode gelap --ink
+   justru TERANG, sehingga maksud "panggung gelap" hilang. */
+
+.lightbox {
+  width: min(96vw, 1400px);
+  max-width: none;
+  max-height: 94vh;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-xl);
+  background: transparent;
+  overflow: visible;
+  z-index: var(--z-modal);
+}
+
+.lightbox::backdrop {
+  background: color-mix(in oklab, oklch(12% 0.02 235) 82%, transparent);
+  backdrop-filter: blur(7px);
+}
+
+.lightbox__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-xl);
+  background: var(--paper-3);
+  box-shadow: var(--shadow-3);
+  overflow: hidden;
+}
+
+.lightbox__stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  max-height: 76vh;
+  padding: var(--space-4);
+  background:
+    radial-gradient(80% 130% at 50% 0%, rgb(16 155 218 / 0.16), transparent 72%),
+    #0b1a24;
+}
+
+.lightbox__close {
+  position: absolute;
+  top: var(--space-3);
+  inset-inline-end: var(--space-3);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-full);
+  background: color-mix(in oklab, var(--paper-3) 88%, transparent);
+  backdrop-filter: blur(6px);
+  color: var(--ink);
+}
+
+@media (hover: hover) {
+  .lightbox__close:hover {
+    border-color: transparent;
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+}
+
+/* `contain`, bukan `cover` — inti lightbox adalah MELIHAT UTUH.
+   `cover` memotong kaligrafi di tepi, yang justru bagian terpenting. */
+.lightbox__img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 72vh;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+
+.lightbox__meta {
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--rule);
+  background: var(--paper-2);
+}
+
+.lightbox__caption {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+}
+
+.lightbox__credit {
+  margin: var(--space-1) 0 0;
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+
+.lightbox__credit a {
+  color: var(--accent);
+  text-underline-offset: 2px;
+}
+
+/* Di ponsel lightbox mengisi layar penuh — tidak ada ruang untuk sisa
+   halaman, jadi ia tampil sebagai penampil gambar penuh. */
+@media (max-width: 560px) {
+  .lightbox {
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 100vh;
+    margin: 0;
+    border-radius: 0;
+  }
+  .lightbox__panel {
+    height: 100vh;
+    border-radius: 0;
+  }
+  .lightbox__stage {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    padding: var(--space-3);
+  }
+  .lightbox__img {
+    max-height: 100%;
+  }
+  .lightbox__meta {
+    padding: var(--space-3) var(--space-4);
+  }
+  .lightbox__close {
+    top: var(--space-2);
+    inset-inline-end: var(--space-2);
+  }
+}
+
+/* ═══ PENEMPATAN TOMBOL PERBESAR PER-KOMPONEN ════════════════════════ */
+
+.hero__zoom {
+  top: auto;
+  bottom: var(--space-6);
+  inset-inline-end: var(--space-6);
+}
+
+.page-head__zoom,
+.reader-head__zoom {
+  top: auto;
+  bottom: var(--space-4);
+  inset-inline-end: var(--space-4);
+}
+
+/* Penempatan .divider-art__zoom ada di chrome.css bersama komponennya. */
+
+@media (max-width: 640px) {
+  /* Di layar sempit label disembunyikan — tombol jadi ikon bulat saja */
+  .photo-zoom__label {
+    display: none;
+  }
+  .photo-zoom {
+    width: 40px;
+    min-height: 40px;
+    padding: 0;
+    justify-content: center;
+  }
+  .hero__zoom {
+    bottom: var(--space-4);
+    inset-inline-end: var(--space-4);
+  }
+}

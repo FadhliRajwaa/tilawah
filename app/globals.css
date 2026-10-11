@@ -1,17 +1,42 @@
 @import "tailwindcss";
 @import "../tokens.css";
-@import "./transitions.css";
-@import "./components.css";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
 
-/* Tilawah memakai <html data-theme="dark">, bukan kelas `.dark` (konvensi
- * shadcn). Tanpa override ini, SEMUA utility `dark:` dari komponen shadcn /
- * rare-ui tidak pernah aktif — mis. VoiceNote tetap berlatar terang di mode
- * gelap. Varian diarahkan ke atribut yang benar-benar dipakai proyek. */
+/* ─── Modul gaya ──────────────────────────────────────────────────────
+   Urutan PENTING: primitives dulu (kontrak bersama), lalu modul domain
+   yang boleh menimpanya secara sengaja.
+
+     1. primitives — tombol, kartu, chip, modal, tab, state, grid
+     2. chrome     — nav, footer, latar watercolor, ornamen, foto
+     3. home       — hero, seksi, galeri, banner, header halaman
+     4. quran      — header baca, toolbar, ayat, katalog, juz
+     5. player     — dock, pemilih qari, waveform
+     6. ibadah     — tab, asmaul husna, doa, sholat, kredit, lightbox
+
+   Aturan: definisi baru masuk ke modul yang paling spesifik. Kalau
+   sebuah gaya dipakai lebih dari satu domain, ia naik ke primitives. */
+@import "./styles/primitives.css";
+@import "./styles/chrome.css";
+@import "./styles/home.css";
+@import "./styles/quran.css";
+@import "./styles/player.css";
+@import "./styles/ibadah.css";
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TILAWAH · GLOBAL
+   Reset, elemen dasar, tipografi, utilitas tata letak.
+   Tidak ada gaya komponen di sini — itu tugas components.css.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ─── Jembatan tema untuk Tailwind & shadcn ────────────────────────────
+   Proyek memakai <html data-theme="dark">, bukan kelas `.dark`.
+   Tanpa varian ini, SEMUA utility `dark:` dari komponen pihak ketiga
+   tidak pernah aktif. */
 @custom-variant dark (&:is([data-theme="dark"] *));
 
-/* Tailwind v4 @theme — jembatan token ke utility */
+/* ─── Tailwind v4 @theme — token jadi utility ──────────────────────────
+   Hanya warna & font yang dipetakan. Skala ruang/radius Tailwind
+   bawaan sengaja TIDAK ditimpa supaya komponen pihak ketiga tetap
+   berperilaku normal. */
 @theme inline {
   --color-paper: var(--paper);
   --color-paper-2: var(--paper-2);
@@ -29,235 +54,46 @@
   --color-gold-soft: var(--gold-soft);
   --color-gold-text: var(--gold-text);
   --color-focus: var(--focus);
-  /* — jembatan komponen rare-ui (dipakai VoiceNote) — */
+  --color-danger: var(--danger);
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-arabic: var(--font-arabic);
+  /* komponen pihak ketiga memakai --font-sans / --font-heading */
+  --font-sans: var(--font-body);
+  --font-heading: var(--font-display);
+
+  /* Token shadcn — dipetakan ke design system Tilawah.
+     Nama generik `--muted` dan `--accent` milik shadcn bentrok dengan
+     token Tilawah, jadi sengaja diberi awalan `sh-`. */
+  --color-background: var(--paper);
+  --color-foreground: var(--ink);
+  --color-card: var(--paper-3);
+  --color-card-foreground: var(--ink);
+  --color-popover: var(--paper-3);
+  --color-popover-foreground: var(--ink);
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--accent-ink);
+  --color-secondary: var(--paper-2);
+  --color-secondary-foreground: var(--ink);
+  --color-muted-foreground: var(--muted);
+  --color-destructive: var(--danger);
+  --color-border: var(--rule);
+  --color-input: var(--rule);
+  --color-ring: var(--focus);
+
+  /* jembatan VoiceNote (rare-ui) */
   --color-vn-surface: var(--paper-2);
   --color-vn-control: var(--paper-3);
   --color-vn-control-ink: var(--ink);
   --color-vn-bar: color-mix(in oklab, var(--ink) 26%, transparent);
-  /* bar yang sudah dilewati memakai accent hijau — menyatu dengan tema
-     mushaf, bukan hitam pekat seperti bawaan komponen */
   --color-vn-bar-on: var(--accent);
   --color-vn-meta: var(--muted);
   --color-vn-ring: var(--focus);
   --color-vn-chip: color-mix(in oklab, var(--ink) 10%, transparent);
   --color-vn-chip-ink: var(--ink-2);
-  --font-display: var(--font-display);
-  --font-body: var(--font-body);
-  --font-arabic: var(--font-arabic);
-  /* komponen shadcn/rare-ui memakai --font-sans — arahkan ke body Tilawah
-     supaya tidak jatuh ke font sistem */
-  --font-heading: var(--font-display);
-  --font-sans: var(--font-body);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--sh-accent-foreground);
-  --color-muted-foreground: var(--sh-muted-foreground);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --color-foreground: var(--foreground);
-  --color-background: var(--background);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* — dasar — */
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-  overflow-x: clip;
-  scroll-padding-top: calc(var(--nav-h) + 16px);
-}
-
-body {
-  margin: 0;
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--font-body);
-  font-size: var(--text-base);
-  line-height: 1.6;
-  overflow-x: clip;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-::selection {
-  background: var(--accent-soft);
-  color: var(--ink);
-}
-
-:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-  border-radius: 2px;
-}
-
-/* — teks Arab — */
-.arabic {
-  font-family: var(--font-arabic);
-  direction: rtl;
-  text-align: right;
-  line-height: 2.15;
-  font-size: var(--text-arabic);
-  overflow-wrap: anywhere;
-}
-
-/* — util khas halaman — */
-.container-page {
-  width: 100%;
-  max-width: 72rem;
-  margin-inline: auto;
-  padding-inline: clamp(1rem, 4vw, 1.5rem);
-}
-
-.rule-hairline {
-  border: 0;
-  border-top: 1px solid var(--rule);
-}
-
-.rule-gold {
-  border: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold) 20%, var(--gold) 80%, transparent);
-}
-
-/* — ornamen sudut kartu mushaf — */
-.ornament-frame {
-  position: relative;
-}
-.ornament-frame::before,
-.ornament-frame::after {
-  content: "";
-  position: absolute;
-  width: 22px;
-  height: 22px;
-  border-color: var(--gold);
-  border-style: solid;
-  pointer-events: none;
-}
-.ornament-frame::before {
-  top: 8px;
-  inset-inline-start: 8px;
-  border-width: 1px 0 0 1px;
-  border-start-start-radius: 6px;
-}
-.ornament-frame::after {
-  bottom: 8px;
-  inset-inline-end: 8px;
-  border-width: 0 1px 1px 0;
-  border-end-end-radius: 6px;
-}
-
-/* — transisi & reduced motion — */
-a,
-button {
-  transition:
-    color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out),
-    opacity var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* — scrollbar halus — */
-@media (pointer: fine) {
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }
-  ::-webkit-scrollbar-track {
-    background: var(--paper-2);
-  }
-  ::-webkit-scrollbar-thumb {
-    background: var(--rule);
-    border-radius: 8px;
-    border: 2px solid var(--paper-2);
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--muted);
-  }
-}
-
-/* — skeleton loading — */
-@keyframes shimmer {
-  0% {
-    background-position: -400px 0;
-  }
-  100% {
-    background-position: 400px 0;
-  }
-}
-.skeleton {
-  background: linear-gradient(90deg, var(--paper-2) 25%, var(--paper-3) 50%, var(--paper-2) 75%);
-  background-size: 800px 100%;
-  animation: shimmer 1.4s linear infinite;
-  border-radius: var(--radius-sm);
-}
-
-/* — fade masuk konten — */
-@keyframes fade-rise {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.fade-rise {
-  animation: fade-rise var(--dur-slow) var(--ease-out) both;
-}
-
-/* ⚠️ Token shadcn DIPETAKAN ke design system Tilawah, TAPI dengan NAMA BERBEDA
- * untuk yang bentrok. shadcn memakai nama generik `--muted` dan `--accent` —
- * sama persis dengan token Tilawah. Kalau ditulis apa adanya, keduanya saling
- * menimpa: `--muted` jadi near-white (teks sekunder hilang) dan `--accent`
- * jadi latar pucat (aksen hijau hilang). Karena itu:
- *   shadcn --muted  → --sh-muted     (Tilawah --muted tetap utuh)
- *   shadcn --accent → --sh-accent    (Tilawah --accent tetap utuh)
- * Sisanya aman karena namanya khas shadcn. */
 :root {
   --background: var(--paper);
   --foreground: var(--ink);
@@ -273,76 +109,444 @@ button {
   --sh-muted-foreground: var(--muted);
   --sh-accent: var(--accent-soft);
   --sh-accent-foreground: var(--accent);
-  --destructive: oklch(55% 0.18 25);
+  --destructive: var(--danger);
   --border: var(--rule);
   --input: var(--rule);
   --ring: var(--focus);
-  --chart-1: var(--accent);
-  --chart-2: var(--gold);
-  --chart-3: var(--accent-2);
-  --chart-4: var(--gold-text);
-  --chart-5: var(--muted);
   --radius: 0.625rem;
-  --sidebar: var(--paper-2);
-  --sidebar-foreground: var(--ink);
-  --sidebar-primary: var(--accent);
-  --sidebar-primary-foreground: var(--accent-ink);
-  --sidebar-accent: var(--accent-soft);
-  --sidebar-accent-foreground: var(--accent);
-  --sidebar-border: var(--rule);
-  --sidebar-ring: var(--focus);
 }
 
-/* Mode gelap: shadcn memakai kelas `.dark`, Tilawah memakai [data-theme="dark"].
- * Keduanya diarahkan ke token Tilawah — token gelap sudah didefinisikan di
- * tokens.css sehingga otomatis ikut. Blok ini hanya menyelaraskan nama shadcn. */
-.dark {
-  --background: var(--paper);
-  --foreground: var(--ink);
-  --card: var(--paper-3);
-  --card-foreground: var(--ink);
-  --popover: var(--paper-3);
-  --popover-foreground: var(--ink);
-  --primary: var(--accent);
-  --primary-foreground: var(--accent-ink);
-  --secondary: var(--paper-2);
-  --secondary-foreground: var(--ink);
-  --sh-muted: var(--paper-2);
-  --sh-muted-foreground: var(--muted);
-  --sh-accent: var(--accent-soft);
-  --sh-accent-foreground: var(--accent);
-  --destructive: oklch(65% 0.16 25);
-  --border: var(--rule);
-  --input: var(--rule);
-  --ring: var(--focus);
-  --chart-1: var(--accent);
-  --chart-2: var(--gold);
-  --chart-3: var(--accent-2);
-  --chart-4: var(--gold-text);
-  --chart-5: var(--muted);
-  --sidebar: var(--paper-2);
-  --sidebar-foreground: var(--ink);
-  --sidebar-primary: var(--accent);
-  --sidebar-primary-foreground: var(--accent-ink);
-  --sidebar-accent: var(--accent-soft);
-  --sidebar-accent-foreground: var(--accent);
-  --sidebar-border: var(--rule);
-  --sidebar-ring: var(--focus);
+/* ─── RESET ──────────────────────────────────────────────────────────
+   Ringkas dan sengaja: hanya yang benar-benar dibutuhkan. Tailwind
+   sudah membawa preflight-nya sendiri. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-/* ⚠️ Base layer shadcn DIBATASI — jangan biarkan menimpa design system Tilawah.
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  /* jangkar tidak tersembunyi di bawah nav yang lengket */
+  scroll-padding-top: calc(var(--nav-h) + var(--space-4));
+  overflow-x: clip;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-normal);
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* ruang untuk dock pemutar — diatur komponen, bukan di sini */
+  min-height: 100dvh;
+}
+
+img,
+picture,
+svg,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+img,
+video {
+  height: auto;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  text-wrap: balance;
+  font-weight: var(--weight-semibold);
+}
+
+p {
+  text-wrap: pretty;
+}
+
+ul,
+ol {
+  list-style: none;
+  padding: 0;
+}
+
+/* ─── FOKUS ──────────────────────────────────────────────────────────
+   Cincin fokus keyboard yang jelas. `:focus-visible` saja supaya klik
+   mouse tidak memunculkan cincin. */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+/* ─── SKIP LINK ──────────────────────────────────────────────────────
+   Tersembunyi sampai difokus lewat Tab. Wajib untuk pengguna keyboard. */
+.skip-link {
+  position: fixed;
+  top: var(--space-3);
+  inset-inline-start: var(--space-3);
+  z-index: var(--z-toast);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-sm);
+  background: var(--ink);
+  color: var(--paper-3);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+  box-shadow: var(--shadow-3);
+  transform: translateY(calc(-100% - var(--space-4)));
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* ─── TIPOGRAFI ────────────────────────────────────────────────────── */
+
+/* Teks Arab — font mushaf, arah RTL, tinggi baris longgar untuk harakat */
+.arabic {
+  font-family: var(--font-arabic);
+  direction: rtl;
+  text-align: right;
+  line-height: var(--leading-arabic);
+  font-size: var(--text-arabic);
+  overflow-wrap: break-word;
+  /* angka Arab dalam teks tidak ikut membalik urutan */
+  font-variant-numeric: normal;
+}
+
+/* Utilitas teks — dipakai lintas komponen */
+.t-xs {
+  font-size: var(--text-xs);
+}
+.t-sm {
+  font-size: var(--text-sm);
+}
+.t-md {
+  font-size: var(--text-md);
+}
+.t-lg {
+  font-size: var(--text-lg);
+}
+.t-muted {
+  color: var(--muted);
+}
+.t-ink-2 {
+  color: var(--ink-2);
+}
+.t-accent {
+  color: var(--accent);
+}
+.t-gold {
+  color: var(--gold-text);
+}
+.t-display {
+  font-family: var(--font-display);
+}
+.t-tight {
+  line-height: var(--leading-tight);
+}
+.t-num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Label kecil huruf besar — eyebrow, kategori.
  *
- * Bawaan shadcn menulis:
- *   body { @apply bg-background text-foreground }
- *   html { @apply font-sans }
- * Itu menimpa --paper/--ink dan font Fraunces/Switzer milik Tilawah dengan
- * token netral shadcn (putih/hitam + Geist) — teks jadi pudar & tak terbaca.
+ * Ini SATU definisi untuk semua eyebrow di situs. Header baca
+ * (`.reader-head__eyebrow`) memakainya sebagai basis dan hanya menambah
+ * `inline-flex` + gap untuk ikon — nilai tipografinya tidak ditulis ulang,
+ * supaya label yang sama tidak terlihat berbeda di halaman berbeda. */
+.t-eyebrow {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--gold-text);
+}
+
+/* Varian dengan ikon di sampingnya */
+.t-eyebrow--inline {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ─── TATA LETAK ───────────────────────────────────────────────────── */
+
+.container-page {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 1.5rem);
+}
+
+.container-narrow {
+  width: 100%;
+  max-width: var(--container-narrow);
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 1.5rem);
+}
+
+/* Seksi halaman — ritme vertikal konsisten */
+.section {
+  padding-block: var(--section-y);
+}
+
+/* Seksi yang menempel ke elemen sebelumnya (mis. di bawah header) */
+.section--tight {
+  padding-block: var(--section-gap);
+}
+
+/* ─── ATURAN RAMBUT (garis pemisah) ────────────────────────────────── */
+
+.rule-hairline {
+  border: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.rule-gold {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--gold) 20%,
+    var(--gold) 80%,
+    transparent
+  );
+}
+
+/* ─── KERANGKA ORNAMEN ───────────────────────────────────────────────
+   Sudut emas pada kartu mushaf. Satu pseudo-element per sudut. */
+.ornament-frame {
+  position: relative;
+}
+
+.ornament-frame::before,
+.ornament-frame::after {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-color: var(--gold);
+  border-style: solid;
+  pointer-events: none;
+}
+
+.ornament-frame::before {
+  top: 8px;
+  inset-inline-start: 8px;
+  border-width: 1px 0 0 1px;
+  border-start-start-radius: var(--radius-xs);
+}
+
+.ornament-frame::after {
+  bottom: 8px;
+  inset-inline-end: 8px;
+  border-width: 0 1px 1px 0;
+  border-end-end-radius: var(--radius-xs);
+}
+
+/* ─── GERAK ──────────────────────────────────────────────────────────
+   Transisi default untuk elemen interaktif. Properti yang berubah
+   disebut SATU PER SATU — bukan `all` — supaya tidak ada properti
+   tak terduga yang ikut beranimasi. */
+a,
+button,
+summary,
+input,
+select,
+textarea {
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+/* Menghormati permintaan kurangi gerak. Animasi tidak dihapus, hanya
+   dipersingkat ke titik tak terlihat — supaya transisi state tetap
+   terjadi (tidak ada elemen yang tertinggal dalam keadaan transparan). */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── ANIMASI BERSAMA ──────────────────────────────────────────────── */
+
+/* Muncul: naik sedikit sambil memudar. Dipakai untuk konten yang baru
+   dimuat (bukan untuk setiap elemen — itu membuat halaman terasa gugup). */
+@keyframes fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-rise {
+  animation: fade-rise var(--dur-slow) var(--ease-out) both;
+}
+
+/* Kerangka pemuatan.
  *
- * Karena itu body/html TIDAK di-@apply ulang di sini; token Tilawah
- * (tokens.css) yang berlaku. Hanya utilitas border/ring yang dibiarkan
- * agar komponen shadcn tetap konsisten. */
+ * ⚠️ Kilauannya digerakkan dengan `transform`, bukan `background-position`.
+ * `background-position` adalah properti PAINT: setiap frame memaksa
+ * peramban melukis ulang seluruh kotak. Pada halaman yang punya 5–6
+ * skeleton sekaligus (halaman baca, hasil pencarian), itu pemborosan yang
+ * terasa. `transform` dikerjakan compositor tanpa paint.
+ *
+ * Bentuknya: satu elemen kilau yang digeser melintasi kotak, di-clip oleh
+ * `overflow: hidden` pada wadahnya. */
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton {
+  position: relative;
+  background: var(--paper-2);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklab, var(--paper-3) 80%, transparent) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.4s linear infinite;
+  will-change: transform;
+}
+
+/* ─── KONTRAS TINGGI (permintaan pengguna) ───────────────────────────
+   `prefers-contrast: more` diaktifkan pengguna lewat setelan sistem
+   (Windows: "Increase contrast", macOS: "Increase contrast"). Ini berbeda
+   dari forced-colors: warnanya tetap, hanya kontrasnya yang dinaikkan.
+
+   Yang dilakukan: tinta sekunder dinaikkan ke tinta utama, dan garis
+   dibuat lebih tegas. Itu saja — mengubah lebih banyak akan merusak
+   hierarki visual yang justru membantu orientasi. */
+@media (prefers-contrast: more) {
+  :root {
+    --ink-2: var(--ink);
+    --muted: var(--ink);
+    --rule: oklch(70% 0.03 220);
+    --rule-2: oklch(78% 0.025 220);
+  }
+
+  [data-theme="dark"] {
+    --ink-2: var(--ink);
+    --muted: var(--ink);
+    --rule: oklch(48% 0.03 233);
+    --rule-2: oklch(42% 0.028 234);
+  }
+
+  /* Fokus diberi cincin kedua supaya terlihat di latar apa pun */
+  :focus-visible {
+    outline-width: 3px;
+    outline-offset: 3px;
+  }
+}
+
+/* ─── SCROLLBAR ──────────────────────────────────────────────────────
+   Hanya di perangkat dengan penunjuk presisi; di layar sentuh scrollbar
+   bawaan sistem lebih baik. */
+@media (pointer: fine) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--paper-2);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--rule);
+    border-radius: var(--radius-full);
+    border: 2px solid var(--paper-2);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted);
+  }
+}
+
+/* ─── LAPISAN DASAR shadcn ───────────────────────────────────────────
+   Hanya utilitas border/ring yang dibiarkan. body/html TIDAK di-@apply
+   ulang — kalau tidak, token netral shadcn menimpa tipografi Tilawah. */
 @layer base {
   * {
-    @apply border-border;
+    border-color: var(--border);
   }
 }

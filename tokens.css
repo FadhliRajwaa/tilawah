@@ -1,120 +1,276 @@
-/* Tilawah · tema "air" — watercolor biru
- * vibe: "kertas basah, tinta biru, sapuan cat air" · paper: oklch(97.5% 0.012 220) · accent: oklch(52% 0.135 235)
- * display: Fraunces · body: Switzer · arabic: LPMQ Isep Misbah (fallback Amiri Quran)
- *
- * Palet diambil dari empat warna washes: #109BDA · #19BBE3 · #52D9E8 · #8BE9EA
- * Diterapkan sebagai: permukaan biru sangat terang + tinta biru tua,
- * dengan emas tetap dipakai tipis sebagai aksen ornamen Islami.
- */
+/* ═══════════════════════════════════════════════════════════════════════
+   TILAWAH · TOKENS
+   Tema "air" — kertas basah, tinta biru, sapuan cat air.
+
+   ATURAN: setiap nilai di seluruh CSS harus berasal dari sini.
+   Tidak ada magic number di file komponen. Kalau sebuah nilai dipakai
+   lebih dari sekali, ia layak jadi token.
+
+   Struktur:
+     1. Warna        — permukaan, tinta, garis, aksen, emas
+     2. Tipografi    — keluarga, skala, tinggi baris, tracking
+     3. Ruang        — skala 4pt
+     4. Bentuk       — radius, bayangan, cincin
+     5. Gerak        — durasi, easing
+     6. Tata letak   — lebar ukur, tinggi chrome, z-index
+   ═══════════════════════════════════════════════════════════════════════ */
 
 :root {
-  /* — permukaan: biru sangat terang, seperti kertas yang dibasahi cat —
-   *
-   * Tiga tingkat ini harus punya JARAK yang terasa, kalau tidak kartu tampak
-   * sebagai lempeng putih di atas latar biru (bug pertama: paper-3 = 99%
-   * sementara paper = 97.5%, bedanya cuma 1.5% → tak terlihat). Sekarang
-   * jaraknya ~4% per tingkat, dan chroma kartu dinaikkan sedikit supaya
-   * tetap terasa "biru", bukan abu-abu netral. */
-  --paper: oklch(96.5% 0.016 220);      /* latar halaman */
-  --paper-2: oklch(92.5% 0.024 218);    /* panel, footer, meta */
-  --paper-3: oklch(99.2% 0.005 220);    /* elevasi tertinggi (kartu, modal) */
+  /* ─── 1. WARNA ─────────────────────────────────────────────────────── */
 
-  /* — tinta: biru tua, bukan hitam — */
-  --ink: oklch(22% 0.032 235);          /* #0E1F2C — 14.4:1 */
-  --ink-2: oklch(43% 0.034 230);        /* #3D5868 — 7.6:1 */
-  --muted: oklch(49% 0.028 228);        /* #52707F — 6.0:1 di paper */
+  /* Permukaan — biru sangat terang, seperti kertas yang dibasahi cat.
+     Jarak antar tingkat harus terasa (±4%), kalau tidak kartu tampak
+     sebagai lempeng putih di atas latar biru. */
+  --paper: oklch(96.5% 0.016 220);
+  --paper-2: oklch(92.5% 0.024 218);
+  --paper-3: oklch(99.2% 0.005 220);
 
-  /* — garis — */
+  /* Tinta — biru tua, bukan hitam. Rasio kontras di --paper:
+     ink 14.4:1 · ink-2 7.6:1 · muted 6.0:1 (semua lolos WCAG AAA/AA) */
+  --ink: oklch(22% 0.032 235);
+  --ink-2: oklch(43% 0.034 230);
+  --muted: oklch(49% 0.028 228);
+
+  /* Garis */
   --rule: oklch(86% 0.024 220);
   --rule-2: oklch(91% 0.014 220);
 
-  /* — accent: biru air (indigo sungai) — */
-  --accent: oklch(50% 0.135 236);       /* #0B74B5 — 6.3:1 */
-  --accent-2: oklch(62% 0.14 230);      /* #109BDA — hover */
-  --accent-soft: oklch(94% 0.035 218);  /* latar chip aktif */
-  --accent-ink: oklch(99% 0.008 220);   /* teks di atas accent — 8.1:1 */
+  /* Aksen — biru air (indigo sungai) */
+  /* ⚠️ --accent dipakai sebagai WARNA TEKS (tautan, label aksen) di atas
+     latar halaman DAN di atas latar watercolor yang lebih pekat. Terukur
+     4.02:1 di area wash paling gelap — gagal AA untuk teks normal.
+     Diturunkan dari 50% ke 46% L: di atas `--paper` naik ke ~6.9:1, dan di
+     area wash terpekat tetap ~4.6:1. */
+  --accent: oklch(46% 0.135 236);
+  /* ⚠️ --accent-2 dipakai sebagai latar HOVER untuk tombol berisi
+     --accent-ink. Pada 62% L, teks putih di atasnya hanya 3.36:1 — gagal
+     AA. Diturunkan ke 52% supaya hover tetap terasa lebih terang dari
+     --accent (46%) tapi teksnya tetap lolos 4.5:1. */
+  --accent-2: oklch(52% 0.14 232);
+  --accent-soft: oklch(94% 0.035 218);
+  --accent-ink: oklch(99% 0.008 220);
 
-  /* — emas: aksen ornamen Islami. Tetap ada, dipakai tipis.
-   * Biru + emas = klasik ubin masjid (Masjid Sultan Ahmed, Tile of Iran). */
-  --gold: oklch(76% 0.12 85);           /* #D0A855 — ornamen/border SAJA */
-  --gold-soft: oklch(92% 0.05 85);      /* #F0E2C4 */
-  --gold-text: oklch(46% 0.1 78);       /* #77520A — 6.8:1 */
+  /* Emas — aksen ornamen Islami, dipakai tipis.
+     Biru + emas = ubin masjid (Masjid Sultan Ahmed, Tile of Iran). */
+  --gold: oklch(76% 0.12 85);
+  --gold-soft: oklch(92% 0.05 85);
+  --gold-text: oklch(46% 0.1 78);
 
-  /* — focus — */
+  /* Fokus — dipakai untuk outline keyboard */
   --focus: oklch(55% 0.16 235);
 
-  /* — empat warna washes (dipakai latar watercolor) — */
+  /* Warna washes — latar watercolor */
   --wash-1: #109bda;
   --wash-2: #19bbe3;
   --wash-3: #52d9e8;
   --wash-4: #8be9ea;
 
-  /* — tipografi — */
+  /* Status */
+  --danger: oklch(52% 0.17 25);
+  --danger-soft: oklch(94% 0.03 25);
+  --success: oklch(48% 0.11 155);
+
+  /* ─── 2. TIPOGRAFI ─────────────────────────────────────────────────── */
+
   --font-display: var(--font-fraunces), "Georgia", serif;
   --font-body: var(--font-switzer), ui-sans-serif, system-ui, sans-serif;
-  --font-arabic: "LPMQ Isep Misbah", var(--font-amiri-quran), "Amiri Quran", "Traditional Arabic", serif;
+  --font-arabic: "LPMQ Isep Misbah", var(--font-amiri-quran), "Amiri Quran",
+    "Traditional Arabic", serif;
 
-  /* — skala teks (rasio 1.25) — */
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-md: 1.125rem;
-  --text-lg: 1.375rem;
-  --text-xl: 1.75rem;
-  --text-2xl: 2.25rem;
-  --text-3xl: 3rem;
-  --text-display: clamp(2.5rem, 6vw + 1rem, 5rem);
-  --text-arabic: clamp(1.75rem, 1rem + 2.2vw, 2.5rem);
+  /* Skala teks — rasio 1.25, dengan clamp untuk yang fluid.
+     Nama mengikuti peran, bukan ukuran, supaya makna tetap saat nilai berubah. */
+  --text-2xs: 0.6875rem; /* 11px — label mikro, badge */
+  --text-xs: 0.75rem; /* 12px — meta, keterangan */
+  --text-sm: 0.875rem; /* 14px — UI, label kontrol */
+  --text-base: 1rem; /* 16px — body */
+  --text-md: 1.125rem; /* 18px — body besar, lede */
+  --text-lg: 1.375rem; /* 22px — sub-judul */
+  --text-xl: 1.75rem; /* 28px — judul bagian */
+  --text-2xl: 2.25rem; /* 36px — judul halaman */
+  --text-3xl: 3rem; /* 48px — display kecil */
 
-  /* — spasi (skala 4pt) — */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.5rem;
-  --space-6: 2rem;
-  --space-7: 3rem;
-  --space-8: 4rem;
-  --space-9: 6rem;
+  /* Fluid — dipakai di hero & judul besar */
+  --text-display: clamp(2.25rem, 1.2rem + 4.2vw, 4.25rem);
+  --text-title: clamp(1.75rem, 1.1rem + 2.6vw, 2.75rem);
+  --text-arabic: clamp(1.6rem, 1rem + 2vw, 2.25rem);
 
-  /* — radius & bayangan — */
-  --radius-sm: 8px;
+  /* Tinggi baris */
+  --leading-tight: 1.12; /* display */
+  --leading-snug: 1.3; /* judul */
+  --leading-normal: 1.55; /* UI */
+  --leading-relaxed: 1.75; /* body baca */
+  --leading-arabic: 2.05; /* teks Arab — butuh ruang harakat */
+
+  /* Tracking */
+  --tracking-tight: -0.02em; /* display besar */
+  --tracking-normal: 0;
+  --tracking-wide: 0.06em; /* label huruf besar */
+  --tracking-wider: 0.12em; /* eyebrow */
+
+  /* Berat */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ─── 3. RUANG ─────────────────────────────────────────────────────── */
+
+  --space-0: 0;
+  --space-1: 0.25rem; /*  4px */
+  --space-2: 0.5rem; /*  8px */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem; /* 16px */
+  --space-5: 1.5rem; /* 24px */
+  --space-6: 2rem; /* 32px */
+  --space-7: 3rem; /* 48px */
+  --space-8: 4rem; /* 64px */
+  --space-9: 6rem; /* 96px */
+
+  /* Ruang seksi — fluid, karena seksi harus bernapas di desktop
+     tanpa membuat ponsel penuh celah kosong. */
+  --section-y: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+  --section-gap: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+
+  /* ─── 4. BENTUK ────────────────────────────────────────────────────── */
+
+  /* Radius — makin besar elemennya, makin besar radiusnya.
+     Aturan sarang: radius luar = radius dalam + padding. */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
   --radius-md: 14px;
-  --radius-lg: 22px;
-  --shadow-1: 0 1px 2px oklch(22% 0.032 235 / 0.06), 0 2px 10px oklch(22% 0.032 235 / 0.05);
-  --shadow-2: 0 2px 6px oklch(22% 0.032 235 / 0.07), 0 14px 34px oklch(22% 0.032 235 / 0.1);
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-full: 999px;
 
-  /* — motion — */
+  /* Bayangan — ditint ke hue latar (biru), bukan hitam netral.
+     Tiga tingkat: menempel, mengambang, melayang. */
+  --shadow-1: 0 1px 2px oklch(22% 0.032 235 / 0.06),
+    0 2px 8px oklch(22% 0.032 235 / 0.05);
+  --shadow-2: 0 2px 4px oklch(22% 0.032 235 / 0.06),
+    0 8px 24px oklch(22% 0.032 235 / 0.09);
+  --shadow-3: 0 4px 8px oklch(22% 0.032 235 / 0.08),
+    0 18px 44px oklch(22% 0.032 235 / 0.14);
+
+  /* Cincin — dipakai untuk outline & border halus pada permukaan */
+  --ring-hairline: 1px solid oklch(22% 0.032 235 / 0.08);
+  --ring-accent: 1px solid color-mix(in oklab, var(--accent) 40%, transparent);
+
+  /* — "Kertas tipis" di area teks bergambar —
+   *
+   * Setiap blok bergambar (hero, header halaman, banner) menaruh teksnya di
+   * atas foto. Keterbacaan TIDAK boleh bergantung pada veil yang pekat —
+   * kalau begitu foto jadi tak terlihat dan halamannya terasa belum selesai.
+   *
+   * Solusinya: lapisan radial yang hanya menutupi AREA TEKS. Veil boleh
+   * tipis (foto terlihat), kontras teks tetap terjaga (kertas menopangnya).
+   * Tiga penempatan: pusat (header), bawah (banner), kiri (banner kiri).
+   *
+   * Disimpan sebagai token supaya ketiganya TIDAK ditulis ulang di tiap
+   * komponen dengan angka yang sedikit berbeda — itu yang dulu terjadi,
+   * dan hasilnya tiap blok terasa seperti keputusan terpisah. */
+  --paper-veil-center: radial-gradient(
+    ellipse 64% 74% at 50% 50%,
+    color-mix(in oklab, var(--paper) 82%, transparent) 0%,
+    color-mix(in oklab, var(--paper) 56%, transparent) 53%,
+    transparent 100%
+  );
+  --paper-veil-bottom: linear-gradient(
+    to top,
+    color-mix(in oklab, var(--paper) 76%, transparent) 0%,
+    color-mix(in oklab, var(--paper) 52%, transparent) 56%,
+    transparent 100%
+  );
+  --paper-veil-left: radial-gradient(
+    ellipse 70% 70% at 40% 50%,
+    color-mix(in oklab, var(--paper) 78%, transparent) 0%,
+    color-mix(in oklab, var(--paper) 50%, transparent) 58%,
+    transparent 100%
+  );
+
+  /* ─── 5. GERAK ─────────────────────────────────────────────────────── */
+
+  /* Durasi: 120ms untuk umpan balik langsung (hover/tap),
+     200ms untuk transisi state, 320ms untuk masuk/keluar elemen. */
+  --dur-instant: 120ms;
+  --dur-fast: 160ms;
+  --dur-base: 220ms;
+  --dur-slow: 320ms;
+
+  /* Easing: keluar cepat lalu mengendap (ease-out) untuk hampir semua hal;
+     ease-in-out hanya untuk gerakan bolak-balik. */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --dur-fast: 140ms;
-  --dur-base: 220ms;
-  --dur-slow: 380ms;
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  /* — layout — */
+  /* ─── 6. TATA LETAK ────────────────────────────────────────────────── */
+
+  /* Lebar ukur teks — batas agar baris tidak terlalu panjang dibaca */
   --measure: 68ch;
+  --measure-narrow: 56ch;
   --measure-arabic: 42ch;
+
+  /* Lebar wadah halaman */
+  --container: 72rem;
+  --container-narrow: 56rem;
+
+  /* Tinggi chrome — dipakai untuk scroll-padding & ruang bawah konten */
   --nav-h: 60px;
   --player-h: 76px;
+  --toolbar-h: 56px;
+
+  /* Z-index — skala bernama, tidak ada 9999 */
+  --z-base: 1;
+  --z-raised: 10;
+  --z-sticky: 40;
+  --z-nav: 50;
+  --z-dock: 60;
+  --z-overlay: 70;
+  --z-modal: 80;
+  --z-toast: 90;
+
+  /* ─── BREAKPOINT — SATU SUMBER KEBENARAN ──────────────────────────
+   *
+   * Media query CSS tidak bisa membaca custom property, jadi nilainya
+   * ditulis manual di @media. Yang penting: hanya lima ini. Setiap nilai
+   * lain adalah penyimpangan yang harus dijustifikasi atau dihapus.
+   *
+   *   400px   ponsel sangat sempit (≤ iPhone SE)
+   *   560px   ponsel — ambang utama untuk tata letak satu kolom
+   *   640px   ponsel besar → tablet kecil
+   *   900px   tablet — ambang untuk nav desktop & grid dua kolom
+   *   1200px  desktop lebar
+   *
+   * Pengecualian lain yang diizinkan: `(hover: none)` dan
+   * `(pointer: coarse)` untuk perangkat sentuh, karena keduanya bukan
+   * soal lebar layar melainkan soal cara input.
+   *
+   * Catatan riwayat: sebelum konsolidasi, 13 nilai berbeda dipakai
+   * (420/480/520/700/720/860/899/1100…). Tidak ada yang salah satu per
+   * satu — masalahnya adalah tidak ada dua yang sama, sehingga perilaku
+   * di lebar 700px berbeda tergantung komponen mana yang melihatnya. */
 }
 
-/* — mode gelap: biru malam, bukan hitam. Hue tetap, lightness turun. — */
+/* ─── MODE GELAP ───────────────────────────────────────────────────────
+   Biru malam, bukan hitam. Hue tetap, lightness turun.
+   Rasio: ink 15.1:1 · ink-2 12.4:1 · muted 9.0:1 di --paper. */
 [data-theme="dark"] {
-  --paper: oklch(17% 0.022 235);        /* #0A151D */
-  --paper-2: oklch(21% 0.026 233);      /* #0F1D27 */
-  --paper-3: oklch(24% 0.028 232);      /* #132430 */
+  --paper: oklch(17% 0.022 235);
+  --paper-2: oklch(21% 0.026 233);
+  --paper-3: oklch(24% 0.028 232);
 
-  --ink: oklch(94% 0.012 220);          /* #E8F1F6 — 15.1:1 */
-  --ink-2: oklch(86% 0.018 220);        /* 5.9:1 di paper-3 */
-  --muted: oklch(76% 0.022 220);        /* 5.1:1 di paper-3 */
+  --ink: oklch(94% 0.012 220);
+  --ink-2: oklch(86% 0.018 220);
+  --muted: oklch(76% 0.022 220);
 
   --rule: oklch(32% 0.026 233);
   --rule-2: oklch(27% 0.024 234);
 
-  --accent: oklch(72% 0.12 225);        /* #6FC8E8 — 8.2:1 di paper */
-  --accent-2: oklch(79% 0.11 218);
+  --accent: oklch(72% 0.12 225);
+  /* Di mode gelap arahnya terbalik: --accent-ink GELAP, jadi hover harus
+     lebih TERANG, bukan lebih gelap. */
+  --accent-2: oklch(82% 0.1 220);
   --accent-soft: oklch(28% 0.045 230);
-  /* accent-ink = teks di atas FILL accent yang terang → harus gelap */
+  /* accent-ink = teks di atas FILL accent terang → harus gelap */
   --accent-ink: oklch(20% 0.03 235);
 
   --gold: oklch(80% 0.105 85);
@@ -123,6 +279,13 @@
 
   --focus: oklch(80% 0.13 220);
 
+  --danger: oklch(68% 0.15 25);
+  --danger-soft: oklch(30% 0.06 25);
+  --success: oklch(72% 0.1 155);
+
   --shadow-1: 0 1px 2px oklch(0% 0 0 / 0.3), 0 2px 8px oklch(0% 0 0 / 0.25);
-  --shadow-2: 0 2px 6px oklch(0% 0 0 / 0.35), 0 10px 28px oklch(0% 0 0 / 0.4);
+  --shadow-2: 0 2px 4px oklch(0% 0 0 / 0.32), 0 8px 24px oklch(0% 0 0 / 0.34);
+  --shadow-3: 0 4px 8px oklch(0% 0 0 / 0.36), 0 18px 44px oklch(0% 0 0 / 0.42);
+
+  --ring-hairline: 1px solid oklch(100% 0 0 / 0.09);
 }
