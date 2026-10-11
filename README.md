@@ -103,18 +103,19 @@ app/
 ├─ juz/                     30 halaman juz  (SSG + ISR 24 jam)
 ├─ ibadah/                  asmaul husna · doa · jadwal sholat
 ├─ cari/  bookmark/  kredit/
-└─ api/                     5 route handler sebagai proxy ber-cache
+├─ api/                     5 route handler sebagai proxy ber-cache
+└─ styles/                  modul CSS per domain (lihat bagian Gaya)
 
 components/
-├─ quran/                   reader surat & juz, kartu ayat, indeks folder juz
+├─ quran/                   reader surat & juz + komponen bersama
 ├─ player/                  pemutar global, pemilih qari, waveform per ayat
-├─ ui/                      komponen rare-ui (Folder, VoiceNote, Fluid Orb)
-└─ orb.tsx  ambient-image.tsx  ornaments.tsx
+└─ orb.tsx  ambient-image.tsx  ornaments.tsx  parallax.tsx
 
 lib/
 ├─ api/                     klien equran.id, juz, asmaul husna, doa, sholat, pencarian
 ├─ store/                   preferensi, bookmark, progres juz (localStorage)
 ├─ data/credits.ts          atribusi gambar (di-import sebagai modul)
+├─ waktu-sholat.ts          konstanta waktu sholat (dipakai server & klien)
 ├─ juz-batas.ts             tabel 30 juz Mushaf Standar Indonesia
 └─ types.ts
 ```
@@ -130,6 +131,66 @@ lib/
   dan kehilangan SSG. Ini yang menjaga 114 halaman tetap ter-prerender.
 - **Gambar pakai `<picture>` + srcSet manual**, bukan `next/image` — karena dipakai sebagai
   latar bertekstur, bukan elemen tajam. `sizes` diatur agar ponsel mengambil varian kecil.
+- **Tanpa dependensi UI pihak ketiga.** Aplikasi ini adalah aplikasi *baca*: setiap byte dan
+  setiap frame yang dipakai animasi adalah yang tidak dipakai untuk menggulir teks. Karena
+  itu seluruh komponen ditulis sendiri dengan CSS murni. Lihat bagian Gaya di bawah.
+
+## Gaya
+
+Seluruh tampilan ditulis dengan **CSS biasa + token**, bukan utility framework dan bukan
+pustaka komponen. Tailwind hanya dipakai untuk `@theme` (menjembatankan token ke utility)
+dan preflight-nya.
+
+```
+tokens.css                  SATU sumber kebenaran untuk semua nilai
+app/globals.css             reset, tipografi, utilitas tata letak, @theme
+app/styles/
+├─ primitives.css           tombol, kartu, chip, modal, tab, tabel, state
+├─ chrome.css               nav, footer, latar watercolor, ornamen, orb, foto
+├─ home.css                 hero, seksi, galeri, banner, header halaman
+├─ quran.css                header baca, toolbar, ayat, katalog, juz
+├─ player.css               dock, pemilih qari, waveform
+└─ ibadah.css               asmaul husna, doa, sholat, kredit, lightbox
+```
+
+**Aturannya:** setiap nilai warna, ukuran, jarak, radius, bayangan, dan durasi harus berasal
+dari `tokens.css`. Tidak ada magic number di file komponen. Kalau sebuah nilai dipakai lebih
+dari sekali, ia layak jadi token. Definisi baru masuk ke modul paling spesifik; kalau dipakai
+lebih dari satu domain, ia naik ke `primitives.css`.
+
+**Breakpoint:** hanya lima — `400px` (ponsel sangat sempit), `560px` (ponsel), `640px`,
+`900px` (tablet), `1200px` (desktop) — plus `(hover: none)` / `(pointer: coarse)` untuk
+perangkat sentuh, yang bukan soal lebar layar melainkan cara input.
+
+### Aksesibilitas
+
+- **Kontras terukur:** mode terang 5.6–6.6:1, mode gelap 6.8–9.0:1 — semua lolos WCAG AA.
+  Batas grafis (medali ayat, penanda mushaf, tepi field) ≥ 3:1 sesuai WCAG 1.4.11.
+- **Target sentuh** minimal 40px untuk kontrol, 44px untuk tombol utama. Slider di dock
+  pemutar punya area sentuh 28px walau track-nya hanya 4px (`background-clip: content-box`).
+- **`prefers-reduced-motion`** dihormati di CSS *dan* JS — opsi `behavior` pada
+  `scrollIntoView` menang atas CSS, jadi pemeriksaannya harus eksplisit.
+- **`prefers-contrast: more`** menaikkan tinta sekunder ke tinta utama (meta 5.6:1 → 15.6:1).
+- **Label yang disembunyikan visual** memakai pola `sr-only`, bukan `display: none` —
+  kalau tidak, tautan navigasi terbaca sebagai "←" tanpa tujuan.
+- **Combobox** (pemilih kota) bisa dipakai keyboard: panah untuk menyorot, Enter memilih,
+  Escape menutup, dengan `aria-activedescendant` yang mengikuti.
+- **Modal** mengembalikan fokus ke pemicunya saat ditutup.
+
+### Kenapa tanpa pustaka UI
+
+Versi awal proyek ini memakai tiga komponen pihak ketiga. Ketiganya diganti, dan alasannya
+konsisten: **beban yang dibayar tidak sebanding dengan yang didapat.**
+
+| Dulu | Sekarang | Alasan |
+|---|---|---|
+| Fluid Orb (shader WebGL, ~400 baris + pengaman perangkat) | Gradien CSS + animasi compositor (~60 baris) | Hasil visualnya nyaris sama (gumpalan cahaya), tapi yang lama memakai main thread saat menggulir |
+| Folder 3D (593 baris + `motion`) | Angka rentang + label (~40 baris) | Yang dicari pengunjung adalah "juz berapa", bukan bentuk foldernya |
+| VoiceNote (800 baris, ~80 node/ayat) | SVG 2 path per ayat (~200 baris) | Terukur: 4.648 node → 166 node untuk Yasin 83 ayat (−96%) |
+
+Efek sampingnya: `motion`, `@base-ui/react`, `class-variance-authority`, `lucide-react`,
+`shadcn`, dan `tw-animate-css` semuanya bisa dilepas. Yang tersisa hanya `next`, `react`,
+`clsx`, dan `tailwind-merge`.
 
 ## Kontribusi
 

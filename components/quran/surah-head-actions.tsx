@@ -14,22 +14,7 @@ import { usePrefs } from "@/lib/store/prefs";
 import { usePlayer, buildFullTrack } from "@/components/player/player-provider";
 import { ReciterPicker } from "@/components/player/reciter-picker";
 import { QARI } from "@/lib/types";
-
-function IconPlay({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden="true">
-      <path d="M8 5.14v13.72a1 1 0 0 0 1.54.84l10.29-6.86a1 1 0 0 0 0-1.68L9.54 4.3A1 1 0 0 0 8 5.14Z" />
-    </svg>
-  );
-}
-function IconPause({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden="true">
-      <rect x="6" y="4" width="4.5" height="16" rx="1.2" />
-      <rect x="13.5" y="4" width="4.5" height="16" rx="1.2" />
-    </svg>
-  );
-}
+import { IconPlay, IconPause } from "@/components/icons";
 
 export function SurahHeadActions({ surah }: { surah: SurahDetail }) {
   const [prefs] = usePrefs();
@@ -63,7 +48,7 @@ export function SurahHeadActions({ surah }: { surah: SurahDetail }) {
   const qariName = QARI.find((q) => q.id === prefs.reciter)?.singkat ?? "qari terpilih";
 
   return (
-    <div className="surah-head__actions">
+    <div className="reader-head__actions">
       {/* pilih qari SEBELUM memutar */}
       <ReciterPicker variant="panel" />
 

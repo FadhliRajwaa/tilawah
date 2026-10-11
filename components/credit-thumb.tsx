@@ -9,6 +9,7 @@
 
 import { useLightbox } from "./image-lightbox";
 import type { CreditEntry } from "@/lib/data/credits";
+import { IconZoom } from "./icons";
 
 export function CreditThumb({ credit }: { credit: CreditEntry }) {
   const { buka } = useLightbox();
@@ -41,10 +42,7 @@ export function CreditThumb({ credit }: { credit: CreditEntry }) {
         className="credit-card__thumb"
       />
       <span className="credit-card__zoom" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">
-          <circle cx="11" cy="11" r="7" />
-          <path d="M20 20l-3.5-3.5M11 8v6M8 11h6" />
-        </svg>
+        <IconZoom />
       </span>
     </button>
   );

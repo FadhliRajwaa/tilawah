@@ -1,18 +1,25 @@
 "use client";
 
-/* — Panel pencarian terjemahan (alquran.cloud), dengan paginasi + sorotan kata. — */
+/* — Panel pencarian terjemahan (alquran.cloud), dengan paginasi + sorotan kata.
+ *
+ * Catatan: gayanya dulu banyak ditulis inline. Sekarang memakai kelas dari
+ * design system (`.searchbox`, `.result-item`, `.empty`, `.pager`), sehingga
+ * konsisten dengan kotak cari lain di situs dan ikut tema otomatis.
+ */
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { SearchMatch } from "@/lib/types";
 
 const SARAN = ["sabar", "syukur", "yatim", "ilmu", "orang tua", "taubat"];
+const LIMIT = 20;
 
 interface ApiResult {
   total: number;
   matches: SearchMatch[];
 }
 
+/** Sorot kemunculan pertama kata kunci di dalam teks hasil. */
 function highlight(text: string, term: string) {
   if (!term) return text;
   const idx = text.toLowerCase().indexOf(term.toLowerCase());
@@ -35,35 +42,33 @@ export function SearchPanel() {
   const [err, setErr] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  const LIMIT = 20;
+  const run = useCallback((term: string, pageIdx: number) => {
+    if (!term.trim()) return;
+    /* Batalkan permintaan sebelumnya — tanpa ini, hasil pencarian lama bisa
+       tiba SETELAH yang baru dan menimpanya. */
+    abortRef.current?.abort();
+    const ac = new AbortController();
+    abortRef.current = ac;
 
-  const run = useCallback(
-    (term: string, pageIdx: number) => {
-      if (!term.trim()) return;
-      abortRef.current?.abort();
-      const ac = new AbortController();
-      abortRef.current = ac;
-      setLoading(true);
-      setErr(null);
-      fetch(`/api/search?q=${encodeURIComponent(term)}&offset=${pageIdx * LIMIT}&limit=${LIMIT}`, {
-        signal: ac.signal,
+    setLoading(true);
+    setErr(null);
+    fetch(`/api/search?q=${encodeURIComponent(term)}&offset=${pageIdx * LIMIT}&limit=${LIMIT}`, {
+      signal: ac.signal,
+    })
+      .then((r) => {
+        if (!r.ok) throw new Error(String(r.status));
+        return r.json();
       })
-        .then((r) => {
-          if (!r.ok) throw new Error(String(r.status));
-          return r.json();
-        })
-        .then((d: ApiResult) => {
-          setData(d);
-          setLoading(false);
-        })
-        .catch((e: unknown) => {
-          if (e instanceof DOMException && e.name === "AbortError") return;
-          setErr("Pencarian gagal. Periksa koneksi lalu coba lagi.");
-          setLoading(false);
-        });
-    },
-    [LIMIT],
-  );
+      .then((d: ApiResult) => {
+        setData(d);
+        setLoading(false);
+      })
+      .catch((e: unknown) => {
+        if (e instanceof DOMException && e.name === "AbortError") return;
+        setErr("Pencarian gagal. Periksa koneksi lalu coba lagi.");
+        setLoading(false);
+      });
+  }, []);
 
   useEffect(() => {
     if (committed) run(committed, page);
@@ -73,6 +78,8 @@ export function SearchPanel() {
   const submit = (term: string) => {
     setPage(0);
     setCommitted(term);
+    /* Kalau kata kuncinya sama persis, state tidak berubah sehingga efek di
+       atas tidak terpicu — jalankan manual. */
     if (term === committed) run(term, 0);
   };
 
@@ -87,6 +94,7 @@ export function SearchPanel() {
           e.preventDefault();
           submit(q);
         }}
+        role="search"
       >
         <input
           type="search"
@@ -95,7 +103,6 @@ export function SearchPanel() {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           aria-label="Kata kunci pencarian"
-          autoFocus
         />
         <button type="submit" className="btn btn--primary" disabled={!q.trim()}>
           Cari
@@ -103,7 +110,13 @@ export function SearchPanel() {
       </form>
 
       {!committed && (
-        <div className="chip-row" style={{ justifyContent: "center", marginTop: "var(--space-4)" }}>
+        <div
+          className="chip-row"
+          style={{ justifyContent: "center", marginTop: "var(--space-4)" }}
+        >
+          <span className="t-xs t-muted" style={{ alignSelf: "center" }}>
+            Coba:
+          </span>
           {SARAN.map((s) => (
             <button
               key={s}
@@ -166,16 +179,7 @@ export function SearchPanel() {
                 ))}
 
                 {totalPages > 1 && (
-                  <nav
-                    aria-label="Navigasi halaman hasil"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "var(--space-3)",
-                      marginTop: "var(--space-5)",
-                    }}
-                  >
+                  <nav className="pager" aria-label="Navigasi halaman hasil">
                     <button
                       type="button"
                       className="btn btn--outline"
@@ -184,7 +188,7 @@ export function SearchPanel() {
                     >
                       ← Sebelumnya
                     </button>
-                    <span className="t-sm t-muted">
+                    <span className="t-sm t-muted t-num">
                       {page + 1} / {totalPages}
                     </span>
                     <button

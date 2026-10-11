@@ -53,13 +53,41 @@ export function MihrabFrame({ className }: { className?: string }) {
   );
 }
 
-/** Medali nomor ayat (gold, dekoratif) — bentuk bintang 8 khas mushaf. */
+/** Medali nomor ayat (emas, dekoratif) — bentuk bintang 8 khas mushaf.
+ *
+ *  ⚠️ Kelas `ayah-medal` duduk di WRAPPER, bukan di `<svg>`.
+ *
+ *  Sebelumnya kelasnya ada di `<svg>` sementara CSS-nya menulis
+ *  `.ayah-medal svg { position: absolute; inset: 0 }` untuk memusatkan
+ *  gambarnya di dalam medali. Selector itu tidak pernah cocok — `.ayah-medal`
+ *  ADALAH svg-nya, jadi tidak ada svg di dalamnya. Akibatnya angka nomor
+ *  mengalir di samping medali, bukan di tengahnya.
+ *
+ *  Sekarang strukturnya eksplisit: wrapper membawa ukuran, svg mengisi
+ *  wrapper, angka diposisikan absolut di tengah. */
 export function AyahMedal({ nomor, className }: { nomor: number; className?: string }) {
   return (
-    <span className={className} aria-label={`Ayat ${nomor}`}>
-      <svg viewBox="0 0 44 44" className="ayah-medal" aria-hidden="true">
-        <rect x="7" y="7" width="30" height="30" transform="rotate(45 22 22)" className="ayah-medal__outer" />
-        <rect x="11.5" y="11.5" width="21" height="21" transform="rotate(45 22 22)" className="ayah-medal__inner" />
+    <span
+      className={className ? `ayah-medal ${className}` : "ayah-medal"}
+      aria-label={`Ayat ${nomor}`}
+    >
+      <svg viewBox="0 0 44 44" className="ayah-medal__svg" aria-hidden="true">
+        <rect
+          x="7"
+          y="7"
+          width="30"
+          height="30"
+          transform="rotate(45 22 22)"
+          className="ayah-medal__outer"
+        />
+        <rect
+          x="11.5"
+          y="11.5"
+          width="21"
+          height="21"
+          transform="rotate(45 22 22)"
+          className="ayah-medal__inner"
+        />
       </svg>
       <span className="ayah-medal__num">{nomor}</span>
     </span>

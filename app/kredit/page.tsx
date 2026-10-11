@@ -10,21 +10,55 @@ export const metadata: Metadata = {
     "Sumber data, gambar, dan lisensi yang digunakan di Tilawah — termasuk atribusi gambar berlisensi Creative Commons dan domain publik.",
 };
 
+/** Sumber data, dipisah dari markup supaya menambah satu cukup satu baris. */
+const SUMBER: { judul: string; ket: string; href?: string; label?: string }[] = [
+  {
+    judul: "Teks Al-Qur'an, terjemahan & tafsir",
+    ket: "Kementerian Agama RI",
+    href: "https://equran.id",
+    label: "equran.id",
+  },
+  { judul: "Audio murottal 6 qari", ket: "CDN equran.id" },
+  {
+    judul: "Asmaul Husna & doa harian",
+    ket: "Islamic API",
+    href: "https://islamic-api-zhirrr.vercel.app",
+    label: "islamic-api-zhirrr",
+  },
+  {
+    judul: "Jadwal sholat 518 kota",
+    ket: "myquran.com",
+    href: "https://api.myquran.com",
+    label: "myquran.com",
+  },
+  {
+    judul: "Pencarian terjemahan",
+    ket: "alquran.cloud",
+    href: "https://alquran.cloud",
+    label: "alquran.cloud",
+  },
+  {
+    judul: "Font mushaf LPMQ Isep Misbah",
+    ket: "Lajnah Pentashihan Mushaf Al-Qur'an, Kemenag RI",
+  },
+  { judul: "Font Latin", ket: "Fraunces (SIL OFL) · Switzer (Fontshare)" },
+];
+
 export default function KreditPage() {
   const credits = CREDITS;
 
   return (
-    <div className="container-page" style={{ paddingBlock: "var(--space-8)", maxWidth: "62rem" }}>
-      <header style={{ textAlign: "center", marginBottom: "var(--space-7)" }}>
-        <p className="surah-head__eyebrow">Transparansi</p>
-        <h1 className="section__title" style={{ fontSize: "var(--text-3xl)", marginTop: "var(--space-3)" }}>
-          Kredit &amp; Lisensi
-        </h1>
-        <p className="section__sub" style={{ maxInlineSize: "56ch", marginInline: "auto" }}>
+    <div className="container-narrow" style={{ paddingBlock: "var(--space-6) var(--space-8)" }}>
+      {/* Kepala halaman tanpa foto — bentuknya mengikuti .page-head supaya
+          tipografi dan ritmenya konsisten dengan halaman lain. */}
+      <header className="page-intro">
+        <p className="t-eyebrow">Transparansi</p>
+        <h1 className="page-intro__title">Kredit &amp; Lisensi</h1>
+        <p className="page-intro__desc">
           Tilawah berdiri di atas karya orang lain. Berikut sumber data dan gambar
           yang dipakai — lengkap dengan lisensinya.
         </p>
-        <div style={{ marginTop: "var(--space-5)" }}>
+        <div className="page-intro__ornament">
           <OrnamentDivider className="ornament-divider" />
         </div>
       </header>
@@ -35,52 +69,29 @@ export default function KreditPage() {
           Sumber data
         </h2>
         <ul className="credit-list">
-          <li>
-            <strong>Teks Al-Qur&rsquo;an, terjemahan &amp; tafsir</strong> — Kementerian
-            Agama RI, diakses melalui{" "}
-            <a href="https://equran.id" target="_blank" rel="noopener noreferrer">
-              equran.id
-            </a>
-            .
-          </li>
-          <li>
-            <strong>Audio murottal 6 qari</strong> — CDN equran.id.
-          </li>
-          <li>
-            <strong>Asmaul Husna &amp; doa harian</strong> —{" "}
-            <a href="https://islamic-api-zhirrr.vercel.app" target="_blank" rel="noopener noreferrer">
-              Islamic API
-            </a>
-            .
-          </li>
-          <li>
-            <strong>Jadwal sholat 518 kota</strong> —{" "}
-            <a href="https://api.myquran.com" target="_blank" rel="noopener noreferrer">
-              myquran.com
-            </a>
-            .
-          </li>
-          <li>
-            <strong>Pencarian terjemahan</strong> —{" "}
-            <a href="https://alquran.cloud" target="_blank" rel="noopener noreferrer">
-              alquran.cloud
-            </a>
-            .
-          </li>
-          <li>
-            <strong>Font mushaf LPMQ Isep Misbah</strong> — Lajnah Pentashihan Mushaf
-            Al-Qur&rsquo;an, Kemenag RI.
-          </li>
-          <li>
-            <strong>Font Latin</strong> — Fraunces (SIL Open Font License) · Switzer
-            (Fontshare, gratis untuk penggunaan komersial).
-          </li>
+          {SUMBER.map((s) => (
+            <li key={s.judul}>
+              <strong>{s.judul}</strong>
+              {" — "}
+              {s.href && s.label ? (
+                <a href={s.href} target="_blank" rel="noopener noreferrer" className="link">
+                  {s.ket}
+                </a>
+              ) : (
+                s.ket
+              )}
+            </li>
+          ))}
         </ul>
       </section>
 
       {/* — gambar — */}
       <section aria-labelledby="kredit-gambar">
-        <h2 id="kredit-gambar" className="section__title" style={{ fontSize: "var(--text-xl)", marginBottom: "var(--space-2)" }}>
+        <h2
+          id="kredit-gambar"
+          className="section__title"
+          style={{ fontSize: "var(--text-xl)", marginBottom: "var(--space-2)" }}
+        >
           Gambar
         </h2>
         <p className="section__sub" style={{ marginBottom: "var(--space-5)" }}>
@@ -92,7 +103,7 @@ export default function KreditPage() {
           <div className="empty">
             <p className="empty__title">Data kredit tidak ditemukan</p>
             <p className="empty__desc">
-              Berkas <code>public/images/credits.json</code> belum tersedia.
+              Modul <code>lib/data/credits.ts</code> belum berisi entri.
             </p>
           </div>
         ) : (

@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getSurah, getSurahList, getTafsir } from "@/lib/api/equran";
 import { SurahReader } from "@/components/quran/surah-reader";
+import { ReaderSkeleton } from "@/components/quran/reader-skeleton";
 import { SurahHeadActions } from "@/components/quran/surah-head-actions";
 import { ReaderHead } from "@/components/reader-head";
+import { PageNav } from "@/components/page-nav";
 import type { SurahDetail, TafsirItem } from "@/lib/types";
 
 export const revalidate = 86400;
@@ -98,12 +99,12 @@ export default async function SurahPage({ params }: Params) {
         position="center 42%"
         intensity={0.9}
       >
-        <p className="surah-head__eyebrow">Surah ke-{surah.nomor}</p>
-        <span className="surah-head__name-ar" lang="ar" dir="rtl">
+        <p className="reader-head__eyebrow">Surah ke-{surah.nomor}</p>
+        <span className="reader-head__name-ar" lang="ar" dir="rtl">
           {surah.nama}
         </span>
-        <h1 className="surah-head__name">{surah.namaLatin}</h1>
-        <div className="surah-head__meta">
+        <h1 className="reader-head__name">{surah.namaLatin}</h1>
+        <div className="reader-head__meta">
           <span>
             Arti: <b>{surah.arti}</b>
           </span>
@@ -119,40 +120,28 @@ export default async function SurahPage({ params }: Params) {
         <SurahHeadActions surah={surah} />
 
         {surah.deskripsi && (
-          <p
-            className="t-sm t-muted"
-            style={{ maxWidth: "62ch", marginInline: "auto", marginTop: "var(--space-5)", lineHeight: 1.75 }}
-          >
-            {cleanDeskripsi(surah.deskripsi)}
-          </p>
+          <p className="reader-head__desc">{cleanDeskripsi(surah.deskripsi)}</p>
         )}
       </ReaderHead>
 
       {/* — navigasi surat — */}
-      <nav className="surah-nav container-page" aria-label="Navigasi antar surah">
-        {surah.suratSebelumnya ? (
-          <Link href={`/surat/${surah.suratSebelumnya.nomor}`} className="btn btn--outline surah-nav__btn">
-            <span aria-hidden="true">←</span>
-            <span className="surah-nav__label">{surah.suratSebelumnya.namaLatin}</span>
-          </Link>
-        ) : (
-          <span aria-hidden="true" />
-        )}
-        <Link href="/surat" className="section__link surah-nav__mid">
-          Semua surah
-        </Link>
-        {surah.suratSelanjutnya ? (
-          <Link href={`/surat/${surah.suratSelanjutnya.nomor}`} className="btn btn--outline surah-nav__btn">
-            <span className="surah-nav__label">{surah.suratSelanjutnya.namaLatin}</span>
-            <span aria-hidden="true">→</span>
-          </Link>
-        ) : (
-          <span aria-hidden="true" />
-        )}
-      </nav>
+      <PageNav
+        ariaLabel="Navigasi antar surah"
+        prev={
+          surah.suratSebelumnya
+            ? { href: `/surat/${surah.suratSebelumnya.nomor}`, label: surah.suratSebelumnya.namaLatin }
+            : null
+        }
+        next={
+          surah.suratSelanjutnya
+            ? { href: `/surat/${surah.suratSelanjutnya.nomor}`, label: surah.suratSelanjutnya.namaLatin }
+            : null
+        }
+        indeks={{ href: "/surat", label: "Semua surah" }}
+      />
 
       {/* — reader — */}
-      <Suspense fallback={<div className="container-page skeleton" style={{ height: 400, marginTop: 24 }} aria-hidden="true" />}>
+      <Suspense fallback={<ReaderSkeleton ayah={5} />}>
         <SurahReader surah={surah} tafsir={tafsir} />
       </Suspense>
     </>

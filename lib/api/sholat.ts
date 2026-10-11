@@ -66,24 +66,6 @@ export async function getJadwalBulanan(
   ).then((d) => d.jadwal);
 }
 
-/** Waktu sholat wajib saja (tanpa imsak/terbit/dhuha). */
-export const WAKTU_WAJIB = [
-  "subuh",
-  "dzuhur",
-  "ashar",
-  "maghrib",
-  "isya",
-] as const;
-
-export type WaktuWajib = (typeof WAKTU_WAJIB)[number];
-
-export const LABEL_WAKTU: Record<string, string> = {
-  imsak: "Imsak",
-  subuh: "Subuh",
-  terbit: "Terbit",
-  dhuha: "Dhuha",
-  dzuhur: "Dzuhur",
-  ashar: "Ashar",
-  maghrib: "Maghrib",
-  isya: "Isya",
-};
+/* Konstanta waktu tinggal di `lib/waktu-sholat.ts` — bukan di sini — supaya
+ * komponen KLIEN bisa mengimpornya tanpa ikut menarik `server-only`. */
+export { WAKTU_SEMUA, WAKTU_WAJIB, LABEL_WAKTU, type WaktuWajib } from "@/lib/waktu-sholat";

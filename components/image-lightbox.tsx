@@ -27,6 +27,7 @@ import {
   useState,
 } from "react";
 import type { CreditEntry } from "@/lib/data/credits";
+import { IconClose } from "./icons";
 
 export interface LightboxImage {
   /** nama aset tanpa akhiran varian, mis. "card-dome-mosaic" */
@@ -109,18 +110,7 @@ function LightboxDialog({
             onClick={onClose}
             aria-label="Tutup gambar"
           >
-            <svg
-              viewBox="0 0 24 24"
-              width="18"
-              height="18"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.9"
-              strokeLinecap="round"
-              aria-hidden="true"
-            >
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
+            <IconClose />
           </button>
 
           {/* panggung gelap: memberi bingkai pada foto bertepi terang */}

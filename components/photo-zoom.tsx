@@ -15,6 +15,7 @@
 import { CREDITS } from "@/lib/data/credits";
 import { useLightbox } from "./image-lightbox";
 import type { ArtVariant } from "./ambient-image";
+import { IconZoom } from "./icons";
 
 interface Props {
   variant: ArtVariant;
@@ -23,24 +24,6 @@ interface Props {
   className?: string;
   /** tampilkan hanya ikon (untuk strip pembatas yang tipis) */
   ringkas?: boolean;
-}
-
-function IconZoom() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width="16"
-      height="16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.9"
-      strokeLinecap="round"
-      aria-hidden="true"
-    >
-      <circle cx="11" cy="11" r="7" />
-      <path d="M20 20l-3.5-3.5M11 8v6M8 11h6" />
-    </svg>
-  );
 }
 
 export function PhotoZoom({

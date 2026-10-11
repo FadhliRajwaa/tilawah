@@ -1,111 +1,95 @@
 "use client";
 
-/* — bookmark ayat + riwayat baca terakhir (localStorage) — */
+/* — Bookmark ayat + riwayat baca terakhir (localStorage).
+ *
+ * Primitif baca/tulis/sinkronisasi tinggal di `./use-local` — dipakai juga
+ * oleh progres juz dan preferensi. Sebelumnya pola yang sama ditulis ulang
+ * empat kali, dan tidak semuanya menangani event `storage` lintas tab.
+ */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import type { Bookmark, LastRead } from "@/lib/types";
+import { readJSON, writeJSON, useLocal, MARKS_CHANGED } from "./use-local";
 
 const KEY_BM = "tilawah:bookmarks";
 const KEY_LR = "tilawah:lastread";
-const EVT = "tilawah:marks-changed";
 
-function readArray<T>(key: string): T[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T[]) : [];
-  } catch {
-    return [];
-  }
+/** Saring data rusak: entri tanpa nomor/ayat yang valid dibuang, bukan
+ *  membuat seluruh daftar gagal render. */
+function parseBookmarks(raw: unknown): Bookmark[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter(
+      (b): b is Bookmark =>
+        !!b &&
+        typeof b === "object" &&
+        typeof (b as Bookmark).nomor === "number" &&
+        typeof (b as Bookmark).ayat === "number",
+    )
+    .sort((a, b) => (b.ts ?? 0) - (a.ts ?? 0));
 }
 
-function writeArray<T>(key: string, value: T[]): void {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    /* abaikan */
-  }
-  window.dispatchEvent(new CustomEvent(EVT));
+function parseLastRead(raw: unknown): LastRead | null {
+  if (!raw || typeof raw !== "object") return null;
+  const lr = raw as LastRead;
+  return typeof lr.nomor === "number" && typeof lr.ayat === "number" ? lr : null;
 }
 
-/* — bookmark — */
+/* ─── Bookmark ─── */
 
 export function getBookmarks(): Bookmark[] {
-  return readArray<Bookmark>(KEY_BM).sort((a, b) => b.ts - a.ts);
+  return parseBookmarks(readJSON<unknown>(KEY_BM, null));
 }
 
 export function isBookmarked(nomor: number, ayat: number): boolean {
-  return readArray<Bookmark>(KEY_BM).some((b) => b.nomor === nomor && b.ayat === ayat);
+  return getBookmarks().some((b) => b.nomor === nomor && b.ayat === ayat);
 }
 
+/** Tandai/batalkan satu ayat; mengembalikan keadaan barunya. */
 export function toggleBookmark(item: Omit<Bookmark, "ts">): boolean {
-  const list = readArray<Bookmark>(KEY_BM);
+  const list = getBookmarks();
   const idx = list.findIndex((b) => b.nomor === item.nomor && b.ayat === item.ayat);
+
   if (idx >= 0) {
     list.splice(idx, 1);
-    writeArray(KEY_BM, list);
+    writeJSON(KEY_BM, list);
     return false;
   }
+
   list.unshift({ ...item, ts: Date.now() });
-  writeArray(KEY_BM, list);
+  writeJSON(KEY_BM, list);
   return true;
 }
 
 export function removeBookmark(nomor: number, ayat: number): void {
-  writeArray(
+  writeJSON(
     KEY_BM,
-    readArray<Bookmark>(KEY_BM).filter((b) => !(b.nomor === nomor && b.ayat === ayat)),
+    getBookmarks().filter((b) => !(b.nomor === nomor && b.ayat === ayat)),
   );
 }
 
+/** Hook: daftar bookmark, ikut ter-update lintas komponen & tab. */
 export function useBookmarks(): Bookmark[] {
-  const [list, setList] = useState<Bookmark[]>([]);
-  useEffect(() => {
-    setList(getBookmarks());
-    const onChange = () => setList(getBookmarks());
-    window.addEventListener(EVT, onChange);
-    window.addEventListener("storage", onChange);
-    return () => {
-      window.removeEventListener(EVT, onChange);
-      window.removeEventListener("storage", onChange);
-    };
-  }, []);
-  return list;
+  return useLocal<Bookmark[]>(KEY_BM, parseBookmarks, []);
 }
 
-/* — riwayat baca — */
+/* ─── Riwayat baca ─── */
 
 export function getLastRead(): LastRead | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem(KEY_LR);
-    return raw ? (JSON.parse(raw) as LastRead) : null;
-  } catch {
-    return null;
-  }
+  return parseLastRead(readJSON<unknown>(KEY_LR, null));
 }
 
 export function setLastRead(item: Omit<LastRead, "ts">): void {
-  try {
-    localStorage.setItem(KEY_LR, JSON.stringify({ ...item, ts: Date.now() }));
-  } catch {
-    /* abaikan */
-  }
-  window.dispatchEvent(new CustomEvent(EVT));
+  writeJSON(KEY_LR, { ...item, ts: Date.now() });
 }
 
+/** Hook: riwayat baca terakhir + setter.
+ *
+ *  Setter ditulis dengan `writeJSON` langsung (bukan lewat `useLocalWriter`)
+ *  karena bentuk datanya objek tunggal, bukan array — dan karena pemanggil
+ *  hanya perlu menulis, tidak perlu membaca kembali. */
 export function useLastRead(): [LastRead | null, (i: Omit<LastRead, "ts">) => void] {
-  const [lr, setLr] = useState<LastRead | null>(null);
-  useEffect(() => {
-    setLr(getLastRead());
-    const onChange = () => setLr(getLastRead());
-    window.addEventListener(EVT, onChange);
-    window.addEventListener("storage", onChange);
-    return () => {
-      window.removeEventListener(EVT, onChange);
-      window.removeEventListener("storage", onChange);
-    };
-  }, []);
+  const lr = useLocal<LastRead | null>(KEY_LR, parseLastRead, null, MARKS_CHANGED);
   const save = useCallback((i: Omit<LastRead, "ts">) => setLastRead(i), []);
   return [lr, save];
 }

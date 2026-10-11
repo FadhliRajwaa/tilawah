@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getJuzAyah, getJuzInfo } from "@/lib/api/juz";
 import { JuzReader } from "@/components/quran/juz-reader";
+import { ReaderSkeleton } from "@/components/quran/reader-skeleton";
 import { ReaderHead } from "@/components/reader-head";
+import { PageNav } from "@/components/page-nav";
 import { toArabicNumber } from "@/lib/utils";
 
 export const revalidate = 86400;
@@ -67,12 +68,12 @@ export default async function JuzDetailPage({ params }: Params) {
         position="center 40%"
         intensity={0.9}
       >
-        <p className="surah-head__eyebrow">Pembagian mushaf</p>
-        <span className="surah-head__name-ar" lang="ar" dir="rtl" aria-hidden="true">
+        <p className="reader-head__eyebrow">Pembagian mushaf</p>
+        <span className="reader-head__name-ar" lang="ar" dir="rtl" aria-hidden="true">
           {toArabicNumber(n)}
         </span>
-        <h1 className="surah-head__name">Juz {n}</h1>
-        <div className="surah-head__meta">
+        <h1 className="reader-head__name">Juz {n}</h1>
+        <div className="reader-head__meta">
           <span>
             <b>{info.jumlahAyat}</b> ayat
           </span>
@@ -84,37 +85,14 @@ export default async function JuzDetailPage({ params }: Params) {
       </ReaderHead>
 
       {/* — navigasi antar juz — */}
-      <nav className="surah-nav container-page" aria-label="Navigasi antar juz">
-        {n > 1 ? (
-          <Link href={`/juz/${n - 1}`} className="btn btn--outline surah-nav__btn">
-            <span aria-hidden="true">←</span>
-            <span className="surah-nav__label">Juz {n - 1}</span>
-          </Link>
-        ) : (
-          <span aria-hidden="true" />
-        )}
-        <Link href="/juz" className="section__link surah-nav__mid">
-          Semua juz
-        </Link>
-        {n < 30 ? (
-          <Link href={`/juz/${n + 1}`} className="btn btn--outline surah-nav__btn">
-            <span className="surah-nav__label">Juz {n + 1}</span>
-            <span aria-hidden="true">→</span>
-          </Link>
-        ) : (
-          <span aria-hidden="true" />
-        )}
-      </nav>
+      <PageNav
+        ariaLabel="Navigasi antar juz"
+        prev={n > 1 ? { href: `/juz/${n - 1}`, label: `Juz ${n - 1}` } : null}
+        next={n < 30 ? { href: `/juz/${n + 1}`, label: `Juz ${n + 1}` } : null}
+        indeks={{ href: "/juz", label: "Semua juz" }}
+      />
 
-      <Suspense
-        fallback={
-          <div
-            className="container-page skeleton"
-            style={{ height: 400, marginTop: 24 }}
-            aria-hidden="true"
-          />
-        }
-      >
+      <Suspense fallback={<ReaderSkeleton ayah={6} />}>
         <JuzReader juzNomor={n} ayat={ayat} />
       </Suspense>
     </>

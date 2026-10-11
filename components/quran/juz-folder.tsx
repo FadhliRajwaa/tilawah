@@ -1,22 +1,28 @@
 "use client";
 
-/* — Indeks juz berbentuk folder (rare-ui Folder).
+/* — Indeks juz: pemilih kelompok + daftar juz.
  *
- * Tiga folder mewakili tiga kelompok juz (1–10, 11–20, 21–30). Memilih salah
- * satu menampilkan kartu juz di dalam kelompok itu.
+ * ⚠️ Rombak dari komponen Folder 3D (593 baris + motion).
  *
- * Catatan pemakaian komponen Folder di sini:
- * - `interactive={false}` → folder jadi ikon dekoratif; klik diterima tombol
- *   pembungkusnya, bukan ditelan folder (perilaku aslinya membuka-tutup flap).
- * - `color="tilawah"` → palet krem + hijau + emas, bukan tema bawaan
- *   hitam/putih/biru.
- * - `size="sm"` + wadah bertinggi tetap → tiga tombol tetap sejajar walau
- *   animasi spring foldernya sedang berjalan.
+ * Alasan: folder yang membuka dengan kartu berhamburan itu menarik sekali
+ * dilihat, tapi ia menuntut tiga hal yang tidak cocok untuk halaman indeks:
+ *
+ *  1. Beban. Setiap folder merender puluhan node SVG + `mix-blend-mode` +
+ *     animasi spring. Tiga folder berdampingan = tiga beban itu sekaligus,
+ *     untuk sesuatu yang hanya perlu DIKLIK SEKALI.
+ *  2. Ruang. Folder butuh kotak setinggi 200px (150px di tablet, 96px di
+ *     ponsel) hanya untuk wadahnya — hampir seperempat layar ponsel habis
+ *     untuk tiga ikon.
+ *  3. Kejelasan. Yang dicari pengunjung adalah "juz berapa", bukan "bentuk
+ *     foldernya". Angka besar menjawab itu langsung; animasi tidak.
+ *
+ * Bentuk barunya: angka rentang sebagai jangkar visual (display, besar),
+ * label, dan hitungan selesai. Hierarki tetap ada — kelompok aktif ditandai
+ * warna aksen + latar, bukan oleh gerakan.
  */
 
 import { useState } from "react";
 import Link from "next/link";
-import { Folder } from "@/components/ui/folder";
 import type { JuzInfo } from "@/lib/api/juz";
 import { useJuzProgress } from "@/lib/store/juz-progress";
 import { cn, toArabicNumber } from "@/lib/utils";
@@ -42,8 +48,8 @@ export function JuzFolder({ list }: { list: JuzInfo[] }) {
 
   return (
     <div className="juz-folder">
-      {/* pemilih kelompok — tiap tombol berisi satu folder dekoratif */}
-      <div className="juz-folder__row">
+      {/* — pemilih kelompok — */}
+      <div className="juz-folder__row" role="group" aria-label="Pilih kelompok juz">
         {KELOMPOK.map((k, i) => {
           const selesai = list.filter(
             (j) => j.nomor >= k.dari && j.nomor <= k.sampai && done.has(j.nomor),
@@ -56,11 +62,10 @@ export function JuzFolder({ list }: { list: JuzInfo[] }) {
               onClick={() => setAktif(i)}
               aria-pressed={aktif === i}
             >
-              <span className="juz-folder__pick-folder" aria-hidden="true">
-                {/* Folder dibiarkan interaktif: hover menaikkan kartu, klik
-                 * membuka penuh. Klik juga tetap memilih kelompok karena
-                 * event-nya naik ke tombol pembungkus. */}
-                <Folder color="tilawah" size="sm" fit />
+              <span className="juz-folder__pick-num" aria-hidden="true">
+                {k.dari}
+                <span>–</span>
+                {k.sampai}
               </span>
               <span className="juz-folder__pick-label">{k.label}</span>
               <span className="juz-folder__pick-count">
@@ -71,7 +76,7 @@ export function JuzFolder({ list }: { list: JuzInfo[] }) {
         })}
       </div>
 
-      {/* daftar juz dalam kelompok terpilih */}
+      {/* — daftar juz dalam kelompok terpilih — */}
       <div className="juz-folder__grid">
         {isi.map((j) => (
           <Link

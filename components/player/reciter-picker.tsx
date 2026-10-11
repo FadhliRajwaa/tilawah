@@ -10,36 +10,7 @@ import { QARI } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { usePlayer } from "./player-provider";
 import { usePrefs } from "@/lib/store/prefs";
-
-function IconUser({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-}
-function IconCheck({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M20 6 9 17l-5-5" />
-    </svg>
-  );
-}
-function IconChevron({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="m6 9 6 6 6-6" />
-    </svg>
-  );
-}
-function IconSpinner({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
-      <path d="M12 3a9 9 0 1 0 9 9" />
-    </svg>
-  );
-}
+import { IconUser, IconCheck, IconChevron, IconSpinner } from "@/components/icons";
 
 /** Varian: "dock" (kompak, di player) · "panel" (lebar, sebelum memutar) */
 export function ReciterPicker({ variant = "dock" }: { variant?: "dock" | "panel" }) {

@@ -1,6 +1,6 @@
 "use client";
 
-/* — Daftar ayat tersimpan + riwayat baca terakhir. — */
+/* — Daftar ayat tersimpan + riwayat baca terakhir. */
 
 import Link from "next/link";
 import { useBookmarks, useLastRead, removeBookmark } from "@/lib/store/bookmark";
@@ -13,15 +13,15 @@ export function BookmarkList() {
   return (
     <>
       {lr && (
-        <div className="card" style={{ marginBottom: "var(--space-6)" }}>
-          <p className="t-xs t-muted" style={{ margin: 0, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-            Terakhir dibaca
-          </p>
-          <p style={{ margin: "var(--space-1) 0 var(--space-2)", fontWeight: 600 }}>
-            {lr.namaLatin} · Ayat {lr.ayat}
-          </p>
-          <Link href={`/surat/${lr.nomor}?ayat=${lr.ayat}`} className="section__link">
-            Lanjutkan membaca →
+        <div className="card resume" style={{ marginBottom: "var(--space-6)" }}>
+          <div>
+            <p className="resume__label">Terakhir dibaca</p>
+            <p className="resume__title">
+              {lr.namaLatin} · Ayat {lr.ayat}
+            </p>
+          </div>
+          <Link href={`/surat/${lr.nomor}?ayat=${lr.ayat}`} className="btn btn--outline">
+            Lanjutkan membaca
           </Link>
         </div>
       )}
@@ -33,7 +33,7 @@ export function BookmarkList() {
             Saat membaca, tekan tombol &ldquo;Tandai&rdquo; pada ayat untuk
             menyimpannya di sini. Tersimpan di perangkat Anda sendiri.
           </p>
-          <div style={{ marginTop: "var(--space-4)" }}>
+          <div className="empty__actions">
             <Link href="/surat/36" className="btn btn--primary">
               Mulai membaca Yasin
             </Link>
@@ -47,11 +47,7 @@ export function BookmarkList() {
           {list.map((b) => (
             <div key={`${b.nomor}-${b.ayat}`} className="bm-item">
               <div className="bm-item__body">
-                <Link
-                  href={`/surat/${b.nomor}?ayat=${b.ayat}`}
-                  className="bm-item__ref"
-                  style={{ textDecoration: "none" }}
-                >
+                <Link href={`/surat/${b.nomor}?ayat=${b.ayat}`} className="bm-item__ref">
                   QS. {b.namaLatin} : {b.ayat}
                 </Link>
                 <p className="bm-item__snippet">{b.snippet}</p>

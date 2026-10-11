@@ -8,53 +8,7 @@ import { ReciterPicker } from "./reciter-picker";
 import { QARI } from "@/lib/types";
 import { usePrefs } from "@/lib/store/prefs";
 import { cn, pad } from "@/lib/utils";
-
-function IconPlay({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="currentColor">
-      <path d="M8 5.14v13.72a1 1 0 0 0 1.54.84l10.29-6.86a1 1 0 0 0 0-1.68L9.54 4.3A1 1 0 0 0 8 5.14Z" />
-    </svg>
-  );
-}
-function IconPause({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="currentColor">
-      <rect x="6" y="4" width="4.5" height="16" rx="1.2" />
-      <rect x="13.5" y="4" width="4.5" height="16" rx="1.2" />
-    </svg>
-  );
-}
-function IconNext({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="currentColor">
-      <path d="M6 5.5v13a1 1 0 0 0 1.55.83L16 13.6V18a1 1 0 0 0 2 0V6a1 1 0 0 0-2 0v4.4L7.55 4.67A1 1 0 0 0 6 5.5Z" />
-    </svg>
-  );
-}
-function IconPrev({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="currentColor">
-      <path d="M18 5.5v13a1 1 0 0 1-1.55.83L8 13.6V18a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v4.4l8.45-5.73A1 1 0 0 1 18 5.5Z" />
-    </svg>
-  );
-}
-function IconRepeat({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m17 2 4 4-4 4" />
-      <path d="M3 11v-1a4 4 0 0 1 4-4h14" />
-      <path d="m7 22-4-4 4-4" />
-      <path d="M21 13v1a4 4 0 0 1-4 4H3" />
-    </svg>
-  );
-}
-function IconClose({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-      <path d="M6 6l12 12M18 6L6 18" />
-    </svg>
-  );
-}
+import { IconPlay, IconPause, IconNext, IconPrev, IconRepeat, IconClose } from "@/components/icons";
 
 const SPEEDS = [0.75, 1, 1.25, 1.5, 2];
 

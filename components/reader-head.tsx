@@ -25,7 +25,7 @@ export function ReaderHead({
   children,
 }: Props) {
   return (
-    <header className="surah-head">
+    <header className="reader-head">
       <AmbientImage
         variant={variant}
         mode="plate"
@@ -33,16 +33,16 @@ export function ReaderHead({
         position={position}
         parallax
       />
-      <div className="surah-head__veil" aria-hidden="true" />
-      <CornerFlourish className="surah-head__corner surah-head__corner--tl" />
-      <CornerFlourish className="surah-head__corner surah-head__corner--br" />
+      <div className="reader-head__veil" aria-hidden="true" />
+      <CornerFlourish className="reader-head__corner reader-head__corner--tl" />
+      <CornerFlourish className="reader-head__corner reader-head__corner--br" />
       <PhotoZoom
         variant={variant}
         caption={caption}
         position={position}
-        className="surah-head__zoom"
+        className="reader-head__zoom"
       />
-      <div className="surah-head__inner container-page on-ambient">{children}</div>
+      <div className="reader-head__inner container-page on-ambient">{children}</div>
     </header>
   );
 }

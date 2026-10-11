@@ -61,7 +61,7 @@ export function PageHead({
         className="page-head__zoom"
       />
       <div className="container-page page-head__inner on-ambient">
-        <p className="surah-head__eyebrow">{eyebrow}</p>
+        <p className="reader-head__eyebrow">{eyebrow}</p>
         <h1 className="page-head__title">{title}</h1>
         <p className="page-head__desc">{desc}</p>
         {children}
