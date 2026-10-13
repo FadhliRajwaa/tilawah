@@ -8,6 +8,7 @@ import { ReaderSkeleton } from "@/components/quran/reader-skeleton";
 import { ReaderBar } from "@/components/quran/reader-toolbar";
 import { SurahHeadActions } from "@/components/quran/surah-head-actions";
 import { ReaderHead } from "@/components/reader-head";
+import { MaskedTitle } from "@/components/masked-title";
 import { PageNav } from "@/components/page-nav";
 
 export const revalidate = 86400;
@@ -72,7 +73,7 @@ export default async function SurahPage({ params }: Params) {
         <span className="reader-head__name-ar" lang="ar" dir="rtl">
           {meta.ar}
         </span>
-        <h1 className="reader-head__name">{surah.namaLatin}</h1>
+        <MaskedTitle as="h1" className="reader-head__name">{surah.namaLatin}</MaskedTitle>
         <div className="reader-head__meta">
           <span>
             Arti: <b>{surah.arti}</b>

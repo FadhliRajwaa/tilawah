@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "@/components/smart-link";
 import { OrnamentDivider } from "@/components/ornaments";
 import { CreditThumb } from "@/components/credit-thumb";
+import { MaskedTitle } from "@/components/masked-title";
 import { CREDITS } from "@/lib/data/credits";
 
 export const metadata: Metadata = {
@@ -53,7 +54,7 @@ export default function KreditPage() {
           tipografi dan ritmenya konsisten dengan halaman lain. */}
       <header className="page-intro">
         <p className="t-eyebrow">Transparansi</p>
-        <h1 className="page-intro__title">Kredit &amp; Lisensi</h1>
+        <MaskedTitle as="h1" className="page-intro__title">Kredit &amp; Lisensi</MaskedTitle>
         <p className="page-intro__desc">
           Tilawah berdiri di atas karya orang lain. Berikut sumber data dan gambar
           yang dipakai — lengkap dengan lisensinya.

@@ -4,12 +4,11 @@
  *
  * Menggantikan menu burger: lima tujuan utama selalu satu ketukan, dalam
  * jangkauan jempol, dengan nama yang terlihat (bukan ikon misterius).
- * Sembunyi saat menggulir turun, muncul saat menggulir naik — konten baca
- * dapat layar penuh tanpa kehilangan navigasi. */
+ * SELALU tampil — auto-hide dihapus karena flicker saat gulir (ambang arah
+ * + momentum scroll ponsel memicu hide/show berulang). */
 
 import Link from "@/components/smart-link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { IconBookmark, IconCrescent, IconHome, IconMushaf, IconSearch } from "./icons";
@@ -24,37 +23,15 @@ const TABS = [
 
 export function Tabbar() {
   const pathname = usePathname();
-  const [hidden, setHidden] = useState(false);
   const kurangGerak = useReducedMotion();
-  const lastY = useRef(0);
-
-  useEffect(() => {
-    lastY.current = window.scrollY;
-    const onScroll = () => {
-      const y = window.scrollY;
-      /* Sembunyi hanya setelah melewati 240px & bergerak turun jelas;
-         ambang 8px mengabaikan goyangan kecil. */
-      if (y > 240 && y - lastY.current > 8) setHidden(true);
-      else if (lastY.current - y > 8 || y <= 240) setHidden(false);
-      lastY.current = y;
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [pathname]);
 
   return (
     <motion.nav
-      className={cn("tabbar", hidden && "is-hidden")}
+      className="tabbar"
       aria-label="Navigasi utama"
-      /* Tersembunyi = tak terlihat DAN tak terjangkau keyboard. Tanpa ini
-         fokus Tab mendarat di tautan di luar layar. */
-      inert={hidden}
-      animate={{ y: hidden ? 88 : 0 }}
-      transition={
-        kurangGerak
-          ? { duration: 0.01 }
-          : { type: "spring", stiffness: 500, damping: 40 }
-      }
+      initial={kurangGerak ? false : { y: 88 }}
+      animate={{ y: 0 }}
+      transition={{ type: "spring", stiffness: 400, damping: 34 }}
     >
       {TABS.map(({ href, label, Icon }) => {
         const active = href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/");
@@ -65,6 +42,16 @@ export function Tabbar() {
             className={cn("tabbar__tab", active && "is-active")}
             aria-current={active ? "page" : undefined}
           >
+            {active && (
+              <motion.span
+                className="tabbar__pill"
+                layoutId="tabbar-pill"
+                aria-hidden="true"
+                transition={
+                  kurangGerak ? { duration: 0.01 } : { type: "spring", stiffness: 500, damping: 38 }
+                }
+              />
+            )}
             <Icon className="tabbar__icon" />
             <span className="tabbar__label">{label}</span>
           </Link>

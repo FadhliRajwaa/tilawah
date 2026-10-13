@@ -189,34 +189,50 @@
     transparent 100%
   );
 
-  /* ─── 5. GERAK ─────────────────────────────────────────────────────── */
+  /* ─── 5. GERAK ───────────────────────────────────────────────────────
+   *
+   * Sistem gerak satu bahasa (Apple × Stripe): mikro cepat + pegas lunak,
+   * masuk sinematik, keluar kilat. Semua durasi/easing lewat token —
+   * tanpa angka gerak di file komponen. */
 
-  /* Durasi: 160ms umpan balik langsung, 220ms transisi state,
-     320ms masuk/keluar elemen. */
+  /* Durasi — mikro (umpan balik): 120–200ms · state UI: 180–260ms ·
+     masuk/keluar elemen: 220–320ms · seksi: 400–800ms ·
+     hero: 800–1600ms (dengan ketukan internal). */
+  --dur-press: 120ms;
   --dur-fast: 160ms;
   --dur-base: 220ms;
   --dur-slow: 320ms;
+  --dur-section: 600ms;
+  --dur-hero: 900ms;
   /* Lembar (sheet) & laci: cukup lama untuk terbaca sebagai benda yang
      bergerak, tapi masih di bawah ambang "menunggu". */
   --dur-sheet: 420ms;
 
-  /* Easing: keluar cepat lalu mengendap (ease-out) untuk hampir semua hal;
-     ease-in-out hanya untuk gerakan bolak-balik. Tanpa kurva memantul —
-     benda nyata melambat lalu berhenti, tidak berayun. */
+  /* Easing — keluar cepat lalu mengendap untuk hampir semua hal;
+     masuk sinematik hero memakai expo; keluar selalu lebih cepat dari
+     masuk (tiba anggun, pergi kilat). Tanpa kurva memantul — benda nyata
+     melambat lalu berhenti, tidak berayun. */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   /* Kurva lembar iOS: mulai cepat, mengendap panjang — terasa seperti
      ditarik, bukan didorong. */
   --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
-  /* Pegas seragam untuk gerak berbasis motion (tabbar, panel): tanpa
-     memantul — benda nyata melambat lalu berhenti. */
-  --ease-spring: linear(0, 0.404 7.4%, 0.772 14.6%, 0.882 17.5%, 0.957 20.8%, 1.008 24.5%, 1.035 28.5%, 1.037 32.7%, 1.017 37.5%, 0.983 43.4%, 0.977 47.4%, 1 56.8%);
-  /* Tekan tombol: umpan balik instan di bawah ambang persepsi tunda. */
-  --dur-press: 120ms;
-  /* Spring JS (motion/gsap): CSS tak bisa pegas — token ini penanda niat. */
-  --ease-spring: linear;
-  /* Umpan tekan tombol (whileTap sheet__close, toast, chip). */
-  --dur-press: 120ms;
+
+  /* Pegas JS (motion): tanpa memantul untuk UI biasa (bounce 0);
+     sentuhan fisik (tab berpindah, panel) boleh sedikit pegas. */
+  --spring-ui: 400;
+  --spring-damp: 30;
+  --spring-damp-soft: 38;
+
+  /* Jarak & stagger — reveal naik 12–24px; stagger teks 25–45ms,
+     kartu 60–90ms; ponsel selalu ambil bawah rentang. */
+  --rise-sm: 10px;
+  --rise: 16px;
+  --rise-lg: 24px;
+  --stagger-word: 0.035;
+  --stagger-card: 0.07;
 
   /* ─── 6. TATA LETAK ────────────────────────────────────────────────── */
 

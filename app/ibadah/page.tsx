@@ -4,6 +4,8 @@ import { getAsmaulHusna, getDoaHarian } from "@/lib/api/ibadah";
 import { IbadahTabs } from "@/components/ibadah/ibadah-tabs";
 import { PageHead } from "@/components/page-head";
 import { Gallery } from "@/components/gallery";
+import { Reveal } from "@/components/reveal";
+import { MaskedTitle } from "@/components/masked-title";
 import type { AsmaulHusnaItem, DoaItem } from "@/lib/types";
 
 export const revalidate = 604800;
@@ -41,12 +43,10 @@ export default async function IbadahPage() {
       </div>
 
       {/* — galeri: cahaya & arsitektur — */}
-      <section className="section container-page" aria-labelledby="galeri-ibadah">
+      <Reveal as="section" className="section container-page" ariaLabelledby="galeri-ibadah" y={24}>
         <div className="section__head">
           <div>
-            <h2 id="galeri-ibadah" className="section__title">
-              Rumah-rumah Allah
-            </h2>
+            <MaskedTitle as="h2" className="section__title" id="galeri-ibadah">Rumah-rumah Allah</MaskedTitle>
             <p className="section__sub">
               Cahaya, geometri, dan ketenangan — pengingat tempat suci di seluruh dunia.
             </p>
@@ -67,7 +67,7 @@ export default async function IbadahPage() {
           ]}
           label="Galeri rumah-rumah Allah"
         />
-      </section>
+      </Reveal>
     </>
   );
 }

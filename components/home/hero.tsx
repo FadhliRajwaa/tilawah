@@ -18,15 +18,17 @@ export function Hero() {
   const nama = SURAH[a.s - 1].latin;
 
   return (
-    <section className="hero" aria-labelledby="hero-title">
-      <AmbientImage
-        variant="hero-dome-gold"
-        mode="plate"
-        intensity={0.85}
-        position="center 38%"
-        fixed
-        priority
-      />
+    <section className="hero" aria-labelledby="hero-title" data-overture="hero">
+      <span data-hero-foto style={{ display: "contents" }}>
+        <AmbientImage
+          variant="hero-dome-gold"
+          mode="plate"
+          intensity={0.85}
+          position="center 38%"
+          fixed
+          priority
+        />
+      </span>
 
       <Orb size={520} color="#109BDA" className="orb-host--hero" delay={1200} />
 
@@ -43,31 +45,31 @@ export function Hero() {
       <div className="hero__inner container-page on-ambient">
         <HeroIntro>
           <div>
-          <span className="hero__eyebrow hero__anim">
+          <span className="hero__eyebrow" data-hero-eyebrow>
             <OrnamentStar className="hero__eyebrow-star" />
             Mushaf digital Indonesia
           </span>
 
-          <h1 id="hero-title" className="hero__title hero__anim">
-            Tilawah, <em>tenang</em> dan lengkap.
+          <h1 id="hero-title" className="hero__title" data-hero-judul>
+            Tilawah, tenang dan lengkap.
           </h1>
 
-          <p className="hero__lede hero__anim">
+          <p className="hero__lede" data-hero-alir>
             Baca Al-Qur&rsquo;an 114 surah dengan teks mushaf, terjemahan Kemenag,
             tafsir per ayat, dan murottal enam qari. Lengkap dengan Asmaul Husna,
             doa harian, dan jadwal sholat.
           </p>
 
-          <div className="hero__actions hero__anim">
-            <Link href="/surat/36" className="btn btn--primary">
+          <div className="hero__actions" data-hero-alir>
+            <Link href="/surat/36" className="btn btn--primary btn--magnet">
               Mulai dari Yasin
             </Link>
-            <Link href="/surat" className="btn btn--outline btn--on-photo">
+            <Link href="/surat" className="btn btn--outline btn--on-photo btn--magnet">
               Jelajahi 114 surah
             </Link>
           </div>
 
-          <div className="hero__stats hero__anim">
+          <div className="hero__stats" data-hero-alir>
             <div className="hero__stat">
               <b>114</b>
               <span>surah</span>
@@ -88,7 +90,7 @@ export function Hero() {
           </div>
         </HeroIntro>
 
-        <aside className="hero__card" aria-label="Ayat hari ini">
+        <aside className="hero__card" aria-label="Ayat hari ini" data-hero-kartu>
           <span className="hero__card-label">Ayat hari ini</span>
           <p className="hero__card-ar" lang="ar" dir="rtl">
             {a.ar}

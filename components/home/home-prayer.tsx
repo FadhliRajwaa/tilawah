@@ -6,18 +6,18 @@
 import Link from "@/components/smart-link";
 import { WAKTU_WAJIB, LABEL_WAKTU } from "@/lib/waktu-sholat";
 import { useSholat } from "@/lib/use-sholat";
+import { Reveal } from "@/components/reveal";
+import { MaskedTitle } from "@/components/masked-title";
 import { cn, formatCountdown, hariIndo, tanggalHijriah } from "@/lib/utils";
 
 export function HomePrayer() {
   const { kota, jadwal, berikut, now, loading } = useSholat();
 
   return (
-    <section className="section container-page" aria-labelledby="sholat-title">
+    <Reveal as="section" className="section container-page" ariaLabelledby="sholat-title" y={24}>
       <div className="section__head">
         <div>
-          <h2 id="sholat-title" className="section__title">
-            Jadwal sholat
-          </h2>
+          <MaskedTitle as="h2" className="section__title" id="sholat-title">Jadwal sholat</MaskedTitle>
           <p className="section__sub">
             {kota ? kota.lokasi : "Pilih kota untuk menampilkan waktu sholat."}
             {jadwal ? ` · ${hariIndo(new Date(now))}, ${jadwal.tanggal} · ${tanggalHijriah(new Date(now))}` : ""}
@@ -64,6 +64,6 @@ export function HomePrayer() {
           </div>
         </div>
       ) : null}
-    </section>
+    </Reveal>
   );
 }

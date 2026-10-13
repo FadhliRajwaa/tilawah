@@ -21,6 +21,11 @@
   transition:
     border-color var(--dur-base) var(--ease-out),
     background-color var(--dur-base) var(--ease-out);
+  /* Topeng blur progresif: konten memudar lembut di bawah nav, bukan
+     terpotong garis keras. Hanya di atas (12% viewport) + murah (satu
+     lapisan, blur kecil — bukan 8 lapis 64px ala showcase). */
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 14px), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 14px), transparent 100%);
 }
 
 .site-nav.is-scrolled {
@@ -169,8 +174,9 @@
 
 /* ═══ BILAH TAB (ponsel) ═════════════════════════════════════════════
    Lima tujuan utama — selalu satu ketukan, dalam jangkauan jempol.
-   Hanya <900px (di sanalah tautan teks nav disembunyikan). Sembunyi saat
-   menggulir turun, muncul saat menggulir naik. Hormati area aman bawah. */
+   Hanya <900px (di sanalah tautan teks nav disembunyikan). SELALU tampil:
+   auto-hide dihapus karena flicker (momentum gulir ponsel memicu
+   hide/show berulang). Hormati area aman bawah. */
 
 .tabbar {
   position: fixed;
@@ -182,19 +188,10 @@
   background: var(--glass);
   backdrop-filter: blur(16px) saturate(1.3);
   border-top: 1px solid var(--glass-edge);
-  transition: transform var(--dur-base) var(--ease-out);
-}
-
-.tabbar.is-hidden {
-  transform: translateY(110%);
-  /* inert sudah menutup keyboard; ini menutup klik/hover */
-  visibility: hidden;
-  transition:
-    transform var(--dur-base) var(--ease-out),
-    visibility 0s var(--dur-base);
 }
 
 .tabbar__tab {
+  position: relative;
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -208,6 +205,15 @@
   font-size: 11px;
   font-weight: var(--weight-medium);
   line-height: 1.2;
+}
+
+/* Latar tab aktif — posisinya digerakkan motion layoutId (satu elemen
+   berpindah antar tab, bukan lima latar berkedip). */
+.tabbar__pill {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
 }
 
 .tabbar__icon {

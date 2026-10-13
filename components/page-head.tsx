@@ -10,6 +10,7 @@
  */
 
 import { AmbientImage, type ArtVariant } from "./ambient-image";
+import { MaskedTitle } from "./masked-title";
 import { Orb } from "./orb";
 import { OrnamentDivider } from "./ornaments";
 import { PhotoZoom } from "./photo-zoom";
@@ -44,14 +45,16 @@ export function PageHead({
 }: Props) {
   return (
     <header className="page-head page-head--tall">
-      <AmbientImage
-        variant={variant}
-        mode="plate"
-        intensity={intensity}
-        position={position}
-        fixed
-        priority={priority}
-      />
+      <span data-overture-foto style={{ display: "contents" }}>
+        <AmbientImage
+          variant={variant}
+          mode="plate"
+          intensity={intensity}
+          position={position}
+          fixed
+          priority={priority}
+        />
+      </span>
       {orb && <Orb size={440} color="#109BDA" className="orb-host--page" delay={900} />}
       <div className="page-head__veil" aria-hidden="true" />
       <PhotoZoom
@@ -62,8 +65,8 @@ export function PageHead({
       />
       <div className="container-page page-head__inner on-ambient">
         <p className="reader-head__eyebrow">{eyebrow}</p>
-        <h1 className="page-head__title">{title}</h1>
-        <p className="page-head__desc">{desc}</p>
+        <MaskedTitle as="h1" className="page-head__title">{title}</MaskedTitle>
+        <p className="page-head__desc" data-overture-panel>{desc}</p>
         {children}
         <div className="page-head__ornament">
           <OrnamentDivider className="ornament-divider" />

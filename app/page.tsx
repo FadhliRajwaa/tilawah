@@ -9,6 +9,7 @@ import { ImageBanner } from "@/components/image-banner";
 import { Gallery, type GalleryItem } from "@/components/gallery";
 import { AmbientImage } from "@/components/ambient-image";
 import { Reveal } from "@/components/reveal";
+import { MaskedTitle } from "@/components/masked-title";
 export const revalidate = 86400;
 
 const POPULER = [
@@ -51,12 +52,10 @@ export default function HomePage() {
       <HomePrayer />
 
       {/* — shortcut surah populer — */}
-      <Reveal as="section" className="section container-page" ariaLabelledby="populer-title">
+      <Reveal as="section" className="section container-page" ariaLabelledby="populer-title" y={24}>
         <div className="section__head">
           <div>
-            <h2 id="populer-title" className="section__title">
-              Sering dibaca
-            </h2>
+            <MaskedTitle as="h2" className="section__title" id="populer-title">Sering dibaca</MaskedTitle>
             <p className="section__sub">
               Surah yang paling banyak dibuka — sekali ketuk langsung tilawah.
             </p>
@@ -71,12 +70,10 @@ export default function HomePage() {
       <ArtDivider variant="divider-zellige" />
 
       {/* — galeri mosaik: inilah bagian yang "playful" — */}
-      <Reveal as="section" className="section container-page" ariaLabelledby="galeri-title" delay={0.05}>
+      <Reveal as="section" className="section container-page" ariaLabelledby="galeri-title" delay={0.05} y={24}>
         <div className="section__head">
           <div>
-            <h2 id="galeri-title" className="section__title">
-              Warisan visual Islam
-            </h2>
+            <MaskedTitle as="h2" className="section__title" id="galeri-title">Warisan visual Islam</MaskedTitle>
             <p className="section__sub">
               Kaligrafi, geometri, cahaya, dan arsitektur — keindahan yang menemani
               tilawah.
@@ -117,12 +114,10 @@ export default function HomePage() {
        * Kuncinya: satu item jadi LEBIH BESAR dari yang lain (Asmaul Husna),
        * supaya ada hierarki. Empat kartu sama besar tidak punya pendapat
        * tentang mana yang penting. */}
-      <Reveal as="section" className="section container-page" ariaLabelledby="fitur-title" delay={0.05}>
+      <Reveal as="section" className="section container-page" ariaLabelledby="fitur-title" delay={0.05} y={24}>
         <div className="section__head">
           <div>
-            <h2 id="fitur-title" className="section__title">
-              Ibadah harian
-            </h2>
+            <MaskedTitle as="h2" className="section__title" id="fitur-title">Ibadah harian</MaskedTitle>
             <p className="section__sub">
               Asmaul Husna, doa harian, dan jadwal sholat — semuanya dalam satu tempat.
             </p>

@@ -3,6 +3,8 @@ import { SURAH } from "@/lib/data/surah";
 import { SurahCatalog } from "@/components/quran/surah-catalog";
 import { PageHead } from "@/components/page-head";
 import { Gallery } from "@/components/gallery";
+import { Reveal } from "@/components/reveal";
+import { MaskedTitle } from "@/components/masked-title";
 
 export const metadata: Metadata = {
   title: "114 Surah Al-Qur'an",
@@ -29,12 +31,10 @@ export default function SurahIndexPage() {
       </div>
 
       {/* — galeri penutup: keindahan mushaf & geometri — */}
-      <section className="section container-page" aria-labelledby="galeri-katalog">
+      <Reveal as="section" className="section container-page" ariaLabelledby="galeri-katalog" y={24}>
         <div className="section__head">
           <div>
-            <h2 id="galeri-katalog" className="section__title">
-              Keindahan yang menemani
-            </h2>
+            <MaskedTitle as="h2" className="section__title" id="galeri-katalog">Keindahan yang menemani</MaskedTitle>
             <p className="section__sub">
               Kaligrafi, iluminasi mushaf, dan geometri Islam — warisan yang tetap hidup.
             </p>
@@ -52,7 +52,7 @@ export default function SurahIndexPage() {
           ]}
           label="Galeri keindahan islami"
         />
-      </section>
+      </Reveal>
     </>
   );
 }

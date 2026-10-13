@@ -8,6 +8,7 @@
 
 import Link from "@/components/smart-link";
 import { AmbientImage, type ArtVariant } from "./ambient-image";
+import { MaskedTitle } from "./masked-title";
 import { PhotoZoom } from "./photo-zoom";
 
 interface Props {
@@ -40,15 +41,17 @@ export function ImageBanner({
 }: Props) {
   return (
     <section className={`img-banner img-banner--${height} img-banner--${align}`}>
-      <AmbientImage variant={variant} mode="plate" intensity={1} position={position} fixed />
+      <span data-overture-foto style={{ display: "contents" }}>
+        <AmbientImage variant={variant} mode="plate" intensity={1} position={position} fixed />
+      </span>
       <div className="img-banner__veil" aria-hidden="true" />
       <PhotoZoom variant={variant} caption={caption ?? title} position={position} />
       <div className="img-banner__body container-page">
         {eyebrow && <p className="img-banner__eyebrow">{eyebrow}</p>}
-        <h2 className="img-banner__title">{title}</h2>
-        {desc && <p className="img-banner__desc">{desc}</p>}
+        <MaskedTitle as="h2" className="img-banner__title">{title}</MaskedTitle>
+        {desc && <p className="img-banner__desc" data-overture-panel>{desc}</p>}
         {cta && (
-          <Link href={cta.href} className="btn btn--primary img-banner__cta">
+          <Link href={cta.href} className="btn btn--primary btn--magnet img-banner__cta">
             {cta.label}
           </Link>
         )}

@@ -21,7 +21,34 @@
 
 /* ═══ HERO ═══════════════════════════════════════════════════════════
    Foto arsitektur Islami sebagai latar + kartu ayat pilihan.
-   Veil diagonal: sisi kiri pekat untuk teks, sisi kanan terbuka untuk foto. */
+   Veil diagonal: sisi kiri pekat untuk teks, sisi kanan terbuka untuk foto.
+
+   Orkestra masuk (hero-intro.tsx, SATU timeline GSAP): foto napas masuk
+   → eyebrow → judul kata-per-kata → lede/aksi/statistik → kartu ayat.
+   CSS di sini hanya topeng kata + keadaan awal SEBELUM JS jalan (agar
+   tak ada kilat konten), bukan animasinya. */
+
+/* — topeng kata (masked-reveal): kata naik lewat overflow hidden.
+   Satu pola untuk hero + ScrollOverture + MaskedTitle. Tanpa blur —
+   teks Arab + blur = halo kotor. */
+.overture__mask,
+.masked__mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+.overture__kata,
+.masked__kata {
+  display: inline-block;
+  will-change: transform;
+}
+
+.masked {
+  visibility: visible;
+}
 
 .hero {
   position: relative;
@@ -888,47 +915,46 @@
   opacity: 0.92;
 }
 
-/* ─── gambar fixed: SATU background dipaku ke viewport ───
-   Dikerjakan compositor: nol JS, nol transform per frame — desktop dan
-   ponsel sama. Varian sm (45 KB) untuk layar sempit, md di atasnya;
-   retina dapat lg lewat image-set. */
+/* ─── gambar "diam": sticky memenuhi viewport per section ───
+   Gambar menempel (top: 0, tinggi 100svh) selama section-nya terlihat,
+   terpotong rapi oleh overflow section saat lewat — terlihat seperti
+   dipaku, tanpa background-attachment dan tanpa JS. `svh` agar bilah
+   URL ponsel tak mengubah tinggi.
 
-.ambient--fixed {
+   Syarat sticky menempel: host LEBIH TINGGI dari gambar. Host dibuat
+   mutlak dari 100% ATAS sampai 100% BAWAH section (tinggi section +
+   2×100svh); gambar sticky di tengahnya, jadi selalu ada ruang gerak
+   berapa pun tinggi section. Tanpa ini (host = tinggi section < 100svh)
+   sticky tak punya ruang gerak dan ikut menggulir — terukur. */
+
+.ambient--sticky {
   position: absolute;
-  inset: 0;
+  top: -100svh;
+  bottom: -100svh;
+  inset-inline: 0;
   z-index: 0;
+  display: block;
   pointer-events: none;
-  background-image: var(--fixed-img-sm);
-  background-position: var(--fixed-pos, center);
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-attachment: fixed;
+}
+
+.ambient--sticky__pic {
+  position: sticky;
+  top: 0;
+  display: block;
+  height: 100svh;
+  overflow: clip;
+}
+
+.ambient--sticky__pic img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   opacity: var(--ambient-opacity, 1);
   -webkit-mask-image: var(--ambient-mask, none);
   mask-image: var(--ambient-mask, none);
 }
 
-@media (min-width: 700px) {
-  .ambient--fixed {
-    background-image: var(--fixed-img-md);
-  }
-}
-
-@media (min-width: 1300px) and (min-resolution: 2dppx) {
-  .ambient--fixed {
-    background-image: var(--fixed-img-lg);
-  }
-}
-
-/* iOS Safari mengabaikan background-attachment: fixed — fallbacknya gambar
-   diam mengikuti elemen (tetap proporsional, tanpa jank transform JS). */
-@supports not (background-attachment: fixed) {
-  .ambient--fixed {
-    background-attachment: scroll;
-  }
-}
-
-[data-theme="dark"] .ambient--fixed {
+[data-theme="dark"] .ambient--sticky__pic img {
   opacity: calc(var(--ambient-opacity, 1) * 0.62);
 }
 

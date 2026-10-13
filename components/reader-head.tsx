@@ -6,6 +6,7 @@
  */
 
 import { AmbientImage, type ArtVariant } from "./ambient-image";
+import { MaskedTitle } from "./masked-title";
 import { CornerFlourish } from "./ornaments";
 import { PhotoZoom } from "./photo-zoom";
 
@@ -26,13 +27,15 @@ export function ReaderHead({
 }: Props) {
   return (
     <header className="reader-head">
-      <AmbientImage
-        variant={variant}
-        mode="plate"
-        intensity={intensity}
-        position={position}
-        fixed
-      />
+      <span data-overture-foto style={{ display: "contents" }}>
+        <AmbientImage
+          variant={variant}
+          mode="plate"
+          intensity={intensity}
+          position={position}
+          fixed
+        />
+      </span>
       <div className="reader-head__veil" aria-hidden="true" />
       <CornerFlourish className="reader-head__corner reader-head__corner--tl" />
       <CornerFlourish className="reader-head__corner reader-head__corner--br" />

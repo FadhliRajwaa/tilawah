@@ -109,29 +109,49 @@ export function AmbientImage({
           ? "linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%)"
           : undefined;
 
-  /* — gambar fixed: SATU background dipaku ke viewport ———————————————
+  /* — gambar "diam": sticky memenuhi viewport per section ———————————
    *
-   * `background-attachment: fixed` dikerjakan compositor: nol JS, nol
-   * transform per frame. `sizes`/`srcSet` tidak berlaku untuk background,
-   * jadi varian dipilih sekali saat mount (sm ≤700px, md di atasnya).
-   * Varian lg tetap untuk retina lewat image-set. */
+   * `<img>` dengan `position: sticky; top: 0; height: 100svh`: gambar
+   * menempel selama section-nya terlihat, terpotong rapi oleh overflow
+   * section saat lewat — efek yang sama terlihat seperti dipaku,
+   * bekerja di semua browser termasuk iOS, nol JS.
+   *
+   * Syarat: host HARUS lebih tinggi dari gambar (lihat .ambient--sticky:
+   * top/bottom -100svh). Tanpa ruang gerak sticky tak menempel dan gambar
+   * ikut menggulir — terukur. */
   if (fixed) {
     return (
       <span
-        className={`ambient ambient--fixed ${className}`.trim()}
+        className={`ambient ambient--sticky ${className}`.trim()}
         style={
           {
             "--ambient-opacity": opacity,
-            "--fixed-pos": position,
-            "--fixed-img-sm": `url(/images/${v}-sm.webp)`,
-            "--fixed-img-md": `url(/images/${v}-md.webp)`,
-            "--fixed-img-lg": `url(/images/${v}-lg.webp)`,
             ...(mask ? { "--ambient-mask": mask } : null),
             ...style,
           } as CSSProperties
         }
         aria-hidden="true"
-      />
+      >
+        <picture className="ambient--sticky__pic">
+          <source
+            type="image/webp"
+            srcSet={`/images/${v}-sm.webp 700w, /images/${v}-md.webp 1300w, /images/${v}-lg.webp 1900w`}
+            sizes="100vw"
+          />
+          <img
+            src={`/images/${v}-md.jpg`}
+            srcSet={`/images/${v}-sm.jpg 700w, /images/${v}-md.jpg 1300w, /images/${v}-lg.jpg 1900w`}
+            sizes="100vw"
+            alt=""
+            width={rw * 100}
+            height={rh * 100}
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
+            decoding={priority ? "sync" : "async"}
+            style={{ objectPosition: position }}
+          />
+        </picture>
+      </span>
     );
   }
 
