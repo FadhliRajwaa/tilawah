@@ -18,6 +18,7 @@ import { AmbientImage, type ArtVariant } from "./ambient-image";
 import { useLightbox } from "./image-lightbox";
 import { CREDITS } from "@/lib/data/credits";
 import { IconZoom } from "./icons";
+import { lightboxSize, lightboxSrcs } from "@/lib/lightbox-src";
 
 export interface GalleryItem {
   variant: ArtVariant;
@@ -47,7 +48,15 @@ export function Gallery({ items, label }: { items: GalleryItem[]; label?: string
               type="button"
               className="mosaic__tap"
               onClick={() =>
-                buka({ name: it.variant, src, caption: it.caption, position: it.position, credit })
+                buka({
+                  name: it.variant,
+                  src,
+                  ...lightboxSize(credit),
+                  srcSet: lightboxSrcs(credit),
+                  caption: it.caption,
+                  position: it.position,
+                  credit,
+                })
               }
               aria-label={`Perbesar gambar: ${it.caption}`}
             >

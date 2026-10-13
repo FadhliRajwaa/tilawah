@@ -61,14 +61,12 @@
 
   /* Warna washes — latar watercolor */
   --wash-1: #109bda;
-  --wash-2: #19bbe3;
   --wash-3: #52d9e8;
   --wash-4: #8be9ea;
 
   /* Status */
   --danger: oklch(52% 0.17 25);
   --danger-soft: oklch(94% 0.03 25);
-  --success: oklch(48% 0.11 155);
 
   /* ─── 2. TIPOGRAFI ─────────────────────────────────────────────────── */
 
@@ -95,7 +93,6 @@
 
   /* Fluid — dipakai di hero & judul besar */
   --text-display: clamp(2.25rem, 1.2rem + 4.2vw, 4.25rem);
-  --text-title: clamp(1.75rem, 1.1rem + 2.6vw, 2.75rem);
   --text-arabic: clamp(1.6rem, 1rem + 2vw, 2.25rem);
 
   /* Tinggi baris */
@@ -107,7 +104,6 @@
 
   /* Tracking */
   --tracking-tight: -0.02em; /* display besar */
-  --tracking-normal: 0;
   --tracking-wide: 0.06em; /* label huruf besar */
   --tracking-wider: 0.12em; /* eyebrow */
 
@@ -119,7 +115,6 @@
 
   /* ─── 3. RUANG ─────────────────────────────────────────────────────── */
 
-  --space-0: 0;
   --space-1: 0.25rem; /*  4px */
   --space-2: 0.5rem; /*  8px */
   --space-3: 0.75rem; /* 12px */
@@ -162,9 +157,6 @@
   --glass-edge: color-mix(in oklab, var(--ink) 9%, transparent);
   --scrim: oklch(15% 0.02 235 / 0.42);
 
-  /* Tepi kiri-kanan halaman; ikut area aman ponsel berponi saat miring */
-  --gutter: clamp(1rem, 4vw, 1.5rem);
-
   /* — "Kertas tipis" di area teks bergambar —
    *
    * Setiap blok bergambar (hero, header halaman, banner) menaruh teksnya di
@@ -199,9 +191,8 @@
 
   /* ─── 5. GERAK ─────────────────────────────────────────────────────── */
 
-  /* Durasi: 120ms untuk umpan balik langsung (hover/tap),
-     200ms untuk transisi state, 320ms untuk masuk/keluar elemen. */
-  --dur-instant: 120ms;
+  /* Durasi: 160ms umpan balik langsung, 220ms transisi state,
+     320ms masuk/keluar elemen. */
   --dur-fast: 160ms;
   --dur-base: 220ms;
   --dur-slow: 320ms;
@@ -223,7 +214,6 @@
   /* Lebar ukur teks — batas agar baris tidak terlalu panjang dibaca */
   --measure: 68ch;
   --measure-narrow: 56ch;
-  --measure-arabic: 42ch;
 
   /* Lebar wadah halaman */
   --container: 72rem;
@@ -236,7 +226,6 @@
   /* dock pemutar desktop · pemutar mini ponsel · bilah tab ponsel */
   --player-h: 76px;
   --mini-h: 64px;
-  --tab-h: 58px;
   /* area aman bawah (iPhone tanpa tombol home) — 0 di perangkat lain */
   --safe-b: env(safe-area-inset-bottom, 0px);
   /* jarak bebas bawah dinamis — ditulis ChromeSpace. Nol saat tidak ada
@@ -245,7 +234,6 @@
   --chrome-top: var(--nav-h);
 
   /* Z-index — skala bernama, tidak ada 9999 */
-  --z-base: 1;
   --z-raised: 10;
   --z-sticky: 40;
   --z-nav: 50;
@@ -308,7 +296,6 @@
 
   --danger: oklch(68% 0.15 25);
   --danger-soft: oklch(30% 0.06 25);
-  --success: oklch(72% 0.1 155);
 
   --shadow-1: 0 1px 2px oklch(0% 0 0 / 0.3), 0 2px 8px oklch(0% 0 0 / 0.25);
   --shadow-2: 0 2px 4px oklch(0% 0 0 / 0.32), 0 8px 24px oklch(0% 0 0 / 0.34);

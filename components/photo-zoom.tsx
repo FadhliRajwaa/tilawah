@@ -16,6 +16,7 @@ import { CREDITS } from "@/lib/data/credits";
 import { useLightbox } from "./image-lightbox";
 import type { ArtVariant } from "./ambient-image";
 import { IconZoom } from "./icons";
+import { lightboxSize, lightboxSrcs } from "@/lib/lightbox-src";
 
 interface Props {
   variant: ArtVariant;
@@ -44,7 +45,7 @@ export function PhotoZoom({
     <button
       type="button"
       className={`photo-zoom${ringkas ? " photo-zoom--ringkas" : ""} ${className ?? ""}`.trim()}
-      onClick={() => buka({ name: variant, src, caption, position, credit })}
+      onClick={() => buka({ name: variant, src, ...lightboxSize(credit), srcSet: lightboxSrcs(credit), caption, position, credit })}
       aria-label={`Perbesar gambar: ${caption}`}
       title="Perbesar gambar"
     >

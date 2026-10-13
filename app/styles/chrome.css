@@ -187,6 +187,11 @@
 
 .tabbar.is-hidden {
   transform: translateY(110%);
+  /* inert sudah menutup keyboard; ini menutup klik/hover */
+  visibility: hidden;
+  transition:
+    transform var(--dur-base) var(--ease-out),
+    visibility 0s var(--dur-base);
 }
 
 .tabbar__tab {

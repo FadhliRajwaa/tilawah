@@ -58,6 +58,10 @@ export function SiteNav() {
   const [qf, setQf] = useState("");
   const [qfAktif, setQfAktif] = useState(0);
   const qfInputRef = useRef<HTMLInputElement>(null);
+  const qfDlgRef = useRef<HTMLDivElement>(null);
+  /* Fokus kembali ke pemicu saat dialog ditutup — tanpa ini pengguna
+     keyboard kehilangan posisi setelah menutup cari. */
+  const qfBackTo = useRef<HTMLElement | null>(null);
   const linksRef = useRef<HTMLElement>(null);
   const [pill, setPill] = useState<{ x: number; w: number } | null>(null);
 
@@ -68,6 +72,13 @@ export function SiteNav() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const bukaQf = () => {
+    if (document.activeElement instanceof HTMLElement) {
+      qfBackTo.current = document.activeElement;
+    }
+    setQfOpen(true);
+  };
+
   /* Ctrl/⌘+K atau "/" membuka cari — kecuali sedang mengetik di field. */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -77,19 +88,50 @@ export function SiteNav() {
         e.target instanceof HTMLSelectElement;
       if ((e.key.toLowerCase() === "k" && (e.ctrlKey || e.metaKey)) || (e.key === "/" && !typing)) {
         e.preventDefault();
-        setQfOpen(true);
+        bukaQf();
       }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
+  /* Dialog modal sungguhan: jebak Tab di dalam, Esc menutup dari mana saja,
+     fokus dikembalikan ke pemicu. Tanpa ini Tab lari ke konten belakang
+     yang masih bisa difokus. */
   useEffect(() => {
-    if (qfOpen) {
-      setQf("");
-      setQfAktif(0);
-      window.setTimeout(() => qfInputRef.current?.focus(), 30);
-    }
+    if (!qfOpen) return;
+    setQf("");
+    setQfAktif(0);
+    window.setTimeout(() => qfInputRef.current?.focus(), 30);
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setQfOpen(false);
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const root = qfDlgRef.current;
+      if (!root) return;
+      const items = [...root.querySelectorAll<HTMLElement>("input, button")].filter(
+        (el) => !el.hasAttribute("disabled"),
+      );
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey, true);
+    return () => {
+      document.removeEventListener("keydown", onKey, true);
+      qfBackTo.current?.focus?.();
+      qfBackTo.current = null;
+    };
   }, [qfOpen]);
 
   useEffect(() => setQfOpen(false), [pathname]);
@@ -170,7 +212,7 @@ export function SiteNav() {
             <button
               type="button"
               className="nav-searchbtn"
-              onClick={() => setQfOpen(true)}
+              onClick={() => bukaQf()}
               aria-label="Cari cepat (Ctrl K)"
               title="Cari cepat (Ctrl+K)"
             >
@@ -201,6 +243,7 @@ export function SiteNav() {
       {qfOpen && (
         <div className="qf-backdrop" onClick={() => setQfOpen(false)}>
           <div
+            ref={qfDlgRef}
             className="qf"
             role="dialog"
             aria-modal="true"

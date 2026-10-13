@@ -32,8 +32,13 @@ import { IconClose } from "./icons";
 export interface LightboxImage {
   /** nama aset tanpa akhiran varian, mis. "card-dome-mosaic" */
   name: string;
-  /** ukuran terbesar yang tersedia */
+  /** ukuran terbesar yang tersedia (fallback kalau srcSet kosong) */
   src: string;
+  /** varian responsif dari CREDITS — ponsel tidak perlu unduh 1900w */
+  srcSet?: { src: string; w: number }[];
+  /** lebar·tinggi varian terbesar, untuk ruang sebelum gambar tiba (tanpa CLS) */
+  width?: number;
+  height?: number;
   caption: string;
   position?: string;
   /** entri atribusi bila ada */
@@ -117,7 +122,16 @@ function LightboxDialog({
           <div className="lightbox__stage">
             <img
               className="lightbox__img"
-              src={image.src}
+              src={image.srcSet?.[0]?.src ?? image.src}
+              srcSet={
+                image.srcSet?.length
+                  ? image.srcSet.map((v) => `/images/${v.src} ${v.w}w`).join(", ")
+                  : undefined
+              }
+              sizes="(max-width: 560px) 100vw, min(1400px, 96vw)"
+              width={image.width}
+              height={image.height}
+              decoding="async"
               alt={image.caption}
               style={image.position ? { objectPosition: image.position } : undefined}
             />

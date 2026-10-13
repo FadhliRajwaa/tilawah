@@ -44,7 +44,9 @@ export function Tabbar() {
     <nav
       className={cn("tabbar", hidden && "is-hidden")}
       aria-label="Navigasi utama"
-      style={{ viewTransitionName: "tabbar" }}
+      /* Tersembunyi = tak terlihat DAN tak terjangkau keyboard. Tanpa ini
+         fokus Tab mendarat di tautan di luar layar. */
+      inert={hidden}
     >
       {TABS.map(({ href, label, Icon }) => {
         const active = href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/");

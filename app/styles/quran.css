@@ -211,16 +211,15 @@
 
 /* ═══ BILAH BACA ═════════════════════════════════════════════════════
    Lengket di bawah nav: mode · ukuran · latin/terjemahan · qari · lompat ayat.
-   Satu baris di desktop, membungkus di ponsel. Kaca (bukan solid) supaya
-   ayat yang menggulir di bawahnya tetap terasa ada. */
+   Satu baris di desktop, membungkus di ponsel. Latar PADAT (bukan kaca):
+   satu lapisan blur lebih sedikit di atas teks Arab yang menggulir. */
 
 .readerbar {
   position: sticky;
   top: var(--nav-h);
   z-index: var(--z-sticky);
-  background: var(--glass);
-  backdrop-filter: blur(12px) saturate(1.2);
-  border-bottom: 1px solid var(--glass-edge);
+  background: var(--paper-3);
+  border-bottom: 1px solid var(--rule-2);
 }
 
 .readerbar__inner {
@@ -343,14 +342,16 @@
 }
 
 .readerbar__jump-input {
-  width: 92px;
+  width: 104px;
   min-height: 38px;
   padding-inline: var(--space-2);
   border: 1px solid var(--rule);
   border-radius: var(--radius-full);
   background: transparent;
   color: var(--ink);
-  font-size: var(--text-xs);
+  /* 16px minimum — iOS Safari auto-zoom pada input lebih kecil dan tidak
+     mengembalikan skala. Sama seperti .searchbox__input dan .qf__input. */
+  font-size: max(16px, var(--text-xs));
   font-variant-numeric: tabular-nums;
 }
 
