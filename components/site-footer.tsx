@@ -1,16 +1,12 @@
-/* — Footer: mast-headed, tiga lapis.
+/* — Footer: ajakan + tautan + atribusi.
  *
- * Lapis 1 — ajakan menutup halaman (foto diam + ajakan membaca), memberi
- *           akhir yang disengaja, bukan sekadar berhenti.
- * Lapis 2 — wordmark + kolom tautan yang dikelompokkan menurut tujuan
- *           (Jelajah / Ibadah / Tentang), bukan satu baris panjang.
- * Lapis 3 — atribusi & lisensi, kecil dan tenang.
- */
+ * Tanpa foto latar: CTA penutup bergambar dihapus — ia duplikat dengan banner
+ * penutup beranda ("Satu ayat hari ini…") yang muncul tepat di atasnya di
+ * halaman utama, dan di halaman lain ia memuat gambar besar hanya untuk dua
+ * tombol. Ajakan satu baris + tombol cukup. */
 
 import Link from "@/components/smart-link";
 import { Logo } from "./logo";
-import { AmbientImage } from "./ambient-image";
-import { PhotoZoom } from "./photo-zoom";
 
 const KOLOM = [
   {
@@ -41,39 +37,22 @@ const KOLOM = [
 export function SiteFooter() {
   return (
     <footer className="site-footer">
-      {/* — lapis 1: ajakan penutup — */}
-      <section className="foot-cta" aria-labelledby="foot-cta-title">
-        <AmbientImage
-          variant="hero-night-gold"
-          mode="plate"
-          intensity={0.7}
-          position="center 45%"
-          parallax
-        />
-        <div className="foot-cta__veil" aria-hidden="true" />
-        <PhotoZoom
-          variant="hero-night-gold"
-          caption="Masjid saat malam — cahaya keemasan"
-          position="center 45%"
-          className="foot-cta__zoom"
-        />
-        <div className="foot-cta__inner container-page">
-          <p className="foot-cta__eyebrow">Sebelum menutup</p>
-          <h2 id="foot-cta-title" className="foot-cta__title">
-            Satu ayat hari ini lebih baik daripada seribu nanti.
-          </h2>
-          <div className="foot-cta__actions">
-            <Link href="/surat/36" className="btn btn--primary">
-              Baca Yasin
-            </Link>
-            <Link href="/surat" className="btn btn--outline">
-              Semua surah
-            </Link>
-          </div>
+      {/* — ajakan penutup — */}
+      <div className="foot-cta container-page">
+        <p className="foot-cta__title">
+          Satu ayat hari ini lebih baik daripada seribu nanti.
+        </p>
+        <div className="foot-cta__actions">
+          <Link href="/surat/36" className="btn btn--primary">
+            Baca Yasin
+          </Link>
+          <Link href="/surat" className="btn btn--outline">
+            Semua surah
+          </Link>
         </div>
-      </section>
+      </div>
 
-      {/* — lapis 2: wordmark + kolom tautan — */}
+      {/* — wordmark + kolom tautan — */}
       <div className="site-footer__inner container-page">
         <div className="site-footer__brand">
           <div className="site-footer__mark">
@@ -102,7 +81,7 @@ export function SiteFooter() {
         </nav>
       </div>
 
-      {/* — lapis 3: atribusi — */}
+      {/* — atribusi — */}
       <div className="site-footer__meta container-page">
         <p>
           Teks Al-Qur&rsquo;an &amp; terjemahan Kemenag via{" "}

@@ -1,16 +1,12 @@
 "use client";
 
-/* — Jadwal sholat ringkas di beranda.
- *
- * Logika kota/jadwal/hitung mundur tinggal di `lib/use-sholat.ts` — dipakai
- * bersama panel lengkap di halaman Ibadah. Di sini hanya tampilannya: lima
- * waktu wajib (imsak/terbit/dhuha tidak relevan di ringkasan) + hitung mundur.
- */
+/* — Jadwal sholat ringkas di beranda: hitung mundur + 5 waktu wajib.
+ * Tanpa kota tersimpan, tampilkan ajakan memilih kota sekali ketuk. */
 
 import Link from "@/components/smart-link";
 import { WAKTU_WAJIB, LABEL_WAKTU } from "@/lib/waktu-sholat";
 import { useSholat } from "@/lib/use-sholat";
-import { cn, formatCountdown, hariIndo } from "@/lib/utils";
+import { cn, formatCountdown, hariIndo, tanggalHijriah } from "@/lib/utils";
 
 export function HomePrayer() {
   const { kota, jadwal, berikut, now, loading } = useSholat();
@@ -24,7 +20,7 @@ export function HomePrayer() {
           </h2>
           <p className="section__sub">
             {kota ? kota.lokasi : "Pilih kota untuk menampilkan waktu sholat."}
-            {jadwal ? ` · ${hariIndo(new Date(now))}, ${jadwal.tanggal}` : ""}
+            {jadwal ? ` · ${hariIndo(new Date(now))}, ${jadwal.tanggal} · ${tanggalHijriah(new Date(now))}` : ""}
           </p>
         </div>
         <Link href="/ibadah?tab=sholat" className="section__link">
@@ -51,13 +47,8 @@ export function HomePrayer() {
         <div className="stack-4">
           <div className="countdown">
             <p className="countdown__label">Menuju {berikut.label}</p>
-            {/* ⚠️ TANPA aria-live: nilai ini berubah setiap detik, dan
-                `aria-live` akan membacakan hitung mundur 3.600 kali per jam —
-                itu membuat pembaca layar tidak bisa dipakai. Yang dibacakan
-                adalah LABEL-nya (waktu sholat berikutnya), bukan detiknya. */}
-            <p className="countdown__time">
-              {formatCountdown(berikut.seconds)}
-            </p>
+            {/* TANPA aria-live: nilai berubah tiap detik — membanjiri pembaca layar. */}
+            <p className="countdown__time">{formatCountdown(berikut.seconds)}</p>
             <p className="countdown__next">
               Waktu <b>{berikut.time}</b> · {kota.lokasi}
             </p>

@@ -4,7 +4,6 @@ import { Hero } from "@/components/home/hero";
 import { PopularSurah } from "@/components/home/popular-surah";
 import { HomePrayer } from "@/components/home/home-prayer";
 import { LastReadCard } from "@/components/home/last-read-card";
-import { OrnamentDivider } from "@/components/ornaments";
 import { ArtDivider } from "@/components/art-divider";
 import { ImageBanner } from "@/components/image-banner";
 import { Gallery, type GalleryItem } from "@/components/gallery";
@@ -44,6 +43,12 @@ export default function HomePage() {
     <>
       <Hero />
 
+      {/* — lanjut baca (hanya muncul kalau ada riwayat) — */}
+      <LastReadCard />
+
+      {/* — jadwal sholat ringkas — */}
+      <HomePrayer />
+
       {/* — shortcut surah populer — */}
       <section className="section container-page" aria-labelledby="populer-title">
         <div className="section__head">
@@ -63,24 +68,6 @@ export default function HomePage() {
       </section>
 
       <ArtDivider variant="divider-zellige" />
-
-      {/* — lanjut baca — */}
-      <LastReadCard />
-
-      {/* — banner: jadwal sholat (foto tampil jelas) — */}
-      <ImageBanner
-        variant="banner-prayer"
-        eyebrow="Ibadah harian"
-        title="Jadwal sholat 518 kota Indonesia"
-        desc="Waktu sholat akurat lengkap dengan hitung mundur, tabel bulanan, dan tanggal Hijriah."
-        cta={{ href: "/ibadah?tab=sholat", label: "Buka jadwal sholat" }}
-        height="md"
-        position="center 42%"
-      />
-
-      <div className="container-page">
-        <OrnamentDivider className="ornament-divider" />
-      </div>
 
       {/* — galeri mosaik: inilah bagian yang "playful" — */}
       <section className="section container-page" aria-labelledby="galeri-title">
@@ -112,9 +99,6 @@ export default function HomePage() {
         position="center 55%"
         align="left"
       />
-
-      {/* — jadwal sholat ringkas — */}
-      <HomePrayer />
 
       <ArtDivider variant="divider-star" />
 
@@ -195,16 +179,6 @@ export default function HomePage() {
         </ol>
       </section>
 
-      {/* — banner penutup: ajakan tilawah — */}
-      <ImageBanner
-        variant="hero-night-gold"
-        eyebrow="Mulai sekarang"
-        title="Satu ayat hari ini lebih baik daripada seribu nanti"
-        desc="Buka Al-Qur'an, pilih surah, dan biarkan murottal menemani."
-        cta={{ href: "/surat", label: "Jelajahi 114 surah" }}
-        height="md"
-        position="center 50%"
-      />
     </>
   );
 }

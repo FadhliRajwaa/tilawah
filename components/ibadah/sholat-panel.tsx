@@ -13,7 +13,7 @@
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { JadwalHarian, Kota } from "@/lib/types";
-import { cn, formatCountdown, hariIndo } from "@/lib/utils";
+import { cn, formatCountdown, hariIndo, tanggalHijriah } from "@/lib/utils";
 import { WAKTU_SEMUA, WAKTU_WAJIB } from "@/lib/waktu-sholat";
 import { useSholat, type KotaSimpan } from "@/lib/use-sholat";
 import { AmbientImage } from "@/components/ambient-image";
@@ -205,7 +205,7 @@ export function SholatPanel() {
               </p>
               <p className="countdown__next">
                 Waktu <b>{berikut?.time}</b> · {kota.lokasi} · {hariIndo(new Date(now))},{" "}
-                {jadwal.tanggal}
+                {jadwal.tanggal} · {tanggalHijriah(new Date(now))}
               </p>
             </div>
 

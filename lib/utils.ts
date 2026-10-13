@@ -21,6 +21,22 @@ export function toArabicNumber(n: number): string {
     .join("");
 }
 
+/** Tanggal Hijriah (kalender Umm al-Qura) dalam Bahasa Indonesia,
+ *  mis. "12 Rabiulawal 1447 H". Dihitung lokal via Intl — tanpa API. */
+export function tanggalHijriah(d: Date = new Date()): string {
+  try {
+    const parts = new Intl.DateTimeFormat("id-u-ca-islamic-umalqura", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }).formatToParts(d);
+    const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+    return `${get("day")} ${get("month")} ${get("year")} H`;
+  } catch {
+    return "";
+  }
+}
+
 /** Nama hari Indonesia dari objek Date */
 export function hariIndo(d: Date): string {
   return ["Ahad", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"][d.getDay()];

@@ -91,6 +91,17 @@ export function IbadahTabs({ asmaul, doa }: { asmaul: AsmaulHusnaItem[]; doa: Do
               setTab(t.id);
               setQ("");
             }}
+            onKeyDown={(e) => {
+              /* Panah kiri/kanan berpindah tab (pola tablist WAI-ARIA).
+                 Fokus mengikuti supaya pembaca layar mengumumkan tab baru. */
+              if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+              e.preventDefault();
+              const i = TABS.findIndex((x) => x.id === tab);
+              const n = (i + (e.key === "ArrowRight" ? 1 : TABS.length - 1)) % TABS.length;
+              setTab(TABS[n].id);
+              setQ("");
+              document.getElementById(`tab-${TABS[n].id}`)?.focus();
+            }}
           >
             {t.label}
           </button>
