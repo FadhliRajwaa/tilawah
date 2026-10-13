@@ -4,26 +4,14 @@
  *  - "veil"   → tekstur latar (opacity rendah + veil warna) — untuk header & hero
  *  - "plate"  → foto tampil jelas sebagai panel/kartu (opacity tinggi, veil tipis)
  *  - "clean"  → foto apa adanya, tanpa veil (untuk thumbnail & galeri)
- *  - `parallax` → foto bergerak lebih lambat dari halaman (efek kedalaman)
+ *  - `fixed`  → foto DIPAKU ke viewport (background-attachment: fixed) —
+ *    konten menggulir di atas gambar yang diam. Desktop dan ponsel sama.
  *
- * ═══ Kenapa `parallax` memakai <img> + ParallaxLayer ═══
- *
- * Versi sebelumnya memakai `background-attachment: fixed`. Dua masalah nyata:
- *  1. **Safari iOS mengabaikannya** (batasan WebKit) — di iPhone efeknya
- *     tidak ada sama sekali.
- *  2. `cover` diukur terhadap VIEWPORT, bukan elemen — di ponsel 390×844,
- *     foto 21:9 jadi lebar 1.969px sehingga hanya ~20% tengah yang terlihat.
- *     Karena itu efeknya lalu dimatikan di ≤700px, dan itulah yang membuat
- *     pengguna melaporkan "fixed tidak jalan di mobile".
- *
- * Sekarang: `<img>` biasa yang digeser dengan `transform: translate3d()`.
- * Bekerja identik di semua peramban, skalanya bisa dikendalikan persis, dan
- * `object-fit: cover` mengukur terhadap ELEMEN (bukan viewport) sehingga
- * foto tetap proporsional di layar sempit.
+ * Tanpa efek parallax JS: tidak ada scroll listener, tidak ada transform per
+ * frame, nol biaya main-thread saat menggulir teks.
  */
 
 import type { CSSProperties } from "react";
-import { ParallaxLayer } from "./parallax";
 
 export type ArtVariant =
   // hero
@@ -87,9 +75,10 @@ interface Props {
   fade?: "bottom" | "sides" | "top" | "none";
   /** "veil" (default) = tekstur; "plate" = foto sebagai panel; "clean" = tanpa perlakuan */
   mode?: "veil" | "plate" | "clean";
+  /** Foto dipaku ke viewport — konten menggulir di atasnya. */
+  fixed?: boolean;
   /**
-   * Foto bergerak lebih lambat dari halaman (efek kedalaman).
-   * `true` = 0.6 (nyaris diam, untuk latar) · angka = kecepatan sendiri.
+   * @deprecated Dulu efek parallax JS. Sekarang diabaikan — pakai `fixed`.
    */
   parallax?: boolean | number;
 }
@@ -103,8 +92,10 @@ export function AmbientImage({
   style,
   fade = "none",
   mode = "veil",
-  parallax = false,
+  fixed = false,
+  parallax: _parallax = false,
 }: Props) {
+  void _parallax;
   const v = (ALIAS[variant] ?? variant) as string;
   const [rw, rh] = RATIO[v] ?? [16, 9];
   const opacity = intensity ?? (mode === "plate" ? 1 : mode === "clean" ? 1 : 0.12);
@@ -118,7 +109,33 @@ export function AmbientImage({
           ? "linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%)"
           : undefined;
 
-  const img = (
+  /* — gambar fixed: SATU background dipaku ke viewport ———————————————
+   *
+   * `background-attachment: fixed` dikerjakan compositor: nol JS, nol
+   * transform per frame. `sizes`/`srcSet` tidak berlaku untuk background,
+   * jadi varian dipilih sekali saat mount (sm ≤700px, md di atasnya).
+   * Varian lg tetap untuk retina lewat image-set. */
+  if (fixed) {
+    return (
+      <span
+        className={`ambient ambient--fixed ${className}`.trim()}
+        style={
+          {
+            "--ambient-opacity": opacity,
+            "--fixed-pos": position,
+            "--fixed-img-sm": `url(/images/${v}-sm.webp)`,
+            "--fixed-img-md": `url(/images/${v}-md.webp)`,
+            "--fixed-img-lg": `url(/images/${v}-lg.webp)`,
+            ...(mask ? { "--ambient-mask": mask } : null),
+            ...style,
+          } as CSSProperties
+        }
+        aria-hidden="true"
+      />
+    );
+  }
+
+  return (
     <picture
       className={`ambient ambient--${mode} ${className}`.trim()}
       style={
@@ -160,21 +177,4 @@ export function AmbientImage({
       />
     </picture>
   );
-
-  /* — mode kedalaman: SATU gambar, satu mekanisme ————————————————
-   *
-   * Hanya `<ParallaxLayer>` yang dirender. Di desktop (≥1025px) ia menggeser
-   * gambar dengan transform; di ponsel lapisannya tidak diaktifkan sama
-   * sekali, jadi gambar tampil diam — tanpa duplikat background CSS dan
-   * tanpa unduhan kedua. */
-  if (parallax) {
-    const speed = parallax === true ? 0.6 : parallax;
-    return (
-      <ParallaxLayer speed={speed} className="ambient--px-host">
-        <span className="ambient--px-shift">{img}</span>
-      </ParallaxLayer>
-    );
-  }
-
-  return img;
 }

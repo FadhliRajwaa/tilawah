@@ -12,6 +12,7 @@
 import Link from "@/components/smart-link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { usePrefs } from "@/lib/store/prefs";
 import { SURAH } from "@/lib/data/surah";
 import { quickFind, type QFResult } from "@/lib/quick-find";
@@ -62,6 +63,7 @@ export function SiteNav() {
   /* Fokus kembali ke pemicu saat dialog ditutup — tanpa ini pengguna
      keyboard kehilangan posisi setelah menutup cari. */
   const qfBackTo = useRef<HTMLElement | null>(null);
+  const kurangGerak = useReducedMotion();
   const linksRef = useRef<HTMLElement>(null);
   const [pill, setPill] = useState<{ x: number; w: number } | null>(null);
 
@@ -240,16 +242,28 @@ export function SiteNav() {
         </div>
       </header>
 
-      {qfOpen && (
-        <div className="qf-backdrop" onClick={() => setQfOpen(false)}>
-          <div
-            ref={qfDlgRef}
-            className="qf"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Cari cepat"
-            onClick={(e) => e.stopPropagation()}
+      <AnimatePresence>
+        {qfOpen && (
+          <motion.div
+            className="qf-backdrop"
+            onClick={() => setQfOpen(false)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: kurangGerak ? 0.01 : 0.18 }}
           >
+            <motion.div
+              ref={qfDlgRef}
+              className="qf"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Cari cepat"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 8, scale: 0.98 }}
+              transition={{ duration: kurangGerak ? 0.01 : 0.15 }}
+            >
             <div className="qf__box">
               <IconSearch className="qf__icon" />
               <input
@@ -317,9 +331,10 @@ export function SiteNav() {
                 Tidak cocok — coba &ldquo;36&rdquo;, &ldquo;2:255&rdquo;, &ldquo;yasin&rdquo;, atau &ldquo;juz 30&rdquo;.
               </p>
             )}
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

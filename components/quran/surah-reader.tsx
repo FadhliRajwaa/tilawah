@@ -18,6 +18,7 @@ import { usePrefs } from "@/lib/store/prefs";
 import { useReading } from "@/lib/reading";
 import { scrollToEl } from "@/lib/utils";
 import { AyahCard } from "./ayah-card";
+import { Reveal } from "@/components/reveal";
 import { OrnamentDivider } from "@/components/ornaments";
 import { MushafFlow } from "./mushaf-flow";
 import { TafsirSheet } from "./tafsir-sheet";
@@ -126,16 +127,17 @@ export function Reader({ ayat, surahNomor, nextSurah, juzNomor, rentang }: Props
         {mode === "ayat" ? (
           <div className="stack-3">
             {ayat.map((a) => (
-              <AyahCard
-                key={`${a.s}:${a.n}`}
-                surahNomor={a.s}
-                surahNama={namaSurah(a.s)}
-                ayah={a}
-                queue={queue}
-                isTarget={target === `${a.s}:${a.n}`}
-                onOpenTafsir={openTafsir}
-                idPrefix={`ayat-${a.s}`}
-              />
+              <Reveal key={`${a.s}:${a.n}`} y={10}>
+                <AyahCard
+                  surahNomor={a.s}
+                  surahNama={namaSurah(a.s)}
+                  ayah={a}
+                  queue={queue}
+                  isTarget={target === `${a.s}:${a.n}`}
+                  onOpenTafsir={openTafsir}
+                  idPrefix={`ayat-${a.s}`}
+                />
+              </Reveal>
             ))}
           </div>
         ) : (

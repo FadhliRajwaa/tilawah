@@ -40,12 +40,9 @@ html {
   scroll-padding-bottom: calc(var(--chrome-bottom, 0px) + var(--space-4));
   overflow-x: clip;
   color-scheme: light;
-  /* Gulir halus untuk tautan dalam halaman. Next.js 16 TIDAK lagi menimpa
-     ini saat pindah halaman — itu sebabnya ada `data-scroll-behavior` di
-     <html> (layout.tsx), yang memintanya mematikan smooth sementara saat
-     navigasi. Tanpa itu, membuka halaman dari kaki halaman panjang memutar
-     animasi gulir ke atas setiap kali. */
-  scroll-behavior: smooth;
+  /* Tanpa scroll-behavior CSS: Lenis yang mengatur kehalusan (satu mesin
+     gulir). Fallback native smooth hanya saat Lenis nonaktif — lihat
+     lib/utils.ts scrollToEl. */
 }
 
 [data-theme="dark"] {

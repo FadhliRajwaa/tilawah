@@ -92,8 +92,15 @@ export function reduceMotion(): boolean {
 }
 
 /** Gulir ke elemen: langsung kalau jauh (animasi 200.000px tidak membantu
- *  siapa pun), halus kalau dekat (mata bisa mengikuti ke mana ia pergi). */
+ *  siapa pun), halus kalau dekat (mata bisa mengikuti ke mana ia pergi).
+ *  Lewat Lenis bila aktif — satu mesin gulir, tanpa rebutan dengan
+ *  scrollIntoView native. */
 export function scrollToEl(el: Element, block: ScrollLogicalPosition = "center"): void {
+  const lenis = (window as unknown as { __lenis?: { scrollTo: (t: Element, o?: object) => void } }).__lenis;
+  if (lenis && !reduceMotion()) {
+    lenis.scrollTo(el, { offset: block === "center" ? -window.innerHeight * 0.25 : 0, duration: 0.9 });
+    return;
+  }
   const dist = Math.abs(el.getBoundingClientRect().top);
   const near = dist < window.innerHeight * 1.5;
   el.scrollIntoView({ block, behavior: near && !reduceMotion() ? "smooth" : "instant" });

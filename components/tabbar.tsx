@@ -10,6 +10,7 @@
 import Link from "@/components/smart-link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { IconBookmark, IconCrescent, IconHome, IconMushaf, IconSearch } from "./icons";
 
@@ -24,6 +25,7 @@ const TABS = [
 export function Tabbar() {
   const pathname = usePathname();
   const [hidden, setHidden] = useState(false);
+  const kurangGerak = useReducedMotion();
   const lastY = useRef(0);
 
   useEffect(() => {
@@ -41,12 +43,18 @@ export function Tabbar() {
   }, [pathname]);
 
   return (
-    <nav
+    <motion.nav
       className={cn("tabbar", hidden && "is-hidden")}
       aria-label="Navigasi utama"
       /* Tersembunyi = tak terlihat DAN tak terjangkau keyboard. Tanpa ini
          fokus Tab mendarat di tautan di luar layar. */
       inert={hidden}
+      animate={{ y: hidden ? 88 : 0 }}
+      transition={
+        kurangGerak
+          ? { duration: 0.01 }
+          : { type: "spring", stiffness: 500, damping: 40 }
+      }
     >
       {TABS.map(({ href, label, Icon }) => {
         const active = href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/");
@@ -62,6 +70,6 @@ export function Tabbar() {
           </Link>
         );
       })}
-    </nav>
+    </motion.nav>
   );
 }

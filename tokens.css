@@ -208,6 +208,15 @@
   /* Kurva lembar iOS: mulai cepat, mengendap panjang — terasa seperti
      ditarik, bukan didorong. */
   --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
+  /* Pegas seragam untuk gerak berbasis motion (tabbar, panel): tanpa
+     memantul — benda nyata melambat lalu berhenti. */
+  --ease-spring: linear(0, 0.404 7.4%, 0.772 14.6%, 0.882 17.5%, 0.957 20.8%, 1.008 24.5%, 1.035 28.5%, 1.037 32.7%, 1.017 37.5%, 0.983 43.4%, 0.977 47.4%, 1 56.8%);
+  /* Tekan tombol: umpan balik instan di bawah ambang persepsi tunda. */
+  --dur-press: 120ms;
+  /* Spring JS (motion/gsap): CSS tak bisa pegas — token ini penanda niat. */
+  --ease-spring: linear;
+  /* Umpan tekan tombol (whileTap sheet__close, toast, chip). */
+  --dur-press: 120ms;
 
   /* ─── 6. TATA LETAK ────────────────────────────────────────────────── */
 

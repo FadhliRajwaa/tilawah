@@ -19,6 +19,7 @@
  */
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { IconClose } from "./icons";
 
@@ -212,9 +213,16 @@ export function Sheet({ open, onClose, title, sub, children, footer, variant = "
             </h2>
             {sub && <p className="sheet__sub">{sub}</p>}
           </div>
-          <button type="button" className="sheet__close" onClick={() => onCloseRef.current()} aria-label="Tutup">
+          <motion.button
+            type="button"
+            className="sheet__close"
+            onClick={() => onCloseRef.current()}
+            aria-label="Tutup"
+            whileTap={{ scale: 0.97 }}
+            transition={{ duration: 0.12 }}
+          >
             <IconClose />
-          </button>
+          </motion.button>
         </div>
         <div className="sheet__body">{children}</div>
         {footer && <div className="sheet__foot">{footer}</div>}

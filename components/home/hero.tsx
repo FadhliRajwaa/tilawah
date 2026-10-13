@@ -5,6 +5,7 @@
  * yang sama, tanpa fetch. Teks Arabnya disalin dari data Kemenag. */
 
 import Link from "@/components/smart-link";
+import { HeroIntro } from "./hero-intro";
 import { MihrabFrame, OrnamentStar } from "@/components/ornaments";
 import { AmbientImage } from "@/components/ambient-image";
 import { Orb } from "@/components/orb";
@@ -23,7 +24,7 @@ export function Hero() {
         mode="plate"
         intensity={0.85}
         position="center 38%"
-        parallax
+        fixed
         priority
       />
 
@@ -40,23 +41,24 @@ export function Hero() {
       />
 
       <div className="hero__inner container-page on-ambient">
-        <div>
-          <span className="hero__eyebrow">
+        <HeroIntro>
+          <div>
+          <span className="hero__eyebrow hero__anim">
             <OrnamentStar className="hero__eyebrow-star" />
             Mushaf digital Indonesia
           </span>
 
-          <h1 id="hero-title" className="hero__title">
+          <h1 id="hero-title" className="hero__title hero__anim">
             Tilawah, <em>tenang</em> dan lengkap.
           </h1>
 
-          <p className="hero__lede">
+          <p className="hero__lede hero__anim">
             Baca Al-Qur&rsquo;an 114 surah dengan teks mushaf, terjemahan Kemenag,
             tafsir per ayat, dan murottal enam qari. Lengkap dengan Asmaul Husna,
             doa harian, dan jadwal sholat.
           </p>
 
-          <div className="hero__actions">
+          <div className="hero__actions hero__anim">
             <Link href="/surat/36" className="btn btn--primary">
               Mulai dari Yasin
             </Link>
@@ -65,7 +67,7 @@ export function Hero() {
             </Link>
           </div>
 
-          <div className="hero__stats">
+          <div className="hero__stats hero__anim">
             <div className="hero__stat">
               <b>114</b>
               <span>surah</span>
@@ -83,7 +85,8 @@ export function Hero() {
               <span>asmaul husna</span>
             </div>
           </div>
-        </div>
+          </div>
+        </HeroIntro>
 
         <aside className="hero__card" aria-label="Ayat hari ini">
           <span className="hero__card-label">Ayat hari ini</span>

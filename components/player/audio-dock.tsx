@@ -4,6 +4,7 @@
  * (ketuk untuk membuka panel penuh) — lihat player-panel.tsx. */
 
 import { useEffect, useRef, useState } from "react";
+import { motion } from "motion/react";
 import { getPosition, next, prev, seek, setRepeat, setSpeed, stop, toggle, usePlayer } from "@/lib/player";
 import { qariOf } from "@/lib/audio";
 import { SURAH } from "@/lib/data/surah";
@@ -71,20 +72,22 @@ export function AudioDock() {
 
         {/* kontrol utama */}
         <div className="audio-dock__controls">
-          <button type="button" className="dock-btn" onClick={prev} aria-label="Sebelumnya">
+          <motion.button type="button" className="dock-btn" onClick={prev} aria-label="Sebelumnya" whileTap={{ scale: 0.94 }} transition={{ duration: 0.12 }}>
             <IconPrev className="dock-btn__icon" />
-          </button>
-          <button
+          </motion.button>
+          <motion.button
             type="button"
             className="dock-btn dock-btn--primary"
             onClick={toggle}
             aria-label={playing ? "Jeda" : "Putar"}
+            whileTap={{ scale: 0.9 }}
+            transition={{ duration: 0.12 }}
           >
             {playing ? <IconPause className="dock-btn__icon" /> : <IconPlay className="dock-btn__icon" />}
-          </button>
-          <button type="button" className="dock-btn" onClick={next} aria-label="Berikutnya">
+          </motion.button>
+          <motion.button type="button" className="dock-btn" onClick={next} aria-label="Berikutnya" whileTap={{ scale: 0.94 }} transition={{ duration: 0.12 }}>
             <IconNext className="dock-btn__icon" />
-          </button>
+          </motion.button>
         </div>
 
         {/* timeline */}

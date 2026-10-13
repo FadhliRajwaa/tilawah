@@ -8,6 +8,7 @@ import { ArtDivider } from "@/components/art-divider";
 import { ImageBanner } from "@/components/image-banner";
 import { Gallery, type GalleryItem } from "@/components/gallery";
 import { AmbientImage } from "@/components/ambient-image";
+import { Reveal } from "@/components/reveal";
 export const revalidate = 86400;
 
 const POPULER = [
@@ -50,7 +51,7 @@ export default function HomePage() {
       <HomePrayer />
 
       {/* — shortcut surah populer — */}
-      <section className="section container-page" aria-labelledby="populer-title">
+      <Reveal as="section" className="section container-page" ariaLabelledby="populer-title">
         <div className="section__head">
           <div>
             <h2 id="populer-title" className="section__title">
@@ -65,12 +66,12 @@ export default function HomePage() {
           </Link>
         </div>
         <PopularSurah items={POPULER.map((p) => ({ ...p, surah: find(p.nomor) }))} />
-      </section>
+      </Reveal>
 
       <ArtDivider variant="divider-zellige" />
 
       {/* — galeri mosaik: inilah bagian yang "playful" — */}
-      <section className="section container-page" aria-labelledby="galeri-title">
+      <Reveal as="section" className="section container-page" ariaLabelledby="galeri-title" delay={0.05}>
         <div className="section__head">
           <div>
             <h2 id="galeri-title" className="section__title">
@@ -86,7 +87,7 @@ export default function HomePage() {
           </Link>
         </div>
         <Gallery items={GALERI} label="Galeri warisan visual Islam" />
-      </section>
+      </Reveal>
 
       {/* — banner: mushaf & tafsir — */}
       <ImageBanner
@@ -116,7 +117,7 @@ export default function HomePage() {
        * Kuncinya: satu item jadi LEBIH BESAR dari yang lain (Asmaul Husna),
        * supaya ada hierarki. Empat kartu sama besar tidak punya pendapat
        * tentang mana yang penting. */}
-      <section className="section container-page" aria-labelledby="fitur-title">
+      <Reveal as="section" className="section container-page" ariaLabelledby="fitur-title" delay={0.05}>
         <div className="section__head">
           <div>
             <h2 id="fitur-title" className="section__title">
@@ -128,7 +129,7 @@ export default function HomePage() {
           </div>
         </div>
         <ol className="routes">
-          <li className="routes__item routes__item--lead">
+          <Reveal as="li" className="routes__item routes__item--lead" delay={0.0} y={10}>
             <Link href="/ibadah?tab=asmaulhusna" className="route">
               <span className="route__num" aria-hidden="true">01</span>
               <span className="route__body">
@@ -139,8 +140,8 @@ export default function HomePage() {
               </span>
               <span className="route__go" aria-hidden="true">→</span>
             </Link>
-          </li>
-          <li className="routes__item">
+          </Reveal>
+          <Reveal as="li" className="routes__item" delay={0.06} y={10}>
             <Link href="/ibadah?tab=doa" className="route">
               <span className="route__num" aria-hidden="true">02</span>
               <span className="route__body">
@@ -151,8 +152,8 @@ export default function HomePage() {
               </span>
               <span className="route__go" aria-hidden="true">→</span>
             </Link>
-          </li>
-          <li className="routes__item">
+          </Reveal>
+          <Reveal as="li" className="routes__item" delay={0.12} y={10}>
             <Link href="/ibadah?tab=sholat" className="route">
               <span className="route__num" aria-hidden="true">03</span>
               <span className="route__body">
@@ -163,8 +164,8 @@ export default function HomePage() {
               </span>
               <span className="route__go" aria-hidden="true">→</span>
             </Link>
-          </li>
-          <li className="routes__item">
+          </Reveal>
+          <Reveal as="li" className="routes__item" delay={0.18} y={10}>
             <Link href="/cari" className="route">
               <span className="route__num" aria-hidden="true">04</span>
               <span className="route__body">
@@ -175,9 +176,9 @@ export default function HomePage() {
               </span>
               <span className="route__go" aria-hidden="true">→</span>
             </Link>
-          </li>
+          </Reveal>
         </ol>
-      </section>
+      </Reveal>
 
     </>
   );

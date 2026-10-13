@@ -12,6 +12,7 @@ import { ThemeScript } from "@/components/theme-script";
 import { WatercolorBg } from "@/components/watercolor-bg";
 import { LightboxProvider } from "@/components/image-lightbox";
 import { Toaster } from "@/components/toaster";
+import { SmoothScroll } from "@/components/smooth-scroll";
 import { ViewTransition } from "react";
 
 const fraunces = Fraunces({
@@ -108,6 +109,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         />
       </head>
       <body>
+        <SmoothScroll />
         <WatercolorBg />
         <a href="#konten" className="skip-link">
           Lewati ke konten

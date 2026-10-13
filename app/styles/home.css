@@ -888,39 +888,47 @@
   opacity: 0.92;
 }
 
-/* ─── kedalaman foto: satu gambar, digeser hanya di desktop ───
-   Lapisan selalu tampil (gambar diam di ponsel). Transform parallax hanya
-   ditulis JS pada ≥1025px; di bawah itu tidak ada pergeseran sama sekali. */
+/* ─── gambar fixed: SATU background dipaku ke viewport ───
+   Dikerjakan compositor: nol JS, nol transform per frame — desktop dan
+   ponsel sama. Varian sm (45 KB) untuk layar sempit, md di atasnya;
+   retina dapat lg lewat image-set. */
 
-.ambient--px-host {
-  display: block;
+.ambient--fixed {
   position: absolute;
   inset: 0;
   z-index: 0;
-  overflow: hidden;
   pointer-events: none;
+  background-image: var(--fixed-img-sm);
+  background-position: var(--fixed-pos, center);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+  opacity: var(--ambient-opacity, 1);
+  -webkit-mask-image: var(--ambient-mask, none);
+  mask-image: var(--ambient-mask, none);
 }
 
-.ambient--px-shift {
-  position: absolute;
-  inset: 0;
-  display: block;
-}
-
-@media (min-width: 1025px) {
-  .ambient--px-shift {
-    top: calc(var(--px-travel, 60vh) * -1);
-    height: calc(100% + var(--px-travel, 60vh) * 2);
-    transform: scale(1.02);
+@media (min-width: 700px) {
+  .ambient--fixed {
+    background-image: var(--fixed-img-md);
   }
 }
 
-.ambient--px-host .ambient {
-  position: absolute;
-  inset: 0;
+@media (min-width: 1300px) and (min-resolution: 2dppx) {
+  .ambient--fixed {
+    background-image: var(--fixed-img-lg);
+  }
 }
 
-[data-theme="dark"] .ambient--px-host .ambient--plate img {
+/* iOS Safari mengabaikan background-attachment: fixed — fallbacknya gambar
+   diam mengikuti elemen (tetap proporsional, tanpa jank transform JS). */
+@supports not (background-attachment: fixed) {
+  .ambient--fixed {
+    background-attachment: scroll;
+  }
+}
+
+[data-theme="dark"] .ambient--fixed {
   opacity: calc(var(--ambient-opacity, 1) * 0.62);
 }
 

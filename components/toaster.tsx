@@ -8,6 +8,7 @@
  * atau fokus ada di atasnya (WCAG 2.2.1: batas waktu bisa disesuaikan). */
 
 import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { TOAST_EVENT, type ToastData } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 
@@ -38,30 +39,37 @@ export function Toaster() {
 
   return (
     <div className="toaster" role="status" aria-live="polite">
-      {t && (
-        <div
-          key={t.id}
-          className={cn("toast", shown && "is-shown")}
+      <AnimatePresence mode="popLayout">
+        {t && shown && (
+          <motion.div
+            key={t.id}
+            className={cn("toast", "is-shown")}
+            layout
+            initial={{ opacity: 0, y: 16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+            transition={{ duration: 0.22 }}
           onPointerEnter={() => window.clearTimeout(timer.current)}
           onPointerLeave={() => shown && arm(2200)}
           onFocus={() => window.clearTimeout(timer.current)}
           onBlur={() => shown && arm(2200)}
-        >
-          <span className="toast__msg">{t.msg}</span>
-          {t.action && (
-            <button
-              type="button"
-              className="toast__act"
-              onClick={() => {
-                t.action!.run();
-                setShown(false);
-              }}
-            >
-              {t.action.label}
-            </button>
-          )}
-        </div>
-      )}
+          >
+            <span className="toast__msg">{t.msg}</span>
+            {t.action && (
+              <button
+                type="button"
+                className="toast__act"
+                onClick={() => {
+                  t.action!.run();
+                  setShown(false);
+                }}
+              >
+                {t.action.label}
+              </button>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

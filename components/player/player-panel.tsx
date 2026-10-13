@@ -11,6 +11,7 @@
  * pemutar tidak ikut memudar saat pindah halaman (seperti nav & dock). */
 
 import { useEffect, useState } from "react";
+import { motion } from "motion/react";
 import {
   getPosition,
   next,
@@ -277,7 +278,7 @@ function PanelBody({ onPickAyat }: { onPickAyat: (n: number) => void }) {
           <p className="ppanel__ayat-label">Ayat surah ini</p>
           <div className="ppanel__ayat-grid" role="list">
             {Array.from({ length: total }, (_, i) => i + 1).map((n) => (
-              <button
+              <motion.button
                 key={n}
                 type="button"
                 role="listitem"
@@ -285,9 +286,11 @@ function PanelBody({ onPickAyat }: { onPickAyat: (n: number) => void }) {
                 onClick={() => onPickAyat(n)}
                 aria-label={`Putar ayat ${n}`}
                 aria-current={n === track.n || undefined}
+                whileTap={{ scale: 0.9 }}
+                transition={{ duration: 0.12 }}
               >
                 {n}
-              </button>
+              </motion.button>
             ))}
           </div>
         </div>
