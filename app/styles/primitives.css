@@ -456,6 +456,268 @@
   padding-inline-start: calc(var(--space-4) * 2 + 17px);
 }
 
+/* ═══ 5b. LEMBAR (sheet) ═══════════════════════════════════════════
+   Satu primitif untuk semua panel di atas halaman. Ponsel: lembar bawah
+   yang bisa diseret. Desktop: drawer kanan, atau "pop" melayang tanpa tirai.
+   Masuk/keluar memakai TRANSISI (bukan keyframe) supaya bisa dibalik di
+   tengah jalan. */
+
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: grid;
+  padding: 0;
+  border: 0;
+  margin: 0;
+  max-width: none;
+  max-height: none;
+  width: 100%;
+  height: 100dvh;
+  background: transparent;
+  overflow: clip;
+  overscroll-behavior: contain;
+}
+
+.sheet__scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--scrim);
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.sheet__panel {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--paper-3);
+  box-shadow: var(--shadow-3);
+  transition:
+    transform var(--dur-sheet) var(--ease-sheet),
+    opacity var(--dur-base) var(--ease-out);
+  will-change: transform;
+}
+
+/* — ponsel: lembar bawah — */
+.sheet__panel {
+  inset-inline: 0;
+  bottom: 0;
+  max-height: 92dvh;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  padding-bottom: var(--safe-b);
+  transform: translate3d(0, 100%, 0);
+}
+
+.sheet[data-state="open"] .sheet__scrim {
+  opacity: 1;
+}
+
+.sheet[data-state="open"] .sheet__panel {
+  transform: translate3d(0, 0, 0);
+}
+
+.sheet[data-state="closed"] .sheet__scrim {
+  opacity: 0;
+}
+
+.sheet__head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4) var(--space-3);
+  touch-action: pan-x;
+  cursor: grab;
+}
+
+.sheet__grip {
+  position: absolute;
+  top: var(--space-2);
+  left: 50%;
+  width: 40px;
+  height: 4px;
+  margin-left: -20px;
+  border-radius: var(--radius-full);
+  background: var(--rule);
+}
+
+.sheet__titles {
+  flex: 1;
+  min-width: 0;
+  padding-top: var(--space-3);
+}
+
+.sheet__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.sheet__sub {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-sm);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.sheet__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-top: var(--space-2);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+@media (hover: hover) {
+  .sheet__close:hover {
+    background: var(--paper-2);
+    color: var(--ink);
+  }
+}
+
+.sheet__body {
+  padding: var(--space-2) var(--space-5) var(--space-5);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.sheet__foot {
+  padding: var(--space-3) var(--space-5) calc(var(--space-4) + var(--safe-b));
+  border-top: 1px solid var(--rule-2);
+}
+
+@media (min-width: 900px) {
+  /* — drawer: laci kanan — */
+  .sheet--drawer .sheet__panel {
+    inset-inline-end: 0;
+    inset-inline-start: auto;
+    top: 0;
+    bottom: 0;
+    width: min(460px, 92vw);
+    max-height: none;
+    border-radius: var(--radius-xl) 0 0 var(--radius-xl);
+    transform: translate3d(100%, 0, 0);
+  }
+
+  [dir="rtl"] .sheet--drawer .sheet__panel {
+    transform: translate3d(-100%, 0, 0);
+  }
+
+  .sheet--drawer[data-state="open"] .sheet__panel {
+    transform: translate3d(0, 0, 0);
+  }
+
+  .sheet--drawer .sheet__head {
+    cursor: default;
+  }
+
+  .sheet--drawer .sheet__grip {
+    display: none;
+  }
+
+  /* — pop: panel melayang di dekat pemicu, TANPA tirai — */
+  .sheet--pop {
+    pointer-events: none;
+  }
+
+  .sheet--pop .sheet__scrim {
+    display: none;
+  }
+
+  .sheet--pop .sheet__panel {
+    pointer-events: auto;
+    inset-inline: auto var(--pop-end, 12px);
+    top: var(--pop-top, 70px);
+    bottom: auto;
+    width: min(380px, calc(100vw - 24px));
+    max-height: min(80dvh, 560px);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-lg);
+    transform-origin: top center;
+    transform: translate3d(0, -8px, 0) scale(0.98);
+    opacity: 0;
+  }
+
+  .sheet--pop[data-state="open"] .sheet__panel {
+    transform: none;
+    opacity: 1;
+  }
+
+  .sheet--pop .sheet__grip {
+    display: none;
+  }
+
+  .sheet--pop .sheet__head {
+    cursor: default;
+  }
+}
+
+/* ═══ 5c. TOAST ═══════════════════════════════════════════════════════
+   Notifikasi singkat + aksi opsional ("Batalkan"). Wadah role=status
+   selalu di DOM supaya pembaca layar mengumumkannya. */
+
+.toaster {
+  position: fixed;
+  inset-inline: 0;
+  bottom: calc(var(--chrome-bottom, 0px) + var(--space-4));
+  z-index: var(--z-toast);
+  display: flex;
+  justify-content: center;
+  padding-inline: var(--space-4);
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: min(480px, 100%);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--ink);
+  color: var(--paper-3);
+  box-shadow: var(--shadow-3);
+  font-size: var(--text-sm);
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+  pointer-events: auto;
+}
+
+.toast.is-shown {
+  opacity: 1;
+  transform: none;
+}
+
+.toast__msg {
+  line-height: var(--leading-normal);
+}
+
+.toast__act {
+  flex-shrink: 0;
+  min-height: 40px;
+  padding-inline: var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--gold);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .toast__act:hover {
+    background: color-mix(in oklab, var(--paper-3) 14%, transparent);
+  }
+}
+
 /* ═══ 6. TAUTAN DALAM TEKS ═══════════════════════════════════════════ */
 
 .link {

@@ -1,27 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cariKota, getKotaList } from "@/lib/api/sholat";
-
-export const revalidate = 604800;
+import { cariKota } from "@/lib/api/sholat";
 
 export async function GET(req: NextRequest) {
-  const q = req.nextUrl.searchParams.get("q")?.trim();
-
+  const q = req.nextUrl.searchParams.get("q")?.trim() ?? "";
+  if (q.length < 3 || q.length > 40) {
+    return NextResponse.json({ error: "Kata kunci kota 3–40 huruf." }, { status: 400 });
+  }
   try {
-    if (!q || q.length < 3) {
-      // tanpa query: kembalikan daftar lengkap (518 kota) untuk pencarian lokal
-      const semua = await getKotaList();
-      return NextResponse.json(semua, {
-        headers: { "Cache-Control": "public, s-maxage=604800, stale-while-revalidate=2592000" },
-      });
-    }
-    const hasil = await cariKota(q);
-    return NextResponse.json(hasil, {
+    return NextResponse.json(await cariKota(q), {
       headers: { "Cache-Control": "public, s-maxage=604800, stale-while-revalidate=2592000" },
     });
   } catch {
-    return NextResponse.json(
-      { error: "Pencarian kota sedang tidak tersedia." },
-      { status: 502 },
-    );
+    return NextResponse.json({ error: "Pencarian kota sedang tidak tersedia." }, { status: 502 });
   }
 }

@@ -1,39 +1,44 @@
 "use client";
 
-/* — Toolbar pengaturan baca.
+/* — Bilah baca: mode, ukuran Arab, latin/terjemahan, qari, dan lompat ayat.
  *
- * ⚠️ Diekstrak dari duplikasi antara `surah-reader.tsx` dan `juz-reader.tsx`.
- * Keduanya menulis blok yang identik — 71 baris yang sama persis, hanya
- * berbeda komentar. Itu berarti setiap perubahan pengaturan baca harus
- * dikerjakan dua kali, dan cepat atau lambat keduanya akan berbeda tanpa
- * ada yang menyadarinya.
- *
- * Sekarang satu komponen, satu sumber kebenaran. Reader surat dan reader juz
- * memanggilnya dengan prop yang sama karena keduanya memang membaca hal yang
- * sama — preferensi pengguna.
- *
- * Semua kontrol menulis ke `usePrefs()`, jadi pilihannya langsung tersimpan
- * dan berlaku di seluruh situs (bukan per halaman).
+ * Menulis langsung ke preferensi (tersimpan + diterapkan ke <html>), tanpa
+ * state lokal — jadi server tidak perlu tahu pilihan untuk mengirim HTML
+ * yang benar. Lengket di bawah nav saat menggulir bacaan panjang.
  */
 
+import { useState } from "react";
 import { usePrefs } from "@/lib/store/prefs";
+import { QARI, qariOf } from "@/lib/audio";
 import { cn } from "@/lib/utils";
+import { IconCheck, IconChevron, IconType } from "@/components/icons";
 
-/** Tangga ukuran teks Arab. Lima langkah — cukup untuk menyesuaikan tanpa
- *  membuat pengguna harus menekan tombol berkali-kali. */
+/** Tangga ukuran teks Arab. Lima langkah — cukup tanpa berkali-kali tekan. */
 const SCALES = [0.85, 1, 1.15, 1.3, 1.5];
 
-export function ReaderToolbar() {
+export function ReaderBar({ maxAyat }: { maxAyat: number }) {
   const [prefs, updatePrefs] = usePrefs();
+  const [qariOpen, setQariOpen] = useState(false);
+  const [jump, setJump] = useState("");
 
-  /* Cari indeks skala terdekat. Toleransi 0.001 karena nilai dari
-     localStorage bisa tersimpan sebagai 1.1500000000000001. */
   const idx = SCALES.findIndex((s) => s >= prefs.arabicScale - 0.001);
+  const qari = qariOf(prefs.reciter);
+
+  const goJump = () => {
+    const n = Number(jump);
+    if (!Number.isInteger(n) || n < 1 || n > maxAyat) return;
+    /* Cari di kedua mode (per-ayat dan mushaf) */
+    const el =
+      document.querySelector(`[data-ayah="${n}"]`) ??
+      document.getElementById(`m-${n}`);
+    el?.scrollIntoView({ block: "center" });
+    setJump("");
+  };
 
   return (
-    <div className="reader-toolbar container-page" role="toolbar" aria-label="Pengaturan tampilan">
-      <div className="reader-toolbar__group">
-        <span className="reader-toolbar__label">Mode</span>
+    <div className="readerbar" role="toolbar" aria-label="Pengaturan baca">
+      <div className="readerbar__inner container-page">
+        {/* mode baca */}
         <div className="segmented" role="group" aria-label="Mode baca">
           <button
             type="button"
@@ -52,17 +57,15 @@ export function ReaderToolbar() {
             Mushaf
           </button>
         </div>
-      </div>
 
-      <div className="reader-toolbar__group">
-        <span className="reader-toolbar__label">Ukuran Arab</span>
-        <div className="stepper">
+        {/* ukuran Arab */}
+        <div className="stepper" role="group" aria-label="Ukuran teks Arab">
           <button
             type="button"
             className="stepper__btn"
             onClick={() => updatePrefs({ arabicScale: SCALES[Math.max(0, idx - 1)] })}
             disabled={idx <= 0}
-            aria-label="Perkecil ukuran teks Arab"
+            aria-label="Perkecil teks Arab"
           >
             −
           </button>
@@ -72,34 +75,92 @@ export function ReaderToolbar() {
           <button
             type="button"
             className="stepper__btn"
-            onClick={() =>
-              updatePrefs({ arabicScale: SCALES[Math.min(SCALES.length - 1, idx + 1)] })
-            }
+            onClick={() => updatePrefs({ arabicScale: SCALES[Math.min(SCALES.length - 1, idx + 1)] })}
             disabled={idx >= SCALES.length - 1}
-            aria-label="Perbesar ukuran teks Arab"
+            aria-label="Perbesar teks Arab"
           >
             +
           </button>
         </div>
-      </div>
 
-      <div className="reader-toolbar__group">
-        <button
-          type="button"
-          className={cn("btn btn--outline", prefs.showLatin && "is-on")}
-          onClick={() => updatePrefs({ showLatin: !prefs.showLatin })}
-          aria-pressed={prefs.showLatin}
+        {/* latin & terjemahan */}
+        <div className="readerbar__toggles" role="group" aria-label="Tampilan teks">
+          <button
+            type="button"
+            className={cn("readerbar__toggle", prefs.showLatin && "is-on")}
+            onClick={() => updatePrefs({ showLatin: !prefs.showLatin })}
+            aria-pressed={prefs.showLatin}
+          >
+            Latin
+          </button>
+          <button
+            type="button"
+            className={cn("readerbar__toggle", prefs.showTranslation && "is-on")}
+            onClick={() => updatePrefs({ showTranslation: !prefs.showTranslation })}
+            aria-pressed={prefs.showTranslation}
+          >
+            Terjemahan
+          </button>
+        </div>
+
+        {/* qari */}
+        <div className="readerbar__qari">
+          <button
+            type="button"
+            className="readerbar__qari-btn"
+            onClick={() => setQariOpen((v) => !v)}
+            aria-haspopup="listbox"
+            aria-expanded={qariOpen}
+            aria-label={`Qari: ${qari.nama}. Ganti qari`}
+          >
+            <IconType className="readerbar__qari-icon" />
+            <span>{qari.singkat}</span>
+            <IconChevron className={cn("readerbar__chev", qariOpen && "is-open")} />
+          </button>
+          {qariOpen && (
+            <div className="readerbar__qari-menu" role="listbox" aria-label="Pilih qari">
+              {QARI.map((q) => (
+                <button
+                  key={q.id}
+                  type="button"
+                  role="option"
+                  aria-selected={q.id === prefs.reciter}
+                  className={cn("readerbar__qari-item", q.id === prefs.reciter && "is-active")}
+                  onClick={() => {
+                    updatePrefs({ reciter: q.id });
+                    setQariOpen(false);
+                  }}
+                >
+                  <span>{q.nama}</span>
+                  {q.id === prefs.reciter && <IconCheck className="readerbar__check" />}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* lompat ke ayat */}
+        <form
+          className="readerbar__jump"
+          onSubmit={(e) => {
+            e.preventDefault();
+            goJump();
+          }}
         >
-          Latin
-        </button>
-        <button
-          type="button"
-          className={cn("btn btn--outline", prefs.showTranslation && "is-on")}
-          onClick={() => updatePrefs({ showTranslation: !prefs.showTranslation })}
-          aria-pressed={prefs.showTranslation}
-        >
-          Terjemahan
-        </button>
+          <input
+            type="number"
+            min={1}
+            max={maxAyat}
+            value={jump}
+            onChange={(e) => setJump(e.target.value)}
+            placeholder={`Ayat 1–${maxAyat}`}
+            aria-label="Lompat ke ayat"
+            className="readerbar__jump-input"
+          />
+          <button type="submit" className="readerbar__jump-btn">
+            Ke ayat
+          </button>
+        </form>
       </div>
     </div>
   );

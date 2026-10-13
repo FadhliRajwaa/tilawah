@@ -7,7 +7,7 @@
  * Lapis 3 — atribusi & lisensi, kecil dan tenang.
  */
 
-import Link from "next/link";
+import Link from "@/components/smart-link";
 import { Logo } from "./logo";
 import { AmbientImage } from "./ambient-image";
 import { PhotoZoom } from "./photo-zoom";

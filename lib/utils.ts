@@ -1,31 +1,16 @@
 /* — utilitas umum — */
 
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-
-/** Gabung className (dipakai komponen shadcn + komponen sendiri). */
-export function cn(...inputs: ClassValue[]): string {
-  return twMerge(clsx(inputs));
+/** Gabung className; nilai falsy dibuang.
+ *
+ *  Dulu `twMerge(clsx(...))`. Proyek ini memakai kelas BEM sendiri — tidak ada
+ *  utility Tailwind yang bisa bertabrakan — jadi dua dependensi itu (±8 KB JS
+ *  di setiap halaman) diganti satu baris. */
+export function cn(...c: Array<string | false | null | undefined>): string {
+  return c.filter(Boolean).join(" ");
 }
 
 export function pad(n: number, w = 2): string {
   return String(n).padStart(w, "0");
-}
-
-/** "2:255" → { surah: 2, ayah: 255 } */
-export function parseAyatRef(ref: string): { surah: number; ayah: number } | null {
-  const m = /^(\d{1,3})[:.](\d{1,3})$/.exec(ref.trim());
-  if (!m) return null;
-  const surah = Number(m[1]);
-  const ayah = Number(m[2]);
-  if (surah < 1 || surah > 114 || ayah < 1) return null;
-  return { surah, ayah };
-}
-
-/** Deteksi input pencarian: "yasin", "36", "2:255", "al-kahf" */
-export function looksLikeSurahQuery(q: string): boolean {
-  const s = q.trim().toLowerCase();
-  return /^\d{1,3}$/.test(s) || /^[a-z\-\s']+$/.test(s);
 }
 
 export function toArabicNumber(n: number): string {
@@ -57,6 +42,13 @@ export function formatCountdown(totalSeconds: number): string {
   return [h, m, sec].map((v) => pad(v)).join(":");
 }
 
+/** Detik → "m:ss" (label pemutar). */
+export function formatTime(sec: number): string {
+  if (!Number.isFinite(sec) || sec <= 0) return "0:00";
+  const s = Math.floor(sec);
+  return `${Math.floor(s / 60)}:${pad(s % 60)}`;
+}
+
 export function timeAgo(ts: number): string {
   const diff = Date.now() - ts;
   const m = Math.floor(diff / 60000);
@@ -74,4 +66,19 @@ export function truncate(text: string, max = 120): string {
   const cut = text.slice(0, max);
   const lastSpace = cut.lastIndexOf(" ");
   return (lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trimEnd() + "…";
+}
+
+/** Permintaan "kurangi gerak" — dibaca saat dipakai, bukan saat modul dimuat,
+ *  karena pengguna bisa mengubahnya kapan saja. Opsi `behavior` pada
+ *  `scrollIntoView` MENANG atas CSS, jadi pemeriksaan ini wajib eksplisit. */
+export function reduceMotion(): boolean {
+  return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+/** Gulir ke elemen: langsung kalau jauh (animasi 200.000px tidak membantu
+ *  siapa pun), halus kalau dekat (mata bisa mengikuti ke mana ia pergi). */
+export function scrollToEl(el: Element, block: ScrollLogicalPosition = "center"): void {
+  const dist = Math.abs(el.getBoundingClientRect().top);
+  const near = dist < window.innerHeight * 1.5;
+  el.scrollIntoView({ block, behavior: near && !reduceMotion() ? "smooth" : "instant" });
 }

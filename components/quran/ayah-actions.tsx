@@ -16,6 +16,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { toast } from "@/lib/toast";
 import { IconPlay, IconBook, IconBookmark, IconCopy, IconLink } from "@/components/icons";
 
 /** Salin ke clipboard dengan konfirmasi sementara.
@@ -32,8 +33,7 @@ function useCopy(ms = 1600) {
       setCopied(kind);
       window.setTimeout(() => setCopied(""), ms);
     } catch {
-      /* clipboard ditolak (izin browser / konteks tidak aman) — abaikan,
-         pengguna masih bisa menyalin manual */
+      toast("Tidak bisa menyalin otomatis — tandai teksnya lalu salin manual");
     }
   };
 
@@ -104,7 +104,7 @@ export function AyahActions({
         aria-pressed={marked}
         aria-label={marked ? `Hapus penanda ayat ${ayahNomor}` : `Tandai ayat ${ayahNomor}`}
       >
-        <IconBookmark className="ayah-action__icon" filled={marked} />
+        <IconBookmark className="ayah-action__icon" />
         {marked ? "Ditandai" : "Tandai"}
       </button>
 

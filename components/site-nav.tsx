@@ -1,23 +1,23 @@
 "use client";
 
-/* — Nav N1b (canonical: wordmark kiri · link tengah · aksi kanan).
+/* — Navigasi utama + cari cepat global.
  *
- * Beberapa penyempurnaan atas versi sebelumnya:
- *  · Indikator aktif adalah PIL yang mengalir di antara tautan (`.nav-link__pill`)
- *    — bukan latar yang menyala-nyala tiap tautan. Satu elemen bergerak lebih
- *    tenang dibaca daripada empat elemen berkedip.
- *  · Ikon tema & burger memakai jalur SVG yang sama sehingga ketebalan garisnya
- *    konsisten (sebelumnya 1.7 vs 1.8 tanpa alasan).
- *  · Menu seluler diberi latar solid penuh + pemisah halus; sebelumnya hanya
- *    tumpukan tautan yang menggantung di bawah nav.
- */
+ * Desktop: wordmark · tautan · cari · tema. Ponsel: wordmark · cari · tema,
+ * dengan tautan pindah ke bilah tab bawah (tabbar.tsx) — jangkauan jempol,
+ * bukan menu burger yang butuh dua ketukan.
+ *
+ * Cari cepat (Ctrl/⌘+K atau "/") mengerti "36", "2:255", "yasin 9",
+ * "kahfi", "juz 30", sampai "ayat kursi" — lihat lib/quick-find.ts. */
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Link from "@/components/smart-link";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { usePrefs } from "@/lib/store/prefs";
+import { SURAH } from "@/lib/data/surah";
+import { quickFind, type QFResult } from "@/lib/quick-find";
 import { cn } from "@/lib/utils";
 import { Logo } from "./logo";
+import { IconMoon, IconSearch, IconSun, IconThemeAuto } from "./icons";
 
 const LINKS = [
   { href: "/surat", label: "Surah" },
@@ -28,35 +28,36 @@ const LINKS = [
 ];
 
 function IconTheme({ mode }: { mode: string }) {
-  if (mode === "dark") {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true" className="nav-icon" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round">
-        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
-      </svg>
-    );
+  const cls = "nav-icon";
+  if (mode === "dark") return <IconMoon className={cls} />;
+  if (mode === "auto") return <IconThemeAuto className={cls} />;
+  return <IconSun className={cls} />;
+}
+
+function labelHasil(r: QFResult): { utama: string; sub: string; href: string } {
+  if (r.kind === "surah") {
+    const s = SURAH[r.s - 1];
+    return { utama: `${r.s}. ${s.latin}`, sub: `${s.arti} · ${s.ayat} ayat`, href: `/surat/${r.s}` };
   }
-  if (mode === "auto") {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true" className="nav-icon" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round">
-        <circle cx="12" cy="12" r="9" />
-        <path d="M12 3v18" />
-        <path d="M12 3a9 9 0 0 1 0 18" fill="currentColor" stroke="none" opacity="0.35" />
-      </svg>
-    );
+  if (r.kind === "ayah") {
+    const s = SURAH[r.s - 1];
+    return { utama: `${s.latin} : ${r.n}`, sub: "Langsung ke ayat", href: `/surat/${r.s}?ayat=${r.n}` };
   }
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="nav-icon" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round">
-      <circle cx="12" cy="12" r="4.2" />
-      <path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6" />
-    </svg>
-  );
+  if (r.kind === "juz") {
+    return { utama: `Juz ${r.n}`, sub: "Buka juz", href: `/juz/${r.n}` };
+  }
+  return { utama: `Cari “${r.q}”`, sub: "Dalam terjemahan", href: `/cari?q=${encodeURIComponent(r.q)}` };
 }
 
 export function SiteNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const [prefs, updatePrefs] = usePrefs();
-  const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [qfOpen, setQfOpen] = useState(false);
+  const [qf, setQf] = useState("");
+  const [qfAktif, setQfAktif] = useState(0);
+  const qfInputRef = useRef<HTMLInputElement>(null);
   const linksRef = useRef<HTMLElement>(null);
   const [pill, setPill] = useState<{ x: number; w: number } | null>(null);
 
@@ -67,9 +68,38 @@ export function SiteNav() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  /* Ctrl/⌘+K atau "/" membuka cari — kecuali sedang mengetik di field. */
   useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
+    const onKey = (e: KeyboardEvent) => {
+      const typing =
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLSelectElement;
+      if ((e.key.toLowerCase() === "k" && (e.ctrlKey || e.metaKey)) || (e.key === "/" && !typing)) {
+        e.preventDefault();
+        setQfOpen(true);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
+  useEffect(() => {
+    if (qfOpen) {
+      setQf("");
+      setQfAktif(0);
+      window.setTimeout(() => qfInputRef.current?.focus(), 30);
+    }
+  }, [qfOpen]);
+
+  useEffect(() => setQfOpen(false), [pathname]);
+
+  const hasil = quickFind(qf, SURAH);
+
+  const bukaHasil = (r: QFResult) => {
+    setQfOpen(false);
+    router.push(labelHasil(r).href);
+  };
 
   /* Ukur tautan aktif lalu geser pil ke posisinya. Diukur dari DOM, bukan
    * dihitung dari indeks — lebar label berbeda-beda ("Cari" vs "Tersimpan"),
@@ -102,7 +132,11 @@ export function SiteNav() {
     prefs.theme === "auto" ? "Tema: ikut sistem" : prefs.theme === "dark" ? "Tema: gelap" : "Tema: terang";
 
   return (
-    <header className={cn("site-nav", scrolled && "is-scrolled")}>
+    <>
+      <header
+        className={cn("site-nav", scrolled && "is-scrolled")}
+        style={{ viewTransitionName: "site-nav" }}
+      >
       <div className="site-nav__inner container-page">
         <Link href="/" className="wordmark" aria-label="Tilawah — beranda">
           <Logo className="wordmark__mark" />
@@ -133,55 +167,116 @@ export function SiteNav() {
         </nav>
 
         <div className="site-nav__actions">
-          <button
-            type="button"
-            className="nav-iconbtn"
-            onClick={cycleTheme}
-            aria-label={themeLabel}
-            title={themeLabel}
-          >
-            <IconTheme mode={prefs.theme} />
-          </button>
-          <Link href="/surat/36" className="nav-cta">
-            Yasin
-          </Link>
-          <button
-            type="button"
-            className={cn("nav-burger", open && "is-open")}
-            aria-expanded={open}
-            aria-controls="nav-mobile"
-            aria-label={open ? "Tutup menu" : "Buka menu"}
-            onClick={() => setOpen((v) => !v)}
-          >
-            <span className="nav-burger__bar" />
-            <span className="nav-burger__bar" />
-          </button>
-        </div>
-      </div>
-
-      <nav
-        id="nav-mobile"
-        className={cn("site-nav__mobile", open && "is-open")}
-        aria-label="Navigasi seluler"
-        hidden={!open}
-      >
-        {LINKS.map((l) => {
-          const active = pathname === l.href || pathname.startsWith(l.href + "/");
-          return (
-            <Link
-              key={l.href}
-              href={l.href}
-              className={cn("nav-mobile-link", active && "is-active")}
-              aria-current={active ? "page" : undefined}
+            <button
+              type="button"
+              className="nav-searchbtn"
+              onClick={() => setQfOpen(true)}
+              aria-label="Cari cepat (Ctrl K)"
+              title="Cari cepat (Ctrl+K)"
             >
-              {l.label}
+              <IconSearch className="nav-icon" />
+              <span className="nav-searchbtn__hint" aria-hidden="true">
+                Cari…
+              </span>
+              <kbd className="nav-searchbtn__kbd" aria-hidden="true">
+                /
+              </kbd>
+            </button>
+            <button
+              type="button"
+              className="nav-iconbtn"
+              onClick={cycleTheme}
+              aria-label={themeLabel}
+              title={themeLabel}
+            >
+              <IconTheme mode={prefs.theme} />
+            </button>
+            <Link href="/surat/36" className="nav-cta">
+              Yasin
             </Link>
-          );
-        })}
-        <Link href="/surat/36" className="nav-mobile-link nav-mobile-link--accent">
-          Baca Yasin
-        </Link>
-      </nav>
-    </header>
+          </div>
+        </div>
+      </header>
+
+      {qfOpen && (
+        <div className="qf-backdrop" onClick={() => setQfOpen(false)}>
+          <div
+            className="qf"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Cari cepat"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="qf__box">
+              <IconSearch className="qf__icon" />
+              <input
+                ref={qfInputRef}
+                type="text"
+                className="qf__input"
+                placeholder="Nomor, 2:255, nama surah, juz…"
+                value={qf}
+                onChange={(e) => {
+                  setQf(e.target.value);
+                  setQfAktif(0);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    setQfAktif((v) => Math.min(hasil.length - 1, v + 1));
+                  } else if (e.key === "ArrowUp") {
+                    e.preventDefault();
+                    setQfAktif((v) => Math.max(0, v - 1));
+                  } else if (e.key === "Enter" && hasil[qfAktif]) {
+                    bukaHasil(hasil[qfAktif]);
+                  } else if (e.key === "Escape") {
+                    setQfOpen(false);
+                  }
+                }}
+                role="combobox"
+                aria-expanded={hasil.length > 0}
+                aria-controls="qf-list"
+                aria-activedescendant={hasil.length > 0 ? `qf-opsi-${qfAktif}` : undefined}
+                aria-label="Cari surah, ayat, atau juz"
+              />
+              <button
+                type="button"
+                className="qf__esc"
+                onClick={() => setQfOpen(false)}
+                aria-label="Tutup pencarian"
+              >
+                Esc
+              </button>
+            </div>
+            {hasil.length > 0 && (
+              <div className="qf__list" id="qf-list" role="listbox" aria-label="Hasil">
+                {hasil.map((r, idx) => {
+                  const h = labelHasil(r);
+                  return (
+                    <button
+                      key={h.href}
+                      id={`qf-opsi-${idx}`}
+                      type="button"
+                      role="option"
+                      aria-selected={idx === qfAktif}
+                      className={cn("qf__item", idx === qfAktif && "is-highlight")}
+                      onMouseEnter={() => setQfAktif(idx)}
+                      onClick={() => bukaHasil(r)}
+                    >
+                      <span className="qf__utama">{h.utama}</span>
+                      <span className="qf__sub">{h.sub}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            {qf.trim() && hasil.length === 0 && (
+              <p className="qf__empty">
+                Tidak cocok — coba &ldquo;36&rdquo;, &ldquo;2:255&rdquo;, &ldquo;yasin&rdquo;, atau &ldquo;juz 30&rdquo;.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   );
 }

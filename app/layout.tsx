@@ -1,19 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Amiri_Quran } from "next/font/google";
+import { Fraunces } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
-import { PlayerProvider } from "@/components/player/player-provider";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
 import { AudioDock } from "@/components/player/audio-dock";
+import { PlayerPanel } from "@/components/player/player-panel";
+import { Tabbar } from "@/components/tabbar";
 import { ThemeScript } from "@/components/theme-script";
 import { WatercolorBg } from "@/components/watercolor-bg";
 import { LightboxProvider } from "@/components/image-lightbox";
-
-/* Catatan: shadcn init sempat menambahkan font Geist (--font-sans) + kelas
- * `font-sans` di <html>. Itu MENIMPA tipografi Tilawah (Fraunces + Switzer),
- * jadi sengaja dihapus. Token --font-sans tetap didefinisikan di globals.css
- * agar komponen shadcn/rare-ui tidak kehilangan variabelnya. */
+import { Toaster } from "@/components/toaster";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -22,10 +19,12 @@ const fraunces = Fraunces({
   axes: ["opsz"],
 });
 
-const amiriQuran = Amiri_Quran({
-  subsets: ["arabic"],
-  weight: "400",
-  variable: "--font-amiri-quran",
+/* Font mushaf standar Indonesia (LPMQ Kemenag). Terverifikasi mencakup
+   seluruh 73 karakter yang dipakai teks 114 surah — jadi Amiri tidak lagi
+   diperlukan sebagai cadangan. */
+const lpmq = localFont({
+  src: [{ path: "../public/fonts/LPMQ-Isep-Misbah.woff2", weight: "400", style: "normal" }],
+  variable: "--font-lpmq",
   display: "swap",
 });
 
@@ -57,7 +56,7 @@ export const metadata: Metadata = {
     "murottal",
     "baca quran online",
   ],
-  metadataBase: new URL("https://tilawah.example.com"),
+  metadataBase: new URL("https://www.tilawahsurah.my.id"),
   openGraph: {
     title: "Tilawah — Al-Qur'an Digital",
     description:
@@ -67,21 +66,26 @@ export const metadata: Metadata = {
   },
 };
 
+/* Bilah status/peramban mengikuti kertas tema, bukan default putih —
+   kalau tidak, mode gelap dibuka dengan kilat putih di atasnya. Nilainya
+   ditulis ulang oleh skrip tema setiap kali tema berubah (layout + JS). */
 export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F5FAFD" },
-    { media: "(prefers-color-scheme: dark)", color: "#0A151D" },
+    { media: "(prefers-color-scheme: light)", color: "#e8f6fb" },
+    { media: "(prefers-color-scheme: dark)", color: "#061118" },
   ],
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
       lang="id"
-      className={`${fraunces.variable} ${switzer.variable} ${amiriQuran.variable}`}
+      className={`${fraunces.variable} ${switzer.variable} ${lpmq.variable}`}
       suppressHydrationWarning
+      data-scroll-behavior="smooth"
     >
       <head>
         <ThemeScript />
@@ -102,20 +106,18 @@ export default function RootLayout({
         />
       </head>
       <body>
-        {/* latar watercolor: fixed di viewport, konten menggulir di atasnya */}
         <WatercolorBg />
         <a href="#konten" className="skip-link">
           Lewati ke konten
         </a>
-        {/* lightbox global: satu dialog untuk seluruh situs — banner, header
-            halaman, galeri, dan halaman kredit semuanya membuka ke sini */}
         <LightboxProvider>
-          <PlayerProvider>
-            <SiteNav />
-            <main id="konten">{children}</main>
-            <SiteFooter />
-            <AudioDock />
-          </PlayerProvider>
+          <SiteNav />
+          <main id="konten">{children}</main>
+          <SiteFooter />
+          <AudioDock />
+          <PlayerPanel />
+          <Tabbar />
+          <Toaster />
         </LightboxProvider>
       </body>
     </html>

@@ -7,10 +7,10 @@
  * juz tidak tampil dua kali di halaman yang sama.
  */
 
-import type { JuzInfo } from "@/lib/api/juz";
+import type { JuzInfo } from "@/lib/data/juz";
 import { useJuzProgress } from "@/lib/store/juz-progress";
 
-export function JuzSummary({ list }: { list: JuzInfo[] }) {
+export function JuzSummary({ list }: { list: readonly JuzInfo[] }) {
   const done = useJuzProgress();
   const totalAyat = list.reduce((a, j) => a + j.jumlahAyat, 0);
   const sudah = list.filter((j) => done.has(j.nomor)).length;

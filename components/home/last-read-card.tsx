@@ -7,12 +7,13 @@
  * `.resume` + `.card` dari design system.
  */
 
-import Link from "next/link";
-import { useLastRead } from "@/lib/store/bookmark";
+import Link from "@/components/smart-link";
+import { SURAH } from "@/lib/data/surah";
+import { resumeHref, useLastRead } from "@/lib/store/progress";
 import { timeAgo } from "@/lib/utils";
 
 export function LastReadCard() {
-  const [lr] = useLastRead();
+  const lr = useLastRead();
   if (!lr) return null;
 
   return (
@@ -21,11 +22,11 @@ export function LastReadCard() {
         <div>
           <p className="resume__label">Lanjut baca</p>
           <p className="resume__title">
-            {lr.namaLatin} · Ayat {lr.ayat}
+            {SURAH[lr.nomor - 1].latin} · Ayat {lr.ayat}
           </p>
           <p className="resume__time">Terakhir dibaca {timeAgo(lr.ts)}</p>
         </div>
-        <Link href={`/surat/${lr.nomor}?ayat=${lr.ayat}`} className="btn btn--primary">
+        <Link href={resumeHref(lr)} className="btn btn--primary">
           Lanjutkan
         </Link>
       </div>

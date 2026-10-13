@@ -7,7 +7,7 @@
  * waktu wajib (imsak/terbit/dhuha tidak relevan di ringkasan) + hitung mundur.
  */
 
-import Link from "next/link";
+import Link from "@/components/smart-link";
 import { WAKTU_WAJIB, LABEL_WAKTU } from "@/lib/waktu-sholat";
 import { useSholat } from "@/lib/use-sholat";
 import { cn, formatCountdown, hariIndo } from "@/lib/utils";

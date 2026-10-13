@@ -2,13 +2,26 @@
 
 /* — Daftar ayat tersimpan + riwayat baca terakhir. */
 
-import Link from "next/link";
-import { useBookmarks, useLastRead, removeBookmark } from "@/lib/store/bookmark";
+import Link from "@/components/smart-link";
+import { removeBookmark, restoreBookmark, useBookmarks } from "@/lib/store/bookmark";
+import { resumeHref, useLastRead } from "@/lib/store/progress";
+import { toast } from "@/lib/toast";
+import { SURAH } from "@/lib/data/surah";
 import { timeAgo } from "@/lib/utils";
 
 export function BookmarkList() {
   const list = useBookmarks();
-  const [lr] = useLastRead();
+  const lr = useLastRead();
+
+  const hapus = (nomor: number, ayat: number) => {
+    const gone = removeBookmark(nomor, ayat);
+    if (gone) {
+      toast(`Penanda ${SURAH[nomor - 1].latin} ayat ${ayat} dihapus`, {
+        label: "Batalkan",
+        run: () => restoreBookmark(gone),
+      });
+    }
+  };
 
   return (
     <>
@@ -17,10 +30,10 @@ export function BookmarkList() {
           <div>
             <p className="resume__label">Terakhir dibaca</p>
             <p className="resume__title">
-              {lr.namaLatin} · Ayat {lr.ayat}
+              {SURAH[lr.nomor - 1].latin} · Ayat {lr.ayat}
             </p>
           </div>
-          <Link href={`/surat/${lr.nomor}?ayat=${lr.ayat}`} className="btn btn--outline">
+          <Link href={resumeHref(lr)} className="btn btn--outline">
             Lanjutkan membaca
           </Link>
         </div>
@@ -56,7 +69,7 @@ export function BookmarkList() {
               <button
                 type="button"
                 className="btn btn--outline bm-item__remove"
-                onClick={() => removeBookmark(b.nomor, b.ayat)}
+                onClick={() => hapus(b.nomor, b.ayat)}
                 aria-label={`Hapus penanda QS. ${b.namaLatin} ayat ${b.ayat}`}
               >
                 Hapus

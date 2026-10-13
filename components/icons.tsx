@@ -97,12 +97,12 @@ export function IconBook({ className }: IconProps) {
   );
 }
 
-export function IconBookmark({ className, filled }: IconProps & { filled?: boolean }) {
+export function IconBookmark({ className }: IconProps) {
   return (
     <svg
       viewBox="0 0 24 24"
-      className={className}
-      fill={filled ? "currentColor" : "none"}
+      className={className ? `i-bm ${className}` : "i-bm"}
+      fill="none"
       stroke="currentColor"
       strokeWidth="1.7"
       strokeLinecap="round"
@@ -273,5 +273,169 @@ export function IconSearch({ className }: IconProps) {
       <circle cx="11" cy="11" r="7" />
       <path d="M20 20l-3.5-3.5" />
     </svg>
+  );
+}
+
+/* ─── Navigasi & chrome ─── */
+
+/** Ikon garis standar: 24×24, stroke 1.7, ujung bulat. */
+function Line({ className, children }: IconProps & { children: React.ReactNode }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {children}
+    </svg>
+  );
+}
+
+export function IconHome({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <path d="M3.5 10.2 12 3.6l8.5 6.6V19a1.6 1.6 0 0 1-1.6 1.6h-4.1v-5.4H9.2v5.4H5.1A1.6 1.6 0 0 1 3.5 19Z" />
+    </Line>
+  );
+}
+
+/** Mushaf terbuka — "Surah" */
+export function IconMushaf({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <path d="M12 6.4C9.6 4.6 6.4 4.2 3.5 5v13.4c2.9-.8 6.1-.4 8.5 1.4 2.4-1.8 5.6-2.2 8.5-1.4V5c-2.9-.8-6.1-.4-8.5 1.4Z" />
+      <path d="M12 6.4v13.4" />
+    </Line>
+  );
+}
+
+/** Tumpukan lembar — "Juz" */
+export function IconLayers({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <path d="m12 3.5 8.5 4.6L12 12.7 3.5 8.1Z" />
+      <path d="m3.5 12.2 8.5 4.6 8.5-4.6" />
+      <path d="m3.5 16.2 8.5 4.6 8.5-4.6" />
+    </Line>
+  );
+}
+
+/** Bulan sabit & bintang — "Ibadah" */
+export function IconCrescent({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <path d="M15.6 20.1A8.6 8.6 0 1 1 13.9 3.6a6.8 6.8 0 0 0 1.7 16.5Z" />
+      <path d="m18.4 6.6.5 1.4 1.4.5-1.4.5-.5 1.4-.5-1.4-1.4-.5 1.4-.5Z" />
+    </Line>
+  );
+}
+
+export function IconSun({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <circle cx="12" cy="12" r="4.2" />
+      <path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6" />
+    </Line>
+  );
+}
+
+export function IconMoon({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
+    </Line>
+  );
+}
+
+export function IconThemeAuto({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor" stroke="none" opacity="0.35" />
+    </Line>
+  );
+}
+
+/** Tiga titik — menu opsi */
+export function IconMore({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden="true">
+      <circle cx="5.5" cy="12" r="1.7" />
+      <circle cx="12" cy="12" r="1.7" />
+      <circle cx="18.5" cy="12" r="1.7" />
+    </svg>
+  );
+}
+
+export function IconShare({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <path d="M12 3.5v11" />
+      <path d="m7.8 7.4 4.2-4 4.2 4" />
+      <path d="M8 10.5H6.6A1.6 1.6 0 0 0 5 12.1v6.8a1.6 1.6 0 0 0 1.6 1.6h10.8a1.6 1.6 0 0 0 1.6-1.6v-6.8a1.6 1.6 0 0 0-1.6-1.6H16" />
+    </Line>
+  );
+}
+
+/** "Aa" — pengaturan tampilan teks */
+export function IconType({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <path d="m3 18 5-12 5 12" />
+      <path d="M4.8 13.8h6.4" />
+      <path d="M15 11.2a3 3 0 0 1 5.7 1.2V18" />
+      <path d="M20.7 14.6c-3.2-.4-5.7.4-5.7 2 0 1 .8 1.6 2 1.6 1.6 0 3-1 3.7-2.6" />
+    </Line>
+  );
+}
+
+export function IconTimer({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <circle cx="12" cy="13" r="8" />
+      <path d="M12 9v4l2.4 2.4" />
+      <path d="M9.5 2.5h5" />
+    </Line>
+  );
+}
+
+export function IconList({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <path d="M9 6h11M9 12h11M9 18h11" />
+      <path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01" strokeWidth="2.6" />
+    </Line>
+  );
+}
+
+export function IconArrowRight({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <path d="M5 12h14" />
+      <path d="m13 6 6 6-6 6" />
+    </Line>
+  );
+}
+
+export function IconInfo({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5.5M12 7.6h.01" />
+    </Line>
+  );
+}
+
+export function IconCompass({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="m15.6 8.4-2.2 5-5 2.2 2.2-5Z" />
+    </Line>
   );
 }

@@ -1,42 +1,47 @@
 "use client";
 
-/* — Bar pemutar audio bawah (persisten). Semua kontrol penting, tanpa keramaian. — */
+/* — Pemutar desktop: bar bawah persisten. Di ponsel digantikan mini-player
+ * (ketuk untuk membuka panel penuh) — lihat player-panel.tsx. */
 
 import { useEffect, useRef, useState } from "react";
-import { usePlayer } from "./player-provider";
-import { ReciterPicker } from "./reciter-picker";
-import { QARI } from "@/lib/types";
+import { getPosition, next, prev, seek, setRepeat, setSpeed, stop, toggle, usePlayer } from "@/lib/player";
+import { qariOf } from "@/lib/audio";
+import { SURAH } from "@/lib/data/surah";
 import { usePrefs } from "@/lib/store/prefs";
-import { cn, pad } from "@/lib/utils";
+import { cn, formatTime } from "@/lib/utils";
 import { IconPlay, IconPause, IconNext, IconPrev, IconRepeat, IconClose } from "@/components/icons";
 
 const SPEEDS = [0.75, 1, 1.25, 1.5, 2];
 
 export function AudioDock() {
-  const { state, toggle, next, prev, seek, stop, setRepeat, setSpeed } = usePlayer();
+  const track = usePlayer((s) => s.track);
   const [prefs] = usePrefs();
   const [scrubbing, setScrubbing] = useState(false);
   const [uiPos, setUiPos] = useState(0);
   const rafRef = useRef(0);
 
-  const { track, playing, duration, positionRef, repeat, speed, error } = state;
+  const playing = usePlayer((s) => s.playing);
+  const duration = usePlayer((s) => s.duration);
+  const repeat = usePlayer((s) => s.repeat);
+  const speed = usePlayer((s) => s.speed);
+  const error = usePlayer((s) => s.error);
 
   /* Sinkronisasi posisi untuk UI tanpa membanjiri React state:
      poll ringan 4x/detik hanya saat scrubbing tidak aktif. */
   useEffect(() => {
     if (!track) return;
     const id = window.setInterval(() => {
-      if (!scrubbing) setUiPos(positionRef.current);
+      if (!scrubbing) setUiPos(getPosition());
     }, 250);
     return () => window.clearInterval(id);
-  }, [track, scrubbing, positionRef]);
+  }, [track, scrubbing]);
 
   useEffect(() => () => cancelAnimationFrame(rafRef.current), []);
 
   if (!track) return null;
 
   const pct = duration > 0 ? Math.min(100, (uiPos / duration) * 100) : 0;
-  const qari = QARI.find((q) => q.id === prefs.reciter);
+  const qari = qariOf(prefs.reciter);
 
   return (
     <div
@@ -44,6 +49,7 @@ export function AudioDock() {
       role="region"
       aria-label="Pemutar murottal"
       data-playing={playing ? "true" : "false"}
+      style={{ viewTransitionName: "player" }}
     >
       <div className="audio-dock__progress" aria-hidden="true">
         <div className="audio-dock__progress-fill" style={{ transform: `scaleX(${pct / 100})` }} />
@@ -53,12 +59,12 @@ export function AudioDock() {
         {/* info track */}
         <div className="audio-dock__meta">
           <span className="audio-dock__badge" aria-hidden="true">
-            {track.full ? "Surat" : "Ayat"}
+            {track.n === 0 ? "Surat" : "Ayat"}
           </span>
           <div className="audio-dock__titles">
-            <strong className="audio-dock__surah">{track.surahNama}</strong>
+            <strong className="audio-dock__surah">{SURAH[track.s - 1].latin}</strong>
             <span className="audio-dock__sub">
-              {track.full ? "Audio penuh" : `Ayat ${track.ayat}`} · {qari?.singkat ?? "Qari"}
+              {track.n === 0 ? "Audio penuh" : `Ayat ${track.n}`} · {qari.singkat}
             </span>
           </div>
         </div>
@@ -133,9 +139,6 @@ export function AudioDock() {
             ))}
           </select>
 
-          {/* pemilih qari real-time: ganti → ayat ini diulang dgn qari baru */}
-          <ReciterPicker variant="dock" />
-
           <button type="button" className="dock-btn dock-btn--ghost" onClick={stop} aria-label="Tutup pemutar">
             <IconClose className="dock-btn__icon" />
           </button>
@@ -151,9 +154,3 @@ export function AudioDock() {
   );
 }
 
-function formatTime(sec: number): string {
-  if (!Number.isFinite(sec) || sec <= 0) return "0:00";
-  const m = Math.floor(sec / 60);
-  const s = Math.floor(sec % 60);
-  return `${m}:${pad(s)}`;
-}

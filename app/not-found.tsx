@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/smart-link";
 import { OrnamentDivider } from "@/components/ornaments";
 
 /* — Halaman 404.

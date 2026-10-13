@@ -203,6 +203,12 @@
   line-height: var(--leading-relaxed);
 }
 
+.hero__card-count {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-2xs);
+  color: var(--muted);
+}
+
 .hero__card-meta {
   display: flex;
   align-items: center;

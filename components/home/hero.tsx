@@ -1,35 +1,23 @@
-/* — Hero beranda.
+/* — Hero beranda: sapaan + ayat hari ini + mulai baca.
  *
- * Latarnya foto arsitektur Islami dalam mode "plate" — foto tampil jelas,
- * bukan tekstur samar. Keterbacaan teks dijamin oleh dua lapis veil
- * (`.hero__veil` diagonal + `.hero__bg` radial) yang membuat sisi kiri
- * pekat dan sisi kanan terbuka. Jadi foto tetap terlihat sebagai foto,
- * sementara teks tetap lolos AA di atasnya.
- *
- * ⚠️ Yang DIHAPUS dari versi lama: adegan awan + siluet cakrawala + kafilah.
- *
- * Adegan itu digambar dengan CSS dan SVG (nol byte, niatnya baik), tapi
- * hasilnya di layar tidak seperti yang dibayangkan: lima awan blur adalah
- * biaya paint yang nyata, dan siluet cakrawala — setinggi 132px di desktop —
- * terbaca sebagai blok abu-abu datar yang menempel di kaki hero, bukan
- * sebagai kabut di kejauhan. Ia juga menabrak baris statistik sebelum
- * padding-nya diperbaiki.
- *
- * Yang tersisa sekarang: foto, veil, bingkai mihrab emas, orb cahaya, dan
- * konten. Lima lapisan, semuanya punya alasan. Hero yang tenang jauh lebih
- * cocok untuk aplikasi baca daripada hero yang ramai.
- */
+ * Foto kubah sebagai latar (LCP, preload di layout). Kartu "Ayat hari ini"
+ * bergilir harian dari data statis — sama untuk semua pengunjung di hari
+ * yang sama, tanpa fetch. Teks Arabnya disalin dari data Kemenag. */
 
-import Link from "next/link";
+import Link from "@/components/smart-link";
 import { MihrabFrame, OrnamentStar } from "@/components/ornaments";
 import { AmbientImage } from "@/components/ambient-image";
 import { Orb } from "@/components/orb";
 import { PhotoZoom } from "@/components/photo-zoom";
+import { AYAT_PILIHAN, ayatHariIni } from "@/lib/data/ayat-pilihan";
+import { SURAH } from "@/lib/data/surah";
 
-export function Hero({ totalSurah }: { totalSurah: number }) {
+export function Hero() {
+  const a = ayatHariIni();
+  const nama = SURAH[a.s - 1].latin;
+
   return (
     <section className="hero" aria-labelledby="hero-title">
-      {/* Foto kubah geometris emas — LCP, dimuat lebih dulu, diam saat scroll */}
       <AmbientImage
         variant="hero-dome-gold"
         mode="plate"
@@ -39,7 +27,6 @@ export function Hero({ totalSurah }: { totalSurah: number }) {
         priority
       />
 
-      {/* Orb cahaya — ditunda 1.2s agar tidak berebut LCP */}
       <Orb size={520} color="#109BDA" className="orb-host--hero" delay={1200} />
 
       <div className="hero__veil" aria-hidden="true" />
@@ -80,7 +67,7 @@ export function Hero({ totalSurah }: { totalSurah: number }) {
 
           <div className="hero__stats">
             <div className="hero__stat">
-              <b>{totalSurah}</b>
+              <b>114</b>
               <span>surah</span>
             </div>
             <div className="hero__stat">
@@ -98,21 +85,23 @@ export function Hero({ totalSurah }: { totalSurah: number }) {
           </div>
         </div>
 
-        <aside className="hero__card" aria-label="Ayat pilihan">
-          <span className="hero__card-label">Ayat pilihan</span>
+        <aside className="hero__card" aria-label="Ayat hari ini">
+          <span className="hero__card-label">Ayat hari ini</span>
           <p className="hero__card-ar" lang="ar" dir="rtl">
-            وَلَقَدْ يَسَّرْنَا الْقُرْاٰنَ لِلذِّكْرِ فَهَلْ مِنْ مُّدَّكِرٍ
+            {a.ar}
           </p>
-          <p className="hero__card-tr">
-            &ldquo;Dan sungguh, telah Kami mudahkan Al-Qur&rsquo;an untuk peringatan,
-            maka adakah orang yang mau mengambil pelajaran?&rdquo;
-          </p>
+          <p className="hero__card-tr">&ldquo;{a.id}&rdquo;</p>
           <div className="hero__card-meta">
-            <span>QS. Al-Qamar : 17</span>
-            <Link href="/surat/54?ayat=17" className="section__link">
+            <span>
+              QS. {nama} : {a.a}
+            </span>
+            <Link href={`/surat/${a.s}?ayat=${a.a}`} className="section__link">
               Buka →
             </Link>
           </div>
+          <p className="hero__card-count">
+            {AYAT_PILIHAN.indexOf(a) + 1} dari {AYAT_PILIHAN.length} ayat pilihan — berganti tiap hari
+          </p>
         </aside>
       </div>
     </section>

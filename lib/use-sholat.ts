@@ -124,9 +124,7 @@ export function useSholat({ bulanan: ambilBulanan = false }: Opsi = {}) {
       fetch(`/api/sholat?id=${kota.id}&y=${y}&m=${m}&d=${day}`).then((r) => r.json()),
     ];
     if (ambilBulanan) {
-      reqs.push(
-        fetch(`/api/sholat/bulanan?id=${kota.id}&y=${y}&m=${m}`).then((r) => r.json()),
-      );
+      reqs.push(fetch(`/api/sholat?id=${kota.id}&y=${y}&m=${m}`).then((r) => r.json()));
     }
 
     Promise.all(reqs)

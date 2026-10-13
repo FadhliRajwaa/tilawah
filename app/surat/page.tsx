@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
-import { getSurahList } from "@/lib/api/equran";
+import { SURAH } from "@/lib/data/surah";
 import { SurahCatalog } from "@/components/quran/surah-catalog";
 import { PageHead } from "@/components/page-head";
 import { Gallery } from "@/components/gallery";
-import type { SurahSummary } from "@/lib/types";
-
-export const revalidate = 604800;
 
 export const metadata: Metadata = {
   title: "114 Surah Al-Qur'an",
@@ -13,15 +10,7 @@ export const metadata: Metadata = {
     "Daftar lengkap 114 surah Al-Qur'an: nama Arab, arti, jumlah ayat, dan tempat turun. Buka surah untuk membaca dengan terjemahan Kemenag dan tafsir.",
 };
 
-export default async function SurahIndexPage() {
-  let list: SurahSummary[] = [];
-  let error = false;
-  try {
-    list = await getSurahList();
-  } catch {
-    error = true;
-  }
-
+export default function SurahIndexPage() {
   return (
     <>
       <PageHead
@@ -36,14 +25,7 @@ export default async function SurahIndexPage() {
       />
 
       <div className="container-page section--tight">
-        {error ? (
-          <div className="error-banner" role="alert">
-            Gagal memuat daftar surah. Server sumber data sedang tidak dapat diakses —
-            coba muat ulang halaman sebentar lagi.
-          </div>
-        ) : (
-          <SurahCatalog list={list} />
-        )}
+        <SurahCatalog list={SURAH} />
       </div>
 
       {/* — galeri penutup: keindahan mushaf & geometri — */}

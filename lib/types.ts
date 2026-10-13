@@ -1,37 +1,34 @@
 /* — tipe data bersama untuk seluruh aplikasi — */
 
-/** equran.id — daftar surat */
-export interface SurahSummary {
-  nomor: number;
-  nama: string; // Arab
-  namaLatin: string;
-  jumlahAyat: number;
-  tempatTurun: string; // "Mekah" | "Madinah"
-  arti: string;
-  deskripsi: string;
-  audioFull: Record<string, string>; // { "01": url, ... }
+import { QARI_DEFAULT } from "./audio";
+
+/** Satu ayat seperti yang dikirim ke klien.
+ *
+ *  Kunci sengaja pendek: daftar ini ikut ter-serialisasi di payload halaman
+ *  (286 kali untuk Al-Baqarah), jadi `teksIndonesia` × 286 itu nyata.
+ *  URL audio TIDAK ikut — diturunkan dari pola CDN (lihat lib/audio.ts). */
+export interface Ayat {
+  /** nomor surah */
+  s: number;
+  /** nomor ayat dalam surah */
+  n: number;
+  /** teks Arab (rasm Kemenag) */
+  ar: string;
+  /** transliterasi latin */
+  lt: string;
+  /** terjemahan Kemenag */
+  tr: string;
 }
 
-/** equran.id — ayat di dalam surat */
-export interface Ayah {
-  nomorAyat: number;
-  teksArab: string;
-  teksLatin: string;
-  teksIndonesia: string;
-  audio: Record<string, string>; // 6 qari
-}
-
-export interface SurahDetail extends SurahSummary {
-  ayat: Ayah[];
-  suratSelanjutnya?: SurahNav;
-  suratSebelumnya?: SurahNav;
-}
-
-export interface SurahNav {
+/** Satu surah lengkap untuk halaman baca. */
+export interface SurahDetail {
   nomor: number;
   nama: string;
   namaLatin: string;
   jumlahAyat: number;
+  arti: string;
+  makkiyah: boolean;
+  ayat: Ayat[];
 }
 
 /** equran.id — tafsir */
@@ -85,27 +82,23 @@ export interface SearchMatch {
   text: string;
 }
 
-/* — 6 qari resmi equran.id — */
-export const QARI: { id: string; nama: string; singkat: string }[] = [
-  { id: "01", nama: "Abdullah Al-Juhany", singkat: "Al-Juhany" },
-  { id: "02", nama: "Abdul Muhsin Al-Qasim", singkat: "Al-Qasim" },
-  { id: "03", nama: "Abdurrahman As-Sudais", singkat: "As-Sudais" },
-  { id: "04", nama: "Ibrahim Al-Dossari", singkat: "Al-Dossari" },
-  { id: "05", nama: "Misyari Rasyid Al-Afasi", singkat: "Al-Afasi" },
-  { id: "06", nama: "Yasser Al-Dosari", singkat: "Yasser" },
-];
-
-export const QARI_DEFAULT = "05";
-
-/** Preferensi pengguna */
+/** Preferensi pengguna.
+ *
+ *  Yang memengaruhi TAMPILAN (tema, latin, terjemahan, mode, ukuran Arab)
+ *  diterapkan sebagai atribut di `<html>` oleh skrip inline sebelum paint —
+ *  jadi halaman yang dirender di server langsung tampil sesuai pilihan,
+ *  tanpa kedipan dan tanpa satu pun komponen perlu membaca preferensi. */
 export interface Prefs {
   theme: "light" | "dark" | "auto";
-  arabicScale: number; // 1 = normal
+  arabicScale: number;
   showLatin: boolean;
   showTranslation: boolean;
-  reciter: string; // id qari
-  autoAdvance: boolean;
   readMode: "ayat" | "mushaf";
+  reciter: string;
+  /** lanjut ke ayat berikutnya saat satu ayat selesai */
+  autoAdvance: boolean;
+  /** gulir otomatis mengikuti ayat yang sedang dibacakan */
+  follow: boolean;
 }
 
 export const PREFS_DEFAULT: Prefs = {
@@ -113,23 +106,17 @@ export const PREFS_DEFAULT: Prefs = {
   arabicScale: 1,
   showLatin: true,
   showTranslation: true,
+  readMode: "ayat",
   reciter: QARI_DEFAULT,
   autoAdvance: true,
-  readMode: "ayat",
+  follow: true,
 };
 
-/** Bookmark & riwayat */
+/** Bookmark ayat */
 export interface Bookmark {
   nomor: number;
   ayat: number;
   namaLatin: string;
   snippet: string;
-  ts: number;
-}
-
-export interface LastRead {
-  nomor: number;
-  ayat: number;
-  namaLatin: string;
   ts: number;
 }

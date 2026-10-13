@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { SearchPanel } from "@/components/quran/search-panel";
 import { PageHead } from "@/components/page-head";
 
@@ -22,7 +23,9 @@ export default function CariPage() {
       />
 
       <div className="container-page section--tight">
-        <SearchPanel />
+        <Suspense>
+          <SearchPanel />
+        </Suspense>
       </div>
     </>
   );

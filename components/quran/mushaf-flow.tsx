@@ -2,106 +2,74 @@
 
 /* — Mode mushaf: satu lembar mengalir, bukan daftar kartu.
  *
- * ⚠️ Diekstrak dari duplikasi antara `surah-reader.tsx` dan `juz-reader.tsx`
- * — keduanya menulis blok ini utuh (~50 baris yang sama persis), hanya
- * berbeda pada cara menandai pergantian surah.
+ * Teks Arab disambung jadi satu paragraf; nomor ayat jadi penanda yang bisa
+ * diketuk untuk membuka tafsir. Ketuk teksnya memutar murottal. Dua aksi,
+ * dua area ketuk — tanpa tombol yang mengotori lembaran.
  *
- * Perbedaan itu diserap oleh prop `penandaSurah`:
- *   · reader SURAT  → tidak perlu penanda (satu surah saja)
- *   · reader JUZ    → perlu penanda, karena satu juz bisa memuat beberapa surah
- *
- * Catatan desain: teks Arab disambung jadi satu paragraf, dengan nomor ayat
- * sebagai penanda bulat emas yang bisa diklik untuk membuka tafsir. Mengetuk
- * teksnya memutar murottal ayat itu. Dua aksi, dua area klik — tidak ada
- * tombol terpisah yang mengotori lembaran.
+ * Server mengirim seluruh teksnya (mode ini butuh semua ayat), tapi TANPA
+ * waveform per ayat — `MushafPlayer` di bawah menangani satu ayat aktif.
  */
 
+import { memo } from "react";
 import { cn, toArabicNumber } from "@/lib/utils";
+import { SURAH } from "@/lib/data/surah";
+import type { Ayat } from "@/lib/types";
 
-export interface MushafAyah {
-  nomorAyat: number;
-  teksArab: string;
-  /** nomor surah — dipakai untuk membedakan penanda saat lintas surah */
-  surahNomor?: number;
-  /** nama Arab surah — hanya perlu kalau `penandaSurah` aktif */
-  surahNama?: string;
-}
-
-interface Props<T extends MushafAyah> {
-  ayat: T[];
-  /** ayat yang sedang diputar (kunci `surah:ayat`, atau nomor ayat untuk surat) */
+interface Props {
+  ayat: Ayat[];
+  /** ayat yang sedang diputar — disorot */
   playingKey?: string | null;
   /** ayat sasaran deep-link — diberi sorot sementara */
-  targetAyah?: number | null;
-  /**
-   * Awalan id elemen. Bisa string (`mushaf` → `mushaf-5`) atau FUNGSI
-   * (`(a) => \`mushaf-${a.surahNomor}-${a.nomorAyat}\``).
-   *
-   * Fungsi diperlukan reader juz: di sana satu halaman memuat beberapa
-   * surah, jadi `mushaf-5` akan muncul lebih dari sekali — dan
-   * `getElementById` hanya mengembalikan yang pertama, sehingga deep-link
-   * menggulir ke ayat yang salah.
-   */
-  idPrefix?: string | ((a: T) => string);
+  targetN?: number | null;
   /** tampilkan penanda pergantian surah (dipakai reader juz) */
   penandaSurah?: boolean;
-  onPlay: (a: T) => void;
-  onOpenTafsir: (a: T) => void;
+  onPlay: (a: Ayat) => void;
+  onOpenTafsir: (a: Ayat) => void;
 }
 
-export function MushafFlow<T extends MushafAyah>({
+export const MushafFlow = memo(function MushafFlow({
   ayat,
   playingKey,
-  targetAyah,
-  idPrefix = "mushaf",
+  targetN,
   penandaSurah = false,
   onPlay,
   onOpenTafsir,
-}: Props<T>) {
+}: Props) {
   return (
     <>
       <div className="mushaf-flow arabic" lang="ar" dir="rtl">
         {ayat.map((a, i) => {
-          const prev = ayat[i - 1];
-          /* Pergantian surah terdeteksi kalau nomor surahnya berbeda dari
-             ayat sebelumnya. Hanya relevan di reader juz. */
-          const gantiSurah =
-            penandaSurah && (!prev || prev.surahNomor !== a.surahNomor);
-          const key = a.surahNomor ? `${a.surahNomor}:${a.nomorAyat}` : String(a.nomorAyat);
+          const gantiSurah = penandaSurah && (i === 0 || ayat[i - 1].s !== a.s);
+          const key = `${a.s}:${a.n}`;
           const isPlaying = playingKey === key;
-
           return (
             <span key={key}>
-              {gantiSurah && a.surahNama && (
+              {gantiSurah && (
                 <span className="mushaf-surah-mark" lang="ar" dir="rtl">
-                  {a.surahNama}
+                  {SURAH[a.s - 1].ar}
                 </span>
               )}
               <span
-                className={cn("mushaf-ayah", targetAyah === a.nomorAyat && "is-target")}
-                id={
-                  typeof idPrefix === "function"
-                    ? idPrefix(a)
-                    : `${idPrefix ?? "mushaf"}-${a.nomorAyat}`
-                }
+                className={cn("mushaf-ayah", targetN === a.n && "is-target")}
+                id={`m-${a.s}-${a.n}`}
               >
                 <button
                   type="button"
                   className={cn("mushaf-ayah__tap", isPlaying && "is-playing")}
                   onClick={() => onPlay(a)}
-                  aria-label={`Putar ayat ${a.nomorAyat}`}
-                  title={`Putar ayat ${a.nomorAyat}`}
+                  aria-label={`Putar ayat ${a.n}`}
+                  title={`Putar ayat ${a.n}`}
                 >
-                  {a.teksArab}
+                  {a.ar}
                 </button>
                 <button
                   type="button"
                   className="mushaf-marker"
                   onClick={() => onOpenTafsir(a)}
-                  aria-label={`Buka tafsir ayat ${a.nomorAyat}`}
-                  title={`Tafsir ayat ${a.nomorAyat}`}
+                  aria-label={`Buka tafsir ayat ${a.n}`}
+                  title={`Tafsir ayat ${a.n}`}
                 >
-                  {toArabicNumber(a.nomorAyat)}
+                  {toArabicNumber(a.n)}
                 </button>
               </span>
             </span>
@@ -113,4 +81,4 @@ export function MushafFlow<T extends MushafAyah>({
       </p>
     </>
   );
-}
+});

@@ -22,8 +22,8 @@
  */
 
 import { useState } from "react";
-import Link from "next/link";
-import type { JuzInfo } from "@/lib/api/juz";
+import Link from "@/components/smart-link";
+import type { JuzInfo } from "@/lib/data/juz";
 import { useJuzProgress } from "@/lib/store/juz-progress";
 import { cn, toArabicNumber } from "@/lib/utils";
 
@@ -39,7 +39,7 @@ const KELOMPOK: Kelompok[] = [
   { label: "Juz 21 – 30", dari: 21, sampai: 30 },
 ];
 
-export function JuzFolder({ list }: { list: JuzInfo[] }) {
+export function JuzFolder({ list }: { list: readonly JuzInfo[] }) {
   const [aktif, setAktif] = useState(0);
   const done = useJuzProgress();
 

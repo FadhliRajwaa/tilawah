@@ -1,7 +1,7 @@
-/* — klien API equran.id (surat, ayat, tafsir, audio) — */
+/* — klien API equran.id (ayat & tafsir) — */
 
 import "server-only";
-import type { SurahDetail, SurahSummary, TafsirItem } from "@/lib/types";
+import type { Ayat, SurahDetail, TafsirItem } from "@/lib/types";
 
 const BASE = "https://equran.id/api/v2";
 const DAY = 60 * 60 * 24;
@@ -10,6 +10,17 @@ interface EquranEnvelope<T> {
   code: number;
   message: string;
   data: T;
+}
+
+interface RawSurah {
+  nomor: number;
+  nama: string;
+  namaLatin: string;
+  jumlahAyat: number;
+  tempatTurun: string;
+  arti: string;
+  deskripsi: string;
+  ayat: { nomorAyat: number; teksArab: string; teksLatin: string; teksIndonesia: string }[];
 }
 
 async function getJSON<T>(url: string, revalidate = DAY): Promise<T> {
@@ -24,31 +35,55 @@ async function getJSON<T>(url: string, revalidate = DAY): Promise<T> {
   return json.data;
 }
 
-/** Daftar 114 surat — cache 7 hari (data statis). */
-export async function getSurahList(): Promise<SurahSummary[]> {
-  return getJSON<SurahSummary[]>(`${BASE}/surat`, DAY * 7);
+/** Deskripsi dari API memuat tag HTML mentah (<i>, <br>) dan entitas. */
+function cleanDeskripsi(html: string): string {
+  return html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/[ \t]+/g, " ")
+    .trim();
 }
 
-/** Detail satu surat beserta seluruh ayat — cache 24 jam. */
+function getRaw(nomor: number): Promise<RawSurah> {
+  return getJSON<RawSurah>(`${BASE}/surat/${nomor}`);
+}
+
+/** Satu surah untuk halaman baca — cache 24 jam.
+ *
+ *  Yang SENGAJA dibuang dari respons API sebelum sampai ke klien:
+ *   · `audio` per ayat (6 URL × jumlah ayat) — diturunkan dari pola CDN
+ *   · `audioFull` — idem
+ *   · `deskripsi` — dimuat terpisah saat "Tentang surah" dibuka
+ *  Untuk Al-Baqarah, ketiganya ±125.000 karakter di setiap kunjungan. */
 export async function getSurah(nomor: number): Promise<SurahDetail> {
-  return getJSON<SurahDetail>(`${BASE}/surat/${nomor}`);
+  const d = await getRaw(nomor);
+  return {
+    nomor: d.nomor,
+    nama: d.nama,
+    namaLatin: d.namaLatin,
+    jumlahAyat: d.jumlahAyat,
+    arti: d.arti,
+    makkiyah: d.tempatTurun === "Mekah",
+    ayat: d.ayat.map(
+      (a): Ayat => ({ s: d.nomor, n: a.nomorAyat, ar: a.teksArab, lt: a.teksLatin, tr: a.teksIndonesia }),
+    ),
+  };
+}
+
+/** Deskripsi surah (teks bersih). Memakai cache fetch yang sama dengan
+ *  `getSurah`, jadi tidak menambah permintaan ke equran.id. */
+export async function getDeskripsi(nomor: number): Promise<string> {
+  return cleanDeskripsi((await getRaw(nomor)).deskripsi ?? "");
 }
 
 /** Tafsir Kemenag satu surat — cache 7 hari (statis). */
 export async function getTafsir(nomor: number): Promise<TafsirItem[]> {
-  const data = await getJSON<{ tafsir: TafsirItem[] }>(
-    `${BASE}/tafsir/${nomor}`,
-    DAY * 7,
-  );
+  const data = await getJSON<{ tafsir: TafsirItem[] }>(`${BASE}/tafsir/${nomor}`, DAY * 7);
   return data.tafsir;
-}
-
-/** URL audio full-surah equran.id untuk qari tertentu. */
-export function audioFullUrl(nomor: number, qari: string): string {
-  const pad = (n: number, w: number) => String(n).padStart(w, "0");
-  // bentuk: audio-full/{slug}/{036}.mp3 — slug diambil dari data audioFull,
-  // tapi karena kita hanya punya URL-nya dari payload surat, fungsi ini
-  // menerima URL penuh dari pemanggil.
-  void pad;
-  return String(nomor);
 }

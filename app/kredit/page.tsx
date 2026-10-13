@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/smart-link";
 import { OrnamentDivider } from "@/components/ornaments";
 import { CreditThumb } from "@/components/credit-thumb";
 import { CREDITS } from "@/lib/data/credits";

@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { getSurahList } from "@/lib/api/equran";
+import Link from "@/components/smart-link";
+import { SURAH } from "@/lib/data/surah";
 import { Hero } from "@/components/home/hero";
 import { PopularSurah } from "@/components/home/popular-surah";
 import { HomePrayer } from "@/components/home/home-prayer";
@@ -9,8 +9,6 @@ import { ArtDivider } from "@/components/art-divider";
 import { ImageBanner } from "@/components/image-banner";
 import { Gallery, type GalleryItem } from "@/components/gallery";
 import { AmbientImage } from "@/components/ambient-image";
-import type { SurahSummary } from "@/lib/types";
-
 export const revalidate = 86400;
 
 const POPULER = [
@@ -39,19 +37,12 @@ const GALERI: GalleryItem[] = [
   { variant: "card-tile-green", caption: "Masjid di tepi air" },
 ];
 
-export default async function HomePage() {
-  let surahList: SurahSummary[] = [];
-  try {
-    surahList = await getSurahList();
-  } catch {
-    surahList = [];
-  }
-
-  const find = (n: number) => surahList.find((s) => s.nomor === n);
+export default function HomePage() {
+  const find = (n: number) => SURAH[n - 1];
 
   return (
     <>
-      <Hero totalSurah={surahList.length || 114} />
+      <Hero />
 
       {/* — shortcut surah populer — */}
       <section className="section container-page" aria-labelledby="populer-title">

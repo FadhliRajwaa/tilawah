@@ -1,165 +1,126 @@
 "use client";
 
-/* — Satu ayat: Arab (font mushaf) + latin opsional + terjemahan + aksi.
+/* — Satu ayat: Arab (font mushaf LPMQ) + latin + terjemahan + aksi.
  *
- * ⚠️ Bentuknya LEMBAR MUSHAF, bukan kartu berbingkai.
+ * Bentuknya LEMBAR, bukan kartu berbingkai: ayat mengalir dipisah nomor
+ * berhias (medali) dan jarak — seperti mushaf sungguhan. Tanpa kotak.
  *
- * Versi lama membungkus tiap ayat dalam kotak putih berbingkai — untuk
- * surah panjang (Al-Baqarah 286 ayat) itu 286 kotak bertumpuk, dan halaman
- * terasa seperti daftar kartu, bukan bacaan. Mushaf sungguhan tidak begitu:
- * ayat mengalir di satu lembar, dipisah nomor dan ruang.
+ * Preferensi tampilan (latin, terjemahan, ukuran Arab) TIDAK dibaca di
+ * sini — mereka diterapkan sebagai atribut di <html> + CSS. Hasilnya kartu
+ * selalu merender ketiganya, dan CSS yang menyembunyikan: server tidak
+ * perlu tahu pilihan pengguna untuk mengirim HTML yang benar.
  *
- * Jadi: tanpa kotak, tanpa border. Pemisah antar ayat adalah nomor berhias
- * (medali) dan jarak. Yang tersisa hanya garis rambut tipis di atas baris
- * aksi — dan itu pun setengah transparan.
- *
- * Baris aksinya sendiri sudah diekstrak ke `AyahActions` karena reader juz
- * memakai lima tombol yang sama persis.
- */
+ * Tombol putarnya terhubung ke pemutar lewat selector sempit, jadi PLAY
+ * pada satu ayat tidak me-render ulang 285 ayat lainnya. */
 
-import { useMemo, useState } from "react";
-import type { Ayah } from "@/lib/types";
-import { usePrefs } from "@/lib/store/prefs";
-import { usePlayer, type Track } from "@/components/player/player-provider";
+import { memo } from "react";
+import type { Ayat } from "@/lib/types";
+import { getPosition, play, sameTrack, seek, toggle, usePlayer } from "@/lib/player";
 import { AyahVoiceNote } from "@/components/player/ayah-voice-note";
-import { toggleBookmark, isBookmarked } from "@/lib/store/bookmark";
-import { cn, truncate } from "@/lib/utils";
+import { toggleBookmark, useBookmarks } from "@/lib/store/bookmark";
+import { toast } from "@/lib/toast";
+import { cn, toArabicNumber, truncate } from "@/lib/utils";
 import { AyahMedal } from "@/components/ornaments";
 import { AyahActions } from "./ayah-actions";
 
 interface Props {
   surahNomor: number;
   surahNama: string;
-  ayah: Ayah;
-  queue: Track[];
-  isActive: boolean;
+  ayah: Ayat;
+  /** antrean lanjut otomatis (dibangun reader) */
+  queue: { s: number; n: number }[];
   isTarget: boolean;
-  onOpenTafsir: (ayah: number) => void;
+  onOpenTafsir: (n: number) => void;
   /**
-   * Keadaan tersimpan dari LUAR. Dipakai reader juz, yang sudah membaca
-   * seluruh bookmark lewat satu hook (`useBookmarks`) untuk menghindari
-   * 148 pembacaan localStorage per render. Kalau tidak diisi, kartu
-   * membaca sendiri saat mount — cukup untuk reader surat.
-   */
-  markedOverride?: boolean;
-  /**
-   * Awalan id elemen. WAJIB diisi saat beberapa surah dirender di satu
-   * halaman (reader juz) — tanpa itu, `ayat-1` muncul berkali-kali
-   * (Al-Fatihah 1, Al-Baqarah 1, …) dan `getElementById` mengembalikan
-   * yang PERTAMA. Akibatnya deep-link `?ayat=N` menggulir ke ayat yang
-   * salah, dan `aria-labelledby` menunjuk elemen yang keliru.
-   *
-   * Default kosong = `ayat-N` (reader surat, satu surah saja).
+   * Awalan id. WAJIB di reader juz (beberapa surah di satu halaman):
+   * tanpa itu `ayat-1` muncul berkali-kali dan `getElementById` hanya
+   * mengembalikan yang pertama — deep-link menggulir ke ayat yang salah.
    */
   idPrefix?: string;
 }
 
-export function AyahCard({
+export const AyahCard = memo(function AyahCard({
   surahNomor,
   surahNama,
   ayah,
   queue,
-  isActive,
   isTarget,
   onOpenTafsir,
-  markedOverride,
   idPrefix,
 }: Props) {
-  const [prefs] = usePrefs();
-  const { play, state } = usePlayer();
-  const [markedLocal, setMarkedLocal] = useState(() =>
-    typeof window !== "undefined" ? isBookmarked(surahNomor, ayah.nomorAyat) : false,
-  );
+  const track = usePlayer((s) => s.track);
+  const playing = usePlayer((s) => s.playing);
+  const bookmarks = useBookmarks();
 
-  /* Sumber kebenaran: prop kalau diberikan, kalau tidak keadaan lokal. */
-  const marked = markedOverride ?? markedLocal;
-
-  const audioUrl = ayah.audio?.[prefs.reciter];
-  const playingThis =
-    isActive && state.track?.ayat === ayah.nomorAyat && state.track?.surahNomor === surahNomor;
-
-  /* Track untuk ayat ini diambil dari `queue` (dibangun reader) supaya
-   * objeknya identik dengan yang dipegang player global. Kalau dibangun
-   * ulang di sini, `track.key` tetap sama tapi objeknya beda — dan
-   * perbandingan di AyahVoiceNote jadi tidak stabil. */
-  const track: Track = useMemo(
-    () =>
-      queue.find((t) => t.ayat === ayah.nomorAyat && t.surahNomor === surahNomor) ?? {
-        key: `${surahNomor}:${ayah.nomorAyat}`,
-        url: audioUrl ?? "",
-        urls: { ...(ayah.audio ?? {}) },
-        surahNomor,
-        surahNama,
-        ayat: ayah.nomorAyat,
-        full: false,
-      },
-    [queue, ayah.nomorAyat, ayah.audio, audioUrl, surahNomor, surahNama],
-  );
+  const playingThis = playing && sameTrack(track, { s: surahNomor, n: ayah.n });
+  const marked = bookmarks.some((b) => b.nomor === surahNomor && b.ayat === ayah.n);
 
   const handlePlay = () => {
-    if (!audioUrl) return;
-    play(track, queue);
+    if (playingThis) toggle();
+    else play({ s: surahNomor, n: ayah.n }, queue);
   };
 
   const handleBookmark = () => {
     const now = toggleBookmark({
       nomor: surahNomor,
-      ayat: ayah.nomorAyat,
+      ayat: ayah.n,
       namaLatin: surahNama,
-      snippet: truncate(ayah.teksIndonesia, 110),
+      snippet: truncate(ayah.tr, 110),
     });
-    /* Keadaan lokal selalu diperbarui walau prop diberikan — kalau pemanggil
-       memakai hook, event store akan menyusul; kalau tidak, ini yang
-       membuat tombolnya langsung berubah. */
-    setMarkedLocal(now);
+    if (now) {
+      toast(`Ayat ${ayah.n} ditandai`, {
+        label: "Batalkan",
+        run: () => toggleBookmark({ nomor: surahNomor, ayat: ayah.n, namaLatin: surahNama, snippet: "" }),
+      });
+    }
   };
 
   return (
     <article
-      id={idPrefix ? `${idPrefix}-${ayah.nomorAyat}` : `ayat-${ayah.nomorAyat}`}
+      id={idPrefix ? `${idPrefix}-${ayah.n}` : `ayat-${surahNomor}-${ayah.n}`}
       className={cn("ayah", playingThis && "is-active", isTarget && "is-target")}
-      data-ayah={ayah.nomorAyat}
+      data-ayah={ayah.n}
     >
       <header className="ayah__head">
-        <AyahMedal nomor={ayah.nomorAyat} />
+        <AyahMedal nomor={ayah.n} />
         <span className="ayah__meta">
-          {surahNama} · Ayat {ayah.nomorAyat}
+          {surahNama} · Ayat {ayah.n}
         </span>
       </header>
 
-      <p
-        className="arabic ayah__arabic"
-        lang="ar"
-        dir="rtl"
-        style={{ fontSize: `calc(var(--text-arabic) * ${prefs.arabicScale})` }}
-      >
-        {ayah.teksArab}
+      <p className="arabic ayah__arabic" lang="ar" dir="rtl">
+        {ayah.ar}
+        <span className="ayah__end" aria-hidden="true">
+          ‏﴿{toArabicNumber(ayah.n)}﴾
+        </span>
       </p>
 
-      {prefs.showLatin && <p className="ayah__latin">{ayah.teksLatin}</p>}
+      <p className="ayah__latin">{ayah.lt}</p>
+      <p className="ayah__translation">{ayah.tr}</p>
 
-      {prefs.showTranslation && <p className="ayah__translation">{ayah.teksIndonesia}</p>}
-
-      {/* Waveform per ayat — tersambung ke player global, bukan audio sendiri */}
       <AyahVoiceNote
-        track={track}
+        s={surahNomor}
+        n={ayah.n}
+        nama={surahNama}
         queue={queue}
-        teksLatin={ayah.teksLatin}
-        seed={surahNomor * 1000 + ayah.nomorAyat}
+        teksLatin={ayah.lt}
+        seed={surahNomor * 1000 + ayah.n}
       />
 
       <AyahActions
         surahNomor={surahNomor}
         surahNama={surahNama}
-        ayahNomor={ayah.nomorAyat}
-        teksArab={ayah.teksArab}
-        teksIndonesia={ayah.teksIndonesia}
+        ayahNomor={ayah.n}
+        teksArab={ayah.ar}
+        teksIndonesia={ayah.tr}
         playing={playingThis}
         marked={marked}
         onPlay={handlePlay}
-        onOpenTafsir={() => onOpenTafsir(ayah.nomorAyat)}
+        onOpenTafsir={() => onOpenTafsir(ayah.n)}
         onToggleBookmark={handleBookmark}
       />
     </article>
   );
-}
+});
+
+export { getPosition, seek };

@@ -1,0 +1,143 @@
+/* — Indeks 114 surah (statis).
+ *
+ * Disalin dari equran.id/api/v2/surat. Data ini tidak pernah berubah (114 surah,
+ * 6.236 ayat), jadi disimpan sebagai modul: halaman katalog, pencarian cepat,
+ * dan pemutar tidak perlu menunggu jaringan — dan tidak bisa gagal karena API
+ * sedang turun. Teks ayat tetap diambil dari API (lihat lib/api/equran.ts).
+ */
+
+export interface SurahMeta {
+  n: number;
+  /** nama Arab */
+  ar: string;
+  latin: string;
+  arti: string;
+  /** jumlah ayat */
+  ayat: number;
+  /** true = Makkiyah (turun di Mekah) */
+  mk: boolean;
+}
+
+export const SURAH: readonly SurahMeta[] = [
+  { n: 1, ar: "الفاتحة", latin: "Al-Fatihah", arti: "Pembukaan", ayat: 7, mk: true },
+  { n: 2, ar: "البقرة", latin: "Al-Baqarah", arti: "Sapi", ayat: 286, mk: false },
+  { n: 3, ar: "اٰل عمران", latin: "Ali 'Imran", arti: "Keluarga Imran", ayat: 200, mk: false },
+  { n: 4, ar: "النساۤء", latin: "An-Nisa'", arti: "Wanita", ayat: 176, mk: false },
+  { n: 5, ar: "الماۤئدة", latin: "Al-Ma'idah", arti: "Hidangan", ayat: 120, mk: false },
+  { n: 6, ar: "الانعام", latin: "Al-An'am", arti: "Binatang Ternak", ayat: 165, mk: true },
+  { n: 7, ar: "الاعراف", latin: "Al-A'raf", arti: "Tempat Tertinggi", ayat: 206, mk: true },
+  { n: 8, ar: "الانفال", latin: "Al-Anfal", arti: "Rampasan Perang", ayat: 75, mk: false },
+  { n: 9, ar: "التوبة", latin: "At-Taubah", arti: "Pengampunan", ayat: 129, mk: false },
+  { n: 10, ar: "يونس", latin: "Yunus", arti: "Yunus", ayat: 109, mk: true },
+  { n: 11, ar: "هود", latin: "Hud", arti: "Hud", ayat: 123, mk: true },
+  { n: 12, ar: "يوسف", latin: "Yusuf", arti: "Yusuf", ayat: 111, mk: true },
+  { n: 13, ar: "الرّعد", latin: "Ar-Ra'd", arti: "Guruh", ayat: 43, mk: false },
+  { n: 14, ar: "ابرٰهيم", latin: "Ibrahim", arti: "Ibrahim", ayat: 52, mk: true },
+  { n: 15, ar: "الحجر", latin: "Al-Hijr", arti: "Hijr", ayat: 99, mk: true },
+  { n: 16, ar: "النحل", latin: "An-Nahl", arti: "Lebah", ayat: 128, mk: true },
+  { n: 17, ar: "الاسراۤء", latin: "Al-Isra'", arti: "Memperjalankan Malam Hari", ayat: 111, mk: true },
+  { n: 18, ar: "الكهف", latin: "Al-Kahf", arti: "Goa", ayat: 110, mk: true },
+  { n: 19, ar: "مريم", latin: "Maryam", arti: "Maryam", ayat: 98, mk: true },
+  { n: 20, ar: "طٰهٰ", latin: "Taha", arti: "Taha", ayat: 135, mk: true },
+  { n: 21, ar: "الانبياۤء", latin: "Al-Anbiya'", arti: "Para Nabi", ayat: 112, mk: true },
+  { n: 22, ar: "الحج", latin: "Al-Hajj", arti: "Haji", ayat: 78, mk: false },
+  { n: 23, ar: "المؤمنون", latin: "Al-Mu'minun", arti: "Orang-Orang Mukmin", ayat: 118, mk: true },
+  { n: 24, ar: "النّور", latin: "An-Nur", arti: "Cahaya", ayat: 64, mk: false },
+  { n: 25, ar: "الفرقان", latin: "Al-Furqan", arti: "Pembeda", ayat: 77, mk: true },
+  { n: 26, ar: "الشعراۤء", latin: "Asy-Syu'ara'", arti: "Para Penyair", ayat: 227, mk: true },
+  { n: 27, ar: "النمل", latin: "An-Naml", arti: "Semut-semut", ayat: 93, mk: true },
+  { n: 28, ar: "القصص", latin: "Al-Qasas", arti: "Kisah-Kisah", ayat: 88, mk: true },
+  { n: 29, ar: "العنكبوت", latin: "Al-'Ankabut", arti: "Laba-Laba", ayat: 69, mk: true },
+  { n: 30, ar: "الرّوم", latin: "Ar-Rum", arti: "Romawi", ayat: 60, mk: true },
+  { n: 31, ar: "لقمٰن", latin: "Luqman", arti: "Luqman", ayat: 34, mk: true },
+  { n: 32, ar: "السّجدة", latin: "As-Sajdah", arti: "Sajdah", ayat: 30, mk: true },
+  { n: 33, ar: "الاحزاب", latin: "Al-Ahzab", arti: "Golongan Yang Bersekutu", ayat: 73, mk: false },
+  { n: 34, ar: "سبأ", latin: "Saba'", arti: "Saba'", ayat: 54, mk: true },
+  { n: 35, ar: "فاطر", latin: "Fatir", arti: "Maha Pencipta", ayat: 45, mk: true },
+  { n: 36, ar: "يٰسۤ", latin: "Yasin", arti: "Yasin", ayat: 83, mk: true },
+  { n: 37, ar: "الصّٰۤفّٰت", latin: "As-Saffat", arti: "Barisan-Barisan", ayat: 182, mk: true },
+  { n: 38, ar: "ص", latin: "Sad", arti: "Sad", ayat: 88, mk: true },
+  { n: 39, ar: "الزمر", latin: "Az-Zumar", arti: "Rombongan", ayat: 75, mk: true },
+  { n: 40, ar: "غافر", latin: "Ghafir", arti: "Maha Pengampun", ayat: 85, mk: true },
+  { n: 41, ar: "فصّلت", latin: "Fussilat", arti: "Yang Dijelaskan", ayat: 54, mk: true },
+  { n: 42, ar: "الشورى", latin: "Asy-Syura", arti: "Musyawarah", ayat: 53, mk: true },
+  { n: 43, ar: "الزخرف", latin: "Az-Zukhruf", arti: "Perhiasan", ayat: 89, mk: true },
+  { n: 44, ar: "الدخان", latin: "Ad-Dukhan", arti: "Kabut", ayat: 59, mk: true },
+  { n: 45, ar: "الجاثية", latin: "Al-Jasiyah", arti: "Berlutut", ayat: 37, mk: true },
+  { n: 46, ar: "الاحقاف", latin: "Al-Ahqaf", arti: "Bukit Pasir", ayat: 35, mk: true },
+  { n: 47, ar: "محمّد", latin: "Muhammad", arti: "Muhammad", ayat: 38, mk: false },
+  { n: 48, ar: "الفتح", latin: "Al-Fath", arti: "Kemenangan", ayat: 29, mk: false },
+  { n: 49, ar: "الحجرٰت", latin: "Al-Hujurat", arti: "Kamar-Kamar", ayat: 18, mk: false },
+  { n: 50, ar: "ق", latin: "Qaf", arti: "Qaf", ayat: 45, mk: true },
+  { n: 51, ar: "الذّٰريٰت", latin: "Az-Zariyat", arti: "Angin yang Menerbangkan", ayat: 60, mk: true },
+  { n: 52, ar: "الطور", latin: "At-Tur", arti: "Bukit Tursina", ayat: 49, mk: true },
+  { n: 53, ar: "النجم", latin: "An-Najm", arti: "Bintang", ayat: 62, mk: true },
+  { n: 54, ar: "القمر", latin: "Al-Qamar", arti: "Bulan", ayat: 55, mk: true },
+  { n: 55, ar: "الرحمن", latin: "Ar-Rahman", arti: "Maha Pengasih", ayat: 78, mk: false },
+  { n: 56, ar: "الواقعة", latin: "Al-Waqi'ah", arti: "Hari Kiamat", ayat: 96, mk: true },
+  { n: 57, ar: "الحديد", latin: "Al-Hadid", arti: "Besi", ayat: 29, mk: false },
+  { n: 58, ar: "المجادلة", latin: "Al-Mujadilah", arti: "Gugatan", ayat: 22, mk: false },
+  { n: 59, ar: "الحشر", latin: "Al-Hasyr", arti: "Pengusiran", ayat: 24, mk: false },
+  { n: 60, ar: "الممتحنة", latin: "Al-Mumtahanah", arti: "Wanita Yang Diuji", ayat: 13, mk: false },
+  { n: 61, ar: "الصّفّ", latin: "As-Saff", arti: "Barisan", ayat: 14, mk: false },
+  { n: 62, ar: "الجمعة", latin: "Al-Jumu'ah", arti: "Jumat", ayat: 11, mk: false },
+  { n: 63, ar: "المنٰفقون", latin: "Al-Munafiqun", arti: "Orang-Orang Munafik", ayat: 11, mk: false },
+  { n: 64, ar: "التغابن", latin: "At-Tagabun", arti: "Pengungkapan Kesalahan", ayat: 18, mk: false },
+  { n: 65, ar: "الطلاق", latin: "At-Talaq", arti: "Talak", ayat: 12, mk: false },
+  { n: 66, ar: "التحريم", latin: "At-Tahrim", arti: "Pengharaman", ayat: 12, mk: false },
+  { n: 67, ar: "الملك", latin: "Al-Mulk", arti: "Kerajaan", ayat: 30, mk: true },
+  { n: 68, ar: "القلم", latin: "Al-Qalam", arti: "Pena", ayat: 52, mk: true },
+  { n: 69, ar: "الحاۤقّة", latin: "Al-Haqqah", arti: "Hari Kiamat", ayat: 52, mk: true },
+  { n: 70, ar: "المعارج", latin: "Al-Ma'arij", arti: "Tempat Naik", ayat: 44, mk: true },
+  { n: 71, ar: "نوح", latin: "Nuh", arti: "Nuh", ayat: 28, mk: true },
+  { n: 72, ar: "الجن", latin: "Al-Jinn", arti: "Jin", ayat: 28, mk: true },
+  { n: 73, ar: "المزّمّل", latin: "Al-Muzzammil", arti: "Orang Yang Berselimut", ayat: 20, mk: true },
+  { n: 74, ar: "المدّثّر", latin: "Al-Muddassir", arti: "Orang Yang Berkemul", ayat: 56, mk: true },
+  { n: 75, ar: "القيٰمة", latin: "Al-Qiyamah", arti: "Hari Kiamat", ayat: 40, mk: true },
+  { n: 76, ar: "الانسان", latin: "Al-Insan", arti: "Manusia", ayat: 31, mk: false },
+  { n: 77, ar: "المرسلٰت", latin: "Al-Mursalat", arti: "Malaikat Yang Diutus", ayat: 50, mk: true },
+  { n: 78, ar: "النبأ", latin: "An-Naba'", arti: "Berita Besar", ayat: 40, mk: true },
+  { n: 79, ar: "النّٰزعٰت", latin: "An-Nazi'at", arti: "Malaikat Yang Mencabut", ayat: 46, mk: true },
+  { n: 80, ar: "عبس", latin: "'Abasa", arti: "Bermuka Masam", ayat: 42, mk: true },
+  { n: 81, ar: "التكوير", latin: "At-Takwir", arti: "Penggulungan", ayat: 29, mk: true },
+  { n: 82, ar: "الانفطار", latin: "Al-Infitar", arti: "Terbelah", ayat: 19, mk: true },
+  { n: 83, ar: "المطفّفين", latin: "Al-Mutaffifin", arti: "Orang-Orang Curang", ayat: 36, mk: true },
+  { n: 84, ar: "الانشقاق", latin: "Al-Insyiqaq", arti: "Terbelah", ayat: 25, mk: true },
+  { n: 85, ar: "البروج", latin: "Al-Buruj", arti: "Gugusan Bintang", ayat: 22, mk: true },
+  { n: 86, ar: "الطارق", latin: "At-Tariq", arti: "Yang Datang Di Malam Hari", ayat: 17, mk: true },
+  { n: 87, ar: "الاعلى", latin: "Al-A'la", arti: "Maha Tinggi", ayat: 19, mk: true },
+  { n: 88, ar: "الغاشية", latin: "Al-Gasyiyah", arti: "Hari Kiamat", ayat: 26, mk: true },
+  { n: 89, ar: "الفجر", latin: "Al-Fajr", arti: "Fajar", ayat: 30, mk: true },
+  { n: 90, ar: "البلد", latin: "Al-Balad", arti: "Negeri", ayat: 20, mk: true },
+  { n: 91, ar: "الشمس", latin: "Asy-Syams", arti: "Matahari", ayat: 15, mk: true },
+  { n: 92, ar: "الّيل", latin: "Al-Lail", arti: "Malam", ayat: 21, mk: true },
+  { n: 93, ar: "الضحى", latin: "Ad-Duha", arti: "Duha", ayat: 11, mk: true },
+  { n: 94, ar: "الشرح", latin: "Al-Insyirah", arti: "Lapang", ayat: 8, mk: true },
+  { n: 95, ar: "التين", latin: "At-Tin", arti: "Buah Tin", ayat: 8, mk: true },
+  { n: 96, ar: "العلق", latin: "Al-'Alaq", arti: "Segumpal Darah", ayat: 19, mk: true },
+  { n: 97, ar: "القدر", latin: "Al-Qadr", arti: "Kemuliaan", ayat: 5, mk: true },
+  { n: 98, ar: "البيّنة", latin: "Al-Bayyinah", arti: "Bukti Nyata", ayat: 8, mk: false },
+  { n: 99, ar: "الزلزلة", latin: "Az-Zalzalah", arti: "Guncangan", ayat: 8, mk: false },
+  { n: 100, ar: "العٰديٰت", latin: "Al-'Adiyat", arti: "Kuda Yang Berlari Kencang", ayat: 11, mk: true },
+  { n: 101, ar: "القارعة", latin: "Al-Qari'ah", arti: "Hari Kiamat", ayat: 11, mk: true },
+  { n: 102, ar: "التكاثر", latin: "At-Takasur", arti: "Bermegah-Megahan", ayat: 8, mk: true },
+  { n: 103, ar: "العصر", latin: "Al-'Asr", arti: "Masa", ayat: 3, mk: true },
+  { n: 104, ar: "الهمزة", latin: "Al-Humazah", arti: "Pengumpat", ayat: 9, mk: true },
+  { n: 105, ar: "الفيل", latin: "Al-Fil", arti: "Gajah", ayat: 5, mk: true },
+  { n: 106, ar: "قريش", latin: "Quraisy", arti: "Quraisy", ayat: 4, mk: true },
+  { n: 107, ar: "الماعون", latin: "Al-Ma'un", arti: "Barang Yang Berguna", ayat: 7, mk: true },
+  { n: 108, ar: "الكوثر", latin: "Al-Kausar", arti: "Pemberian Yang Banyak", ayat: 3, mk: true },
+  { n: 109, ar: "الكٰفرون", latin: "Al-Kafirun", arti: "Orang-Orang kafir", ayat: 6, mk: true },
+  { n: 110, ar: "النصر", latin: "An-Nasr", arti: "Pertolongan", ayat: 3, mk: false },
+  { n: 111, ar: "اللهب", latin: "Al-Lahab", arti: "Api Yang Bergejolak", ayat: 5, mk: true },
+  { n: 112, ar: "الاخلاص", latin: "Al-Ikhlas", arti: "Ikhlas", ayat: 4, mk: true },
+  { n: 113, ar: "الفلق", latin: "Al-Falaq", arti: "Subuh", ayat: 5, mk: false },
+  { n: 114, ar: "الناس", latin: "An-Nas", arti: "Manusia", ayat: 6, mk: false },
+];
+
+/** Meta satu surah (1–114). */
+export const surahMeta = (n: number): SurahMeta => SURAH[n - 1];
+
+/** Basmalah — disalin dari Al-Fatihah ayat 1 (data Kemenag), bukan diketik
+ *  ulang: versi ketikan tangan sebelumnya berbeda urutan tanda harakat. */
+export const BASMALAH = "بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ";

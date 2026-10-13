@@ -74,8 +74,12 @@
 
   --font-display: var(--font-fraunces), "Georgia", serif;
   --font-body: var(--font-switzer), ui-sans-serif, system-ui, sans-serif;
-  --font-arabic: "LPMQ Isep Misbah", var(--font-amiri-quran), "Amiri Quran",
-    "Traditional Arabic", serif;
+  /* Font mushaf standar Indonesia (LPMQ Kemenag). Terverifikasi mencakup
+     seluruh 73 karakter yang dipakai teks 114 surah equran.id — jadi tidak
+     perlu font Arab kedua sebagai cadangan. Dulu berkasnya ada di
+     public/fonts tapi tidak pernah didaftarkan, sehingga yang tampil
+     sebenarnya Amiri. */
+  --font-arabic: var(--font-lpmq), "Traditional Arabic", serif;
 
   /* Skala teks — rasio 1.25, dengan clamp untuk yang fluid.
      Nama mengikuti peran, bukan ukuran, supaya makna tetap saat nilai berubah. */
@@ -151,9 +155,15 @@
   --shadow-3: 0 4px 8px oklch(22% 0.032 235 / 0.08),
     0 18px 44px oklch(22% 0.032 235 / 0.14);
 
-  /* Cincin — dipakai untuk outline & border halus pada permukaan */
-  --ring-hairline: 1px solid oklch(22% 0.032 235 / 0.08);
-  --ring-accent: 1px solid color-mix(in oklab, var(--accent) 40%, transparent);
+  /* Permukaan kaca (nav, bilah baca, pemutar, bilah tab) dan tirai lembar.
+     Kaca dipakai HANYA di chrome yang mengapung di atas teks — bukan di
+     kartu konten, supaya kesannya tetap "lapisan di atas", bukan hiasan. */
+  --glass: color-mix(in oklab, var(--paper-3) 84%, transparent);
+  --glass-edge: color-mix(in oklab, var(--ink) 9%, transparent);
+  --scrim: oklch(15% 0.02 235 / 0.42);
+
+  /* Tepi kiri-kanan halaman; ikut area aman ponsel berponi saat miring */
+  --gutter: clamp(1rem, 4vw, 1.5rem);
 
   /* — "Kertas tipis" di area teks bergambar —
    *
@@ -195,12 +205,18 @@
   --dur-fast: 160ms;
   --dur-base: 220ms;
   --dur-slow: 320ms;
+  /* Lembar (sheet) & laci: cukup lama untuk terbaca sebagai benda yang
+     bergerak, tapi masih di bawah ambang "menunggu". */
+  --dur-sheet: 420ms;
 
   /* Easing: keluar cepat lalu mengendap (ease-out) untuk hampir semua hal;
-     ease-in-out hanya untuk gerakan bolak-balik. */
+     ease-in-out hanya untuk gerakan bolak-balik. Tanpa kurva memantul —
+     benda nyata melambat lalu berhenti, tidak berayun. */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Kurva lembar iOS: mulai cepat, mengendap panjang — terasa seperti
+     ditarik, bukan didorong. */
+  --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
 
   /* ─── 6. TATA LETAK ────────────────────────────────────────────────── */
 
@@ -215,14 +231,21 @@
 
   /* Tinggi chrome — dipakai untuk scroll-padding & ruang bawah konten */
   --nav-h: 60px;
+  /* bilah baca lengket di halaman surat/juz */
+  --bar-h: 52px;
+  /* dock pemutar desktop · pemutar mini ponsel · bilah tab ponsel */
   --player-h: 76px;
-  --toolbar-h: 56px;
+  --mini-h: 64px;
+  --tab-h: 58px;
+  /* area aman bawah (iPhone tanpa tombol home) — 0 di perangkat lain */
+  --safe-b: env(safe-area-inset-bottom, 0px);
 
   /* Z-index — skala bernama, tidak ada 9999 */
   --z-base: 1;
   --z-raised: 10;
   --z-sticky: 40;
   --z-nav: 50;
+  --z-tabbar: 55;
   --z-dock: 60;
   --z-overlay: 70;
   --z-modal: 80;
@@ -287,5 +310,6 @@
   --shadow-2: 0 2px 4px oklch(0% 0 0 / 0.32), 0 8px 24px oklch(0% 0 0 / 0.34);
   --shadow-3: 0 4px 8px oklch(0% 0 0 / 0.36), 0 18px 44px oklch(0% 0 0 / 0.42);
 
-  --ring-hairline: 1px solid oklch(100% 0 0 / 0.09);
+  --glass-edge: oklch(100% 0 0 / 0.08);
+  --scrim: oklch(8% 0.02 235 / 0.6);
 }

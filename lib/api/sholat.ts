@@ -29,11 +29,6 @@ async function getBody<T>(url: string, revalidate: number): Promise<T> {
   return json.data;
 }
 
-/** Daftar 518 kota — cache 7 hari. */
-export async function getKotaList(): Promise<Kota[]> {
-  return getBody<Kota[]>(`${BASE}/kota/semua`, WEEK);
-}
-
 /** Cari kota berdasarkan kata kunci. */
 export async function cariKota(q: string): Promise<Kota[]> {
   return getBody<Kota[]>(`${BASE}/kota/cari/${encodeURIComponent(q)}`, WEEK);
@@ -65,7 +60,3 @@ export async function getJadwalBulanan(
     HOUR,
   ).then((d) => d.jadwal);
 }
-
-/* Konstanta waktu tinggal di `lib/waktu-sholat.ts` — bukan di sini — supaya
- * komponen KLIEN bisa mengimpornya tanpa ikut menarik `server-only`. */
-export { WAKTU_SEMUA, WAKTU_WAJIB, LABEL_WAKTU, type WaktuWajib } from "@/lib/waktu-sholat";

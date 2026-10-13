@@ -11,7 +11,7 @@
  * viewport, bukan elemen). Sekarang `transform` — lihat parallax.tsx.
  */
 
-import Link from "next/link";
+import Link from "@/components/smart-link";
 import { AmbientImage, type ArtVariant } from "./ambient-image";
 import { PhotoZoom } from "./photo-zoom";
 

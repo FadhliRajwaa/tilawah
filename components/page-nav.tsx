@@ -10,7 +10,7 @@
  * dan itu membuat halaman terasa tidak stabil.
  */
 
-import Link from "next/link";
+import Link from "@/components/smart-link";
 
 interface Props {
   /** Tautan sebelumnya; `null` kalau ini yang pertama */

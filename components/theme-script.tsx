@@ -1,26 +1,29 @@
-/* — Script inline anti-flash: menerapkan tema SEBELUM paint pertama.
+/* — Skrip inline sebelum paint pertama.
  *
- * Alasan (dari riset Next.js): membaca localStorage saat render → hydration
- * mismatch. Solusi resmi: inline script sinkron di <head> yang menulis
- * data-theme ke <html> sebelum React hydrate; komponen klien membaca
- * nilai yang sama setelah mount.
+ * Menerapkan preferensi tampilan ke <html> SEBELUM React hidrasi, supaya
+ * halaman yang dirender server langsung tampil sesuai pilihan pengguna:
+ * tema, latin/terjemahan, mode baca, dan ukuran teks Arab.
+ *
+ * ⚠️ Logikanya harus sama dengan `applyPrefs` di lib/store/prefs.ts.
+ * Duplikasi ini disengaja: skrip ini berjalan sebelum bundle JS dimuat,
+ * jadi tidak bisa mengimpor apa pun.
  */
 
 const SCRIPT = `
 (function () {
-  try {
-    var raw = localStorage.getItem("tilawah:prefs");
-    var mode = raw ? (JSON.parse(raw).theme || "auto") : "auto";
-    var dark =
-      mode === "dark" ||
-      (mode === "auto" &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches);
-    document.documentElement.dataset.theme = dark ? "dark" : "light";
-    document.documentElement.dataset.themeMode = mode;
-  } catch (e) {
-    document.documentElement.dataset.theme = "light";
-    document.documentElement.dataset.themeMode = "auto";
-  }
+  var d = document.documentElement, p = {};
+  try { p = JSON.parse(localStorage.getItem("tilawah:prefs") || "{}") || {}; } catch (e) {}
+  var mode = p.theme || "auto";
+  var dark = mode === "dark" || (mode === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
+  d.dataset.theme = dark ? "dark" : "light";
+  d.dataset.themeMode = mode;
+  d.dataset.latin = p.showLatin === false ? "0" : "1";
+  d.dataset.tr = p.showTranslation === false ? "0" : "1";
+  d.dataset.mode = p.readMode === "mushaf" ? "mushaf" : "ayat";
+  var s = Number(p.arabicScale);
+  if (s >= 0.7 && s <= 2) d.style.setProperty("--arabic-scale", String(s));
+  var m = document.querySelectorAll('meta[name="theme-color"]');
+  for (var i = 0; i < m.length; i++) m[i].content = dark ? "#061118" : "#e8f6fb";
 })();
 `;
 

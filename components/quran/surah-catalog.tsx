@@ -24,8 +24,8 @@
  */
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
-import type { SurahSummary } from "@/lib/types";
+import Link from "@/components/smart-link";
+import type { SurahMeta } from "@/lib/data/surah";
 import { cn } from "@/lib/utils";
 
 type Filter = "semua" | "Mekah" | "Madinah";
@@ -36,20 +36,20 @@ const FILTER: { id: Filter; label: string }[] = [
   { id: "Madinah", label: "Madaniyah" },
 ];
 
-export function SurahCatalog({ list }: { list: SurahSummary[] }) {
+export function SurahCatalog({ list }: { list: readonly SurahMeta[] }) {
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<Filter>("semua");
 
   const results = useMemo(() => {
     const term = q.trim().toLowerCase();
     return list.filter((s) => {
-      if (filter !== "semua" && s.tempatTurun !== filter) return false;
+      if (filter !== "semua" && (s.mk ? "Mekah" : "Madinah") !== filter) return false;
       if (!term) return true;
       return (
-        s.namaLatin.toLowerCase().includes(term) ||
+        s.latin.toLowerCase().includes(term) ||
         s.arti.toLowerCase().includes(term) ||
-        String(s.nomor) === term ||
-        String(s.nomor).padStart(3, "0") === term
+        String(s.n) === term ||
+        String(s.n).padStart(3, "0") === term
       );
     });
   }, [list, q, filter]);
@@ -98,23 +98,23 @@ export function SurahCatalog({ list }: { list: SurahSummary[] }) {
       ) : (
         <ol className="idx" aria-label="Indeks 114 surah">
           {results.map((s) => (
-            <li key={s.nomor} className="idx__row">
-              <Link href={`/surat/${s.nomor}`} className="idx__link">
-                <span className="idx__num">{s.nomor}</span>
+            <li key={s.n} className="idx__row">
+              <Link href={`/surat/${s.n}`} className="idx__link">
+                <span className="idx__num">{s.n}</span>
 
                 <span className="idx__body">
-                  <span className="idx__name">{s.namaLatin}</span>
+                  <span className="idx__name">{s.latin}</span>
                   <span className="idx__meta">
                     {s.arti}
                     <span className="idx__dot" aria-hidden="true">·</span>
-                    {s.jumlahAyat} ayat
+                    {s.ayat} ayat
                     <span className="idx__dot" aria-hidden="true">·</span>
-                    {s.tempatTurun === "Mekah" ? "Makkiyah" : "Madaniyah"}
+                    {s.mk ? "Makkiyah" : "Madaniyah"}
                   </span>
                 </span>
 
                 <span className="idx__ar" lang="ar" dir="rtl">
-                  {s.nama}
+                  {s.ar}
                 </span>
               </Link>
             </li>

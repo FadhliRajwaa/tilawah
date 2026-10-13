@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { getJuzAyah, getJuzInfo } from "@/lib/api/juz";
-import { JuzReader } from "@/components/quran/juz-reader";
+import { getJuzAyah } from "@/lib/api/juz";
+import { JUZ } from "@/lib/data/juz";
+import { Suspense } from "react";
+import { Reader } from "@/components/quran/surah-reader";
 import { ReaderSkeleton } from "@/components/quran/reader-skeleton";
+import { ReaderBar } from "@/components/quran/reader-toolbar";
 import { ReaderHead } from "@/components/reader-head";
 import { PageNav } from "@/components/page-nav";
 import { toArabicNumber } from "@/lib/utils";
 
 export const revalidate = 86400;
 
-/** Prerender 30 halaman juz (ISR harian). */
-export async function generateStaticParams() {
+/** Prerender 30 halaman juz (ISR harian). Nomornya 1–30, selalu. */
+export function generateStaticParams() {
   return Array.from({ length: 30 }, (_, i) => ({ nomor: String(i + 1) }));
 }
 
@@ -23,20 +25,16 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { nomor } = await params;
   const n = Number(nomor);
   if (!Number.isInteger(n) || n < 1 || n > 30) return { title: "Juz tidak ditemukan" };
-  try {
-    const info = await getJuzInfo(n);
-    return {
-      title: `Juz ${n} — ${info.jumlahAyat} Ayat, Arab & Terjemahan`,
-      description: `Baca Juz ${n} Al-Qur'an lengkap (${info.label}) — ${info.jumlahAyat} ayat dengan teks mushaf, terjemahan Kemenag, tafsir per ayat, dan murottal 6 qari.`,
-      alternates: { canonical: `/juz/${n}` },
-      openGraph: {
-        title: `Juz ${n} — Tilawah`,
-        description: `${info.jumlahAyat} ayat · ${info.label}`,
-      },
-    };
-  } catch {
-    return { title: `Juz ${n}` };
-  }
+  const info = JUZ[n - 1];
+  return {
+    title: `Juz ${n} — ${info.jumlahAyat} Ayat, Arab & Terjemahan`,
+    description: `Baca Juz ${n} Al-Qur'an lengkap (${info.label}) — ${info.jumlahAyat} ayat dengan teks mushaf, terjemahan Kemenag, tafsir per ayat, dan murottal 6 qari.`,
+    alternates: { canonical: `/juz/${n}` },
+    openGraph: {
+      title: `Juz ${n} — Tilawah`,
+      description: `${info.jumlahAyat} ayat · ${info.label}`,
+    },
+  };
 }
 
 export default async function JuzDetailPage({ params }: Params) {
@@ -44,10 +42,10 @@ export default async function JuzDetailPage({ params }: Params) {
   const n = Number(nomor);
   if (!Number.isInteger(n) || n < 1 || n > 30) notFound();
 
-  let info;
+  const info = JUZ[n - 1];
   let ayat;
   try {
-    [info, ayat] = await Promise.all([getJuzInfo(n), getJuzAyah(n)]);
+    ayat = await getJuzAyah(n);
   } catch {
     return (
       <div className="container-page" style={{ paddingBlock: "var(--space-8)" }}>
@@ -61,7 +59,6 @@ export default async function JuzDetailPage({ params }: Params) {
 
   return (
     <>
-      {/* — header juz (latar dipaku ke viewport) — */}
       <ReaderHead
         variant="tex-dome-detail"
         caption="Detail kubah — geometri Islam"
@@ -78,13 +75,12 @@ export default async function JuzDetailPage({ params }: Params) {
             <b>{info.jumlahAyat}</b> ayat
           </span>
           <span>
-            <b>{info.surahList.length}</b> surah
+            <b>{info.rentang.length}</b> surah
           </span>
           <span>{info.label}</span>
         </div>
       </ReaderHead>
 
-      {/* — navigasi antar juz — */}
       <PageNav
         ariaLabel="Navigasi antar juz"
         prev={n > 1 ? { href: `/juz/${n - 1}`, label: `Juz ${n - 1}` } : null}
@@ -93,7 +89,13 @@ export default async function JuzDetailPage({ params }: Params) {
       />
 
       <Suspense fallback={<ReaderSkeleton ayah={6} />}>
-        <JuzReader juzNomor={n} ayat={ayat} />
+      <ReaderBar maxAyat={Math.max(...info.rentang.map((r) => r.sampai))} />
+      <Reader
+        ayat={ayat}
+        surahNomor={info.rentang[0].surah}
+        juzNomor={n}
+        rentang={info.rentang}
+      />
       </Suspense>
     </>
   );

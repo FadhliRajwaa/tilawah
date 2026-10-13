@@ -8,7 +8,8 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import Link from "@/components/smart-link";
 import type { SearchMatch } from "@/lib/types";
 
 const SARAN = ["sabar", "syukur", "yatim", "ilmu", "orang tua", "taubat"];
@@ -34,8 +35,10 @@ function highlight(text: string, term: string) {
 }
 
 export function SearchPanel() {
+  const params = useSearchParams();
   const [q, setQ] = useState("");
-  const [committed, setCommitted] = useState("");
+  /* `?q=` dari cari cepat — langsung dijalankan, bisa dibagikan lewat URL. */
+  const [committed, setCommitted] = useState(() => params.get("q")?.trim() ?? "");
   const [page, setPage] = useState(0);
   const [data, setData] = useState<ApiResult | null>(null);
   const [loading, setLoading] = useState(false);

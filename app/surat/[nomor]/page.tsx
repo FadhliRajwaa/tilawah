@@ -1,64 +1,41 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { getSurah, getSurahList, getTafsir } from "@/lib/api/equran";
-import { SurahReader } from "@/components/quran/surah-reader";
+import { getSurah } from "@/lib/api/equran";
+import { SURAH, surahMeta } from "@/lib/data/surah";
+import { Suspense } from "react";
+import { Reader } from "@/components/quran/surah-reader";
 import { ReaderSkeleton } from "@/components/quran/reader-skeleton";
+import { ReaderBar } from "@/components/quran/reader-toolbar";
 import { SurahHeadActions } from "@/components/quran/surah-head-actions";
 import { ReaderHead } from "@/components/reader-head";
 import { PageNav } from "@/components/page-nav";
-import type { SurahDetail, TafsirItem } from "@/lib/types";
 
 export const revalidate = 86400;
 
-/** Prerender 114 halaman surat saat build (ISR harian). */
-export async function generateStaticParams() {
-  try {
-    const list = await getSurahList();
-    return list.map((s) => ({ nomor: String(s.nomor) }));
-  } catch {
-    // bila API sedang down saat build, fallback: render on-demand
-    return [];
-  }
+/** Prerender 114 halaman surat saat build (ISR harian). Tanpa fetch —
+ *  nomornya 1–114, selalu. */
+export function generateStaticParams() {
+  return SURAH.map((s) => ({ nomor: String(s.n) }));
 }
 
 interface Params {
   params: Promise<{ nomor: string }>;
 }
 
-/** Deskripsi dari API memuat tag HTML mentah (<i>, <b>) dan &nbsp; —
- *  bersihkan agar tidak tampil sebagai teks. */
-function cleanDeskripsi(html: string): string {
-  return html
-    .replace(/<[^>]*>/g, "")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { nomor } = await params;
   const n = Number(nomor);
   if (!Number.isInteger(n) || n < 1 || n > 114) return { title: "Surah tidak ditemukan" };
-  try {
-    const s = await getSurah(n);
-    return {
-      title: `Surat ${s.namaLatin} — ${s.jumlahAyat} Ayat, Arab & Terjemahan`,
-      description: `Baca Surat ${s.namaLatin} (${s.arti}) ${s.jumlahAyat} ayat lengkap: teks Arab mushaf, terjemahan Kemenag, tafsir per ayat, dan murottal 6 qari.`,
-      alternates: { canonical: `/surat/${n}` },
-      openGraph: {
-        title: `Surat ${s.namaLatin} — Tilawah`,
-        description: `${s.jumlahAyat} ayat · ${s.tempatTurun} · ${s.arti}`,
-      },
-    };
-  } catch {
-    return { title: `Surat ${n}` };
-  }
+  const m = surahMeta(n);
+  return {
+    title: `Surat ${m.latin} — ${m.ayat} Ayat, Arab & Terjemahan`,
+    description: `Baca Surat ${m.latin} (${m.arti}) ${m.ayat} ayat lengkap: teks Arab mushaf, terjemahan Kemenag, tafsir per ayat, dan murottal 6 qari.`,
+    alternates: { canonical: `/surat/${n}` },
+    openGraph: {
+      title: `Surat ${m.latin} — Tilawah`,
+      description: `${m.ayat} ayat · ${m.mk ? "Makkiyah" : "Madaniyah"} · ${m.arti}`,
+    },
+  };
 }
 
 export default async function SurahPage({ params }: Params) {
@@ -66,7 +43,7 @@ export default async function SurahPage({ params }: Params) {
   const n = Number(nomor);
   if (!Number.isInteger(n) || n < 1 || n > 114) notFound();
 
-  let surah: SurahDetail;
+  let surah;
   try {
     surah = await getSurah(n);
   } catch {
@@ -80,19 +57,11 @@ export default async function SurahPage({ params }: Params) {
     );
   }
 
-  // tafsir dimuat paralel; kegagalan tidak boleh memblokir pembacaan ayat
-  let tafsir: TafsirItem[] | null = null;
-  try {
-    tafsir = await getTafsir(n);
-  } catch {
-    tafsir = null;
-  }
-
-  const isMekah = surah.tempatTurun === "Mekah";
+  const meta = surahMeta(n);
+  const nextSurah = n < 114 ? { nomor: n + 1, namaLatin: surahMeta(n + 1).latin } : null;
 
   return (
     <>
-      {/* — header surat: marquee mushaf (latar dipaku ke viewport) — */}
       <ReaderHead
         variant="tex-manuscript"
         caption="Manuskrip mushaf — tulisan tangan lama"
@@ -101,7 +70,7 @@ export default async function SurahPage({ params }: Params) {
       >
         <p className="reader-head__eyebrow">Surah ke-{surah.nomor}</p>
         <span className="reader-head__name-ar" lang="ar" dir="rtl">
-          {surah.nama}
+          {meta.ar}
         </span>
         <h1 className="reader-head__name">{surah.namaLatin}</h1>
         <div className="reader-head__meta">
@@ -111,38 +80,26 @@ export default async function SurahPage({ params }: Params) {
           <span>
             <b>{surah.jumlahAyat}</b> ayat
           </span>
-          <span>
-            Turun di <b>{isMekah ? "Mekah" : "Madinah"}</b>
-          </span>
-          <span>{isMekah ? "Makkiyah" : "Madaniyah"}</span>
+          <span>{meta.mk ? "Makkiyah" : "Madaniyah"}</span>
         </div>
 
         <SurahHeadActions surah={surah} />
-
-        {surah.deskripsi && (
-          <p className="reader-head__desc">{cleanDeskripsi(surah.deskripsi)}</p>
-        )}
       </ReaderHead>
 
-      {/* — navigasi surat — */}
       <PageNav
         ariaLabel="Navigasi antar surah"
-        prev={
-          surah.suratSebelumnya
-            ? { href: `/surat/${surah.suratSebelumnya.nomor}`, label: surah.suratSebelumnya.namaLatin }
-            : null
-        }
-        next={
-          surah.suratSelanjutnya
-            ? { href: `/surat/${surah.suratSelanjutnya.nomor}`, label: surah.suratSelanjutnya.namaLatin }
-            : null
-        }
+        prev={n > 1 ? { href: `/surat/${n - 1}`, label: surahMeta(n - 1).latin } : null}
+        next={nextSurah ? { href: `/surat/${n + 1}`, label: nextSurah.namaLatin } : null}
         indeks={{ href: "/surat", label: "Semua surah" }}
       />
 
-      {/* — reader — */}
       <Suspense fallback={<ReaderSkeleton ayah={5} />}>
-        <SurahReader surah={surah} tafsir={tafsir} />
+      <ReaderBar maxAyat={surah.jumlahAyat} />
+      <Reader
+        ayat={surah.ayat}
+        surahNomor={surah.nomor}
+        nextSurah={nextSurah}
+      />
       </Suspense>
     </>
   );

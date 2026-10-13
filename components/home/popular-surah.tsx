@@ -1,10 +1,10 @@
-import Link from "next/link";
-import type { SurahSummary } from "@/lib/types";
+import Link from "@/components/smart-link";
+import type { SurahMeta } from "@/lib/data/surah";
 
 interface Item {
   nomor: number;
   label: string;
-  surah?: SurahSummary;
+  surah?: SurahMeta;
 }
 
 export function PopularSurah({ items }: { items: Item[] }) {
@@ -13,7 +13,7 @@ export function PopularSurah({ items }: { items: Item[] }) {
       {items.map((it) => (
         <Link key={it.nomor} href={`/surat/${it.nomor}`} className="chip">
           {it.label}
-          <b>{it.surah ? `${it.surah.jumlahAyat} ayat` : `#${it.nomor}`}</b>
+          <b>{it.surah ? `${it.surah.ayat} ayat` : `#${it.nomor}`}</b>
         </Link>
       ))}
     </div>
