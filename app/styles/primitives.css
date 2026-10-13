@@ -780,8 +780,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  min-height: 38px;
+  width: 44px;
+  min-height: 44px;
   color: var(--ink-2);
   font-size: var(--text-md);
   font-weight: var(--weight-semibold);

@@ -237,7 +237,7 @@
 }
 
 .readerbar__toggle {
-  min-height: 38px;
+  min-height: 44px;
   padding-inline: var(--space-3);
   border: 1px solid var(--rule);
   border-radius: var(--radius-full);
@@ -263,7 +263,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  min-height: 38px;
+  min-height: 44px;
   padding-inline: var(--space-3);
   border: 1px solid var(--rule);
   border-radius: var(--radius-full);
@@ -343,7 +343,7 @@
 
 .readerbar__jump-input {
   width: 104px;
-  min-height: 38px;
+  min-height: 44px;
   padding-inline: var(--space-2);
   border: 1px solid var(--rule);
   border-radius: var(--radius-full);
@@ -361,7 +361,7 @@
 }
 
 .readerbar__jump-btn {
-  min-height: 38px;
+  min-height: 44px;
   padding-inline: var(--space-3);
   border-radius: var(--radius-full);
   background: var(--paper-2);
@@ -483,6 +483,10 @@ html[data-tr="0"] .doa__tr {
   position: relative;
   padding-block: var(--space-6) var(--space-5);
   scroll-margin-top: calc(var(--chrome-top, var(--nav-h)) + var(--space-5));
+  /* Ayat di luar layar dilewati peramban (paint/layout) — penting di
+     Al-Baqarah 286 ayat. Estimasi tinggi menjaga scrollbar stabil. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
 }
 
 /* Garis pemisah antar ayat — muncul di semua KECUALI yang pertama,
@@ -837,6 +841,7 @@ html[data-tr="0"] .doa__tr {
 }
 
 .mushaf-flow .mushaf-marker {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -844,6 +849,13 @@ html[data-tr="0"] .doa__tr {
   height: 1.9em;
   margin-inline: 0.35em;
   padding: 0;
+  /* Hit-area 44px via ::after transparan — glyph emas tetap kecil,
+     tapi jempol tidak perlu membidik 22px. */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -12px;
+  }
   /* `--gold-text`, bukan `--gold`: penanda ini bisa diklik, jadi batasnya
      harus terlihat (≥3:1). Lihat catatan pada `.ayah-medal__outer`. */
   border: 1px solid var(--gold-text);
