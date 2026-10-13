@@ -266,11 +266,21 @@ textarea {
 }
 
 ::view-transition-old(root) {
-  animation: vt-out var(--dur-fast) var(--ease-out) both;
+  animation:
+    vt-out var(--dur-fast) var(--ease-out) both,
+    page-out var(--dur-fast) var(--ease-out) both;
 }
 
 ::view-transition-new(root) {
   animation: vt-in var(--dur-slow) var(--ease-out) both;
+}
+
+::view-transition-old(.page-out) {
+  animation: page-out var(--dur-fast) var(--ease-out) both;
+}
+
+::view-transition-new(.page-in) {
+  animation: page-in var(--dur-slow) var(--ease-out) both;
 }
 
 @keyframes vt-out {
@@ -280,6 +290,19 @@ textarea {
 }
 
 @keyframes vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes page-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes page-in {
   from {
     opacity: 0;
     transform: translateY(10px);

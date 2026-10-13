@@ -17,10 +17,12 @@ import {
   play,
   prev,
   seek,
+  setReciter,
   setRepeat,
   setSleep,
   setSpeed,
   stop,
+  surahQueue,
   toggle,
   usePlayer,
 } from "@/lib/player";
@@ -61,7 +63,7 @@ export function PlayerPanel() {
         className="mini-player"
         role="region"
         aria-label="Pemutar murottal"
-        style={{ viewTransitionName: "player" }}
+        data-player-anchor
       >
         <div className="audio-dock__progress" aria-hidden="true">
           <MiniProgress />
@@ -99,7 +101,7 @@ export function PlayerPanel() {
       >
         <PanelBody
           onPickAyat={(n) => {
-            play({ s: track.s, n });
+            play({ s: track.s, n }, surahQueue(track.s));
           }}
         />
       </Sheet>
@@ -133,23 +135,12 @@ function MiniProgress() {
 function PanelBody({ onPickAyat }: { onPickAyat: (n: number) => void }) {
   const track = usePlayer((s) => s.track);
   const playing = usePlayer((s) => s.playing);
-  const duration = usePlayer((s) => s.duration);
   const repeat = usePlayer((s) => s.repeat);
   const speed = usePlayer((s) => s.speed);
   const sleepAt = usePlayer((s) => s.sleepAt);
-  const [prefs, updatePrefs] = usePrefs();
-  const [uiPos, setUiPos] = useState(0);
-  const [scrubbing, setScrubbing] = useState(false);
+  const [prefs] = usePrefs();
   const [qariOpen, setQariOpen] = useState(false);
   const [sleepOpen, setSleepOpen] = useState(false);
-
-  useEffect(() => {
-    if (!track) return;
-    const id = window.setInterval(() => {
-      if (!scrubbing) setUiPos(getPosition());
-    }, 250);
-    return () => window.clearInterval(id);
-  }, [track, scrubbing]);
 
   if (!track) return null;
   const total = SURAH[track.s - 1].ayat;
@@ -160,28 +151,9 @@ function PanelBody({ onPickAyat }: { onPickAyat: (n: number) => void }) {
     <div className="ppanel">
       {/* gelombang + waktu */}
       {track.n > 0 ? (
-        <AyahVoiceNote s={track.s} n={track.n} nama={SURAH[track.s - 1].latin} queue={[]} teksLatin="" seed={track.s * 1000 + track.n} />
+        <AyahVoiceNote s={track.s} n={track.n} nama={SURAH[track.s - 1].latin} queue={surahQueue(track.s)} teksLatin="" seed={track.s * 1000 + track.n} />
       ) : (
-        <div className="ppanel__timeline">
-          <span className="audio-dock__time">{formatTime(uiPos)}</span>
-          <input
-            type="range"
-            min={0}
-            max={Math.max(1, Math.floor(duration))}
-            value={Math.floor(Math.min(uiPos, duration || 0))}
-            onChange={(e) => {
-              setScrubbing(true);
-              setUiPos(Number(e.target.value));
-            }}
-            onPointerUp={(e) => {
-              seek(Number((e.target as HTMLInputElement).value));
-              setScrubbing(false);
-            }}
-            className="audio-dock__range ppanel__range"
-            aria-label="Posisi audio"
-          />
-          <span className="audio-dock__time">{formatTime(duration)}</span>
-        </div>
+        <FullTimeline />
       )}
 
       {/* kontrol utama */}
@@ -287,7 +259,7 @@ function PanelBody({ onPickAyat }: { onPickAyat: (n: number) => void }) {
                 aria-selected={q.id === prefs.reciter}
                 className={cn("ppanel__qari-item", q.id === prefs.reciter && "is-active")}
                 onClick={() => {
-                  updatePrefs({ reciter: q.id });
+                  setReciter(q.id);
                   setQariOpen(false);
                 }}
               >
@@ -320,6 +292,47 @@ function PanelBody({ onPickAyat }: { onPickAyat: (n: number) => void }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/** Timeline surah penuh — interval hanya me-render komponen kecil ini,
+ *  bukan seluruh panel (termasuk grid s.d. 286 tombol ayat). */
+function FullTimeline() {
+  const track = usePlayer((s) => s.track);
+  const duration = usePlayer((s) => s.duration);
+  const [uiPos, setUiPos] = useState(0);
+  const [scrubbing, setScrubbing] = useState(false);
+
+  useEffect(() => {
+    if (!track) return;
+    const id = window.setInterval(() => {
+      if (!scrubbing) setUiPos(getPosition());
+    }, 250);
+    return () => window.clearInterval(id);
+  }, [track, scrubbing]);
+
+  if (!track) return null;
+  return (
+    <div className="ppanel__timeline">
+      <span className="audio-dock__time">{formatTime(uiPos)}</span>
+      <input
+        type="range"
+        min={0}
+        max={Math.max(1, Math.floor(duration))}
+        value={Math.floor(Math.min(uiPos, duration || 0))}
+        onChange={(e) => {
+          setScrubbing(true);
+          setUiPos(Number(e.target.value));
+        }}
+        onPointerUp={(e) => {
+          seek(Number((e.target as HTMLInputElement).value));
+          setScrubbing(false);
+        }}
+        className="audio-dock__range ppanel__range"
+        aria-label="Posisi audio"
+      />
+      <span className="audio-dock__time">{formatTime(duration)}</span>
     </div>
   );
 }

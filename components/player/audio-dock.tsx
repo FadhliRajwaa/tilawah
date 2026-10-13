@@ -49,7 +49,7 @@ export function AudioDock() {
       role="region"
       aria-label="Pemutar murottal"
       data-playing={playing ? "true" : "false"}
-      style={{ viewTransitionName: "player" }}
+      data-player-anchor
     >
       <div className="audio-dock__progress" aria-hidden="true">
         <div className="audio-dock__progress-fill" style={{ transform: `scaleX(${pct / 100})` }} />

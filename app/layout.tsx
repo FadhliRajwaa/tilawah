@@ -7,10 +7,12 @@ import { SiteFooter } from "@/components/site-footer";
 import { AudioDock } from "@/components/player/audio-dock";
 import { PlayerPanel } from "@/components/player/player-panel";
 import { Tabbar } from "@/components/tabbar";
+import { ChromeSpace } from "@/components/chrome-space";
 import { ThemeScript } from "@/components/theme-script";
 import { WatercolorBg } from "@/components/watercolor-bg";
 import { LightboxProvider } from "@/components/image-lightbox";
 import { Toaster } from "@/components/toaster";
+import { ViewTransition } from "react";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -112,10 +114,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         </a>
         <LightboxProvider>
           <SiteNav />
-          <main id="konten">{children}</main>
+          <main id="konten">
+            <ViewTransition enter="page-in" exit="page-out" default="none">
+              {children}
+            </ViewTransition>
+          </main>
           <SiteFooter />
           <AudioDock />
           <PlayerPanel />
+          <ChromeSpace />
           <Tabbar />
           <Toaster />
         </LightboxProvider>

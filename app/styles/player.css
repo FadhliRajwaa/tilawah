@@ -35,7 +35,20 @@
   background: var(--accent);
   transform-origin: left center;
   transition: transform 250ms linear;
-  will-change: transform;
+}
+
+/* Jangkar view-transition: hanya SATU elemen bernama per viewport.
+   Dock memilikinya di desktop, mini-player di ponsel. */
+@media (min-width: 901px) {
+  .audio-dock {
+    view-transition-name: player;
+  }
+}
+
+@media (max-width: 900px) {
+  .mini-player {
+    view-transition-name: player;
+  }
 }
 
 .audio-dock__inner {
@@ -262,47 +275,12 @@
   text-align: center;
 }
 
-/* Ruang bawah agar konten tidak tertutup dock */
-body:has(.audio-dock) main {
-  padding-bottom: calc(var(--player-h) + var(--space-6));
-}
-
 /* Di bawah 900px dock desktop digantikan mini-player + panel penuh
    (player-panel.tsx) — bar tiga lapis yang lama selalu menutupi sepertiga
    layar ponsel. */
 @media (max-width: 900px) {
   .audio-dock {
     display: none;
-  }
-}
-
-@media (max-width: 900px) {
-  .audio-dock__inner {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      "meta controls"
-      "timeline timeline"
-      "options options";
-    gap: var(--space-2) var(--space-3);
-    padding-block: var(--space-3);
-  }
-  .audio-dock__meta {
-    grid-area: meta;
-  }
-  .audio-dock__controls {
-    grid-area: controls;
-  }
-  .audio-dock__timeline {
-    grid-area: timeline;
-  }
-  .audio-dock__options {
-    grid-area: options;
-    justify-content: flex-start;
-  }
-  /* Pemilih qari + tombol tutup didorong ke kanan */
-  .audio-dock__options .reciter {
-    margin-inline-start: auto;
   }
 }
 
@@ -338,7 +316,8 @@ body:has(.audio-dock) main {
 .mini-player {
   position: fixed;
   inset-inline: var(--space-3);
-  bottom: calc(var(--space-3) + var(--safe-b));
+  /* di atas tabbar yang terlihat; ChromeSpace memperbarui jarak ini */
+  bottom: calc(var(--space-3) + var(--safe-b) + var(--tabbar-space, 0px));
   z-index: var(--z-dock);
   display: none;
   align-items: center;

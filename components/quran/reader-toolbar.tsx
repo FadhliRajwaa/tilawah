@@ -7,8 +7,9 @@
  * yang benar. Lengket di bawah nav saat menggulir bacaan panjang.
  */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePrefs } from "@/lib/store/prefs";
+import { setReciter } from "@/lib/player";
 import { QARI, qariOf } from "@/lib/audio";
 import { cn } from "@/lib/utils";
 import { IconCheck, IconChevron, IconType } from "@/components/icons";
@@ -20,6 +21,37 @@ export function ReaderBar({ maxAyat }: { maxAyat: number }) {
   const [prefs, updatePrefs] = usePrefs();
   const [qariOpen, setQariOpen] = useState(false);
   const [jump, setJump] = useState("");
+  const qariRef = useRef<HTMLDivElement>(null);
+
+  /* Tutup menu qari saat klik di luar atau Esc — tanpa ini menu hanya
+     tertutup lewat tombol yang sama. */
+  useEffect(() => {
+    if (!qariOpen) return;
+    const onDown = (e: PointerEvent) => {
+      if (qariRef.current && !qariRef.current.contains(e.target as Node)) setQariOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setQariOpen(false);
+    };
+    document.addEventListener("pointerdown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [qariOpen]);
+
+  /* Halaman baca punya chrome atas kedua (bilah ini) — publikasikan agar
+     jangkar ayat tidak tersembunyi di bawahnya. */
+  useEffect(() => {
+    const root = document.documentElement;
+    const prev = root.style.getPropertyValue("--chrome-top");
+    root.style.setProperty("--chrome-top", "calc(var(--nav-h) + var(--bar-h))");
+    return () => {
+      if (prev) root.style.setProperty("--chrome-top", prev);
+      else root.style.removeProperty("--chrome-top");
+    };
+  }, []);
 
   const idx = SCALES.findIndex((s) => s >= prefs.arabicScale - 0.001);
   const qari = qariOf(prefs.reciter);
@@ -27,10 +59,17 @@ export function ReaderBar({ maxAyat }: { maxAyat: number }) {
   const goJump = () => {
     const n = Number(jump);
     if (!Number.isInteger(n) || n < 1 || n > maxAyat) return;
-    /* Cari di kedua mode (per-ayat dan mushaf) */
-    const el =
-      document.querySelector(`[data-ayah="${n}"]`) ??
-      document.getElementById(`m-${n}`);
+    /* Cari di kedua mode. Di juz, ambil ayat pertama surah berjalan yang
+       nomornya cocok dari elemen terdekat di viewport. */
+    const all = document.querySelectorAll<HTMLElement>("[data-ayah]");
+    let el: HTMLElement | null = null;
+    for (const c of all) {
+      if (c.dataset.ayah?.endsWith(`:${n}`)) {
+        el = c;
+        break;
+      }
+    }
+    el ??= document.querySelector<HTMLElement>(`[id^="m-"][id$="-${n}"]`);
     el?.scrollIntoView({ block: "center" });
     setJump("");
   };
@@ -104,7 +143,7 @@ export function ReaderBar({ maxAyat }: { maxAyat: number }) {
         </div>
 
         {/* qari */}
-        <div className="readerbar__qari">
+        <div className="readerbar__qari" ref={qariRef}>
           <button
             type="button"
             className="readerbar__qari-btn"
@@ -127,7 +166,7 @@ export function ReaderBar({ maxAyat }: { maxAyat: number }) {
                   aria-selected={q.id === prefs.reciter}
                   className={cn("readerbar__qari-item", q.id === prefs.reciter && "is-active")}
                   onClick={() => {
-                    updatePrefs({ reciter: q.id });
+                    setReciter(q.id);
                     setQariOpen(false);
                   }}
                 >

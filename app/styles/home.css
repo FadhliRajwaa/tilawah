@@ -888,32 +888,31 @@
   opacity: 0.92;
 }
 
-/* ─── kedalaman foto: dua mekanisme, dipisah lebar layar ───
-   Desktop (≥1025px): transform via JS — main thread lapang.
-   Mobile/tablet: `background-attachment: fixed` — CSS murni yang
-   dikerjakan compositor, jadi mulus tanpa JS sama sekali.
-
-   Keduanya di-render; CSS yang memilih. Tidak ada ketergantungan JS
-   untuk memutuskan, jadi tidak ada kedipan saat ukuran jendela berubah. */
+/* ─── kedalaman foto: satu gambar, digeser hanya di desktop ───
+   Lapisan selalu tampil (gambar diam di ponsel). Transform parallax hanya
+   ditulis JS pada ≥1025px; di bawah itu tidak ada pergeseran sama sekali. */
 
 .ambient--px-host {
-  display: none;
+  display: block;
   position: absolute;
   inset: 0;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
 }
 
 .ambient--px-shift {
   position: absolute;
   inset: 0;
-  top: calc(var(--px-travel, 60vh) * -1);
   display: block;
-  height: calc(100% + var(--px-travel, 60vh) * 2);
-  transform: scale(1.02);
+}
+
+@media (min-width: 1025px) {
+  .ambient--px-shift {
+    top: calc(var(--px-travel, 60vh) * -1);
+    height: calc(100% + var(--px-travel, 60vh) * 2);
+    transform: scale(1.02);
+  }
 }
 
 .ambient--px-host .ambient {
@@ -923,34 +922,6 @@
 
 [data-theme="dark"] .ambient--px-host .ambient--plate img {
   opacity: calc(var(--ambient-opacity, 1) * 0.62);
-}
-
-.ambient--depth {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  display: block;
-  pointer-events: none;
-  background-image: var(--amb-sm);
-  background-position: var(--amb-pos, center);
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-attachment: fixed;
-  opacity: var(--ambient-opacity, 1);
-}
-
-[data-theme="dark"] .ambient--depth {
-  opacity: calc(var(--ambient-opacity, 1) * 0.62);
-}
-
-@media (min-width: 1025px) {
-  .ambient--px-host {
-    display: block;
-  }
-  /* Di desktop latar CSS dilepas sama sekali — biar tidak ada dua gambar */
-  .ambient--depth {
-    display: none;
-  }
 }
 
 /* Konten di atas latar atmosferik harus punya z-index di atas veil (z2) */

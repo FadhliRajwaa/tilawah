@@ -92,6 +92,23 @@ export function Reader({ ayat, surahNomor, nextSurah, juzNomor, rentang }: Props
   const onPlay = useCallback((a: Ayat) => play({ s: a.s, n: a.n }, queue), [queue]);
   const playingKey = playing && track ? `${track.s}:${track.n}` : null;
 
+  /* Ikuti bacaan: saat ayat yang diputar berganti dan ia di luar zona baca,
+     gulir halus ke sana. Dihormati preferensi `follow` dan gerak minimum. */
+  const lastFollowed = useRef<string | null>(null);
+  useEffect(() => {
+    if (!playing || !track || !prefs.follow) return;
+    const key = `${track.s}:${track.n}`;
+    if (lastFollowed.current === key) return;
+    lastFollowed.current = key;
+    const el =
+      document.getElementById(`ayat-${track.s}-${track.n}`) ??
+      document.getElementById(`m-${track.s}-${track.n}`);
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const inZone = r.bottom > window.innerHeight * 0.2 && r.top < window.innerHeight * 0.8;
+    if (!inZone) scrollToEl(el);
+  }, [playing, track, prefs.follow]);
+
   const isBasmalahFirst = !juzNomor && surahNomor !== 1 && surahNomor !== 9 && ayat.length > 0;
 
   return (
@@ -116,7 +133,7 @@ export function Reader({ ayat, surahNomor, nextSurah, juzNomor, rentang }: Props
                 ayah={a}
                 queue={queue}
                 isTarget={target === `${a.s}:${a.n}`}
-                onOpenTafsir={() => openTafsir(a)}
+                onOpenTafsir={openTafsir}
                 idPrefix={`ayat-${a.s}`}
               />
             ))}

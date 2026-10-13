@@ -52,6 +52,7 @@ export const MushafFlow = memo(function MushafFlow({
               <span
                 className={cn("mushaf-ayah", targetN === a.n && "is-target")}
                 id={`m-${a.s}-${a.n}`}
+                data-ayah={`${a.s}:${a.n}`}
               >
                 <button
                   type="button"

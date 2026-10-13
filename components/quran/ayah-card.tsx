@@ -30,7 +30,7 @@ interface Props {
   /** antrean lanjut otomatis (dibangun reader) */
   queue: { s: number; n: number }[];
   isTarget: boolean;
-  onOpenTafsir: (n: number) => void;
+  onOpenTafsir: (a: Ayat) => void;
   /**
    * Awalan id. WAJIB di reader juz (beberapa surah di satu halaman):
    * tanpa itu `ayat-1` muncul berkali-kali dan `getElementById` hanya
@@ -79,7 +79,7 @@ export const AyahCard = memo(function AyahCard({
     <article
       id={idPrefix ? `${idPrefix}-${ayah.n}` : `ayat-${surahNomor}-${ayah.n}`}
       className={cn("ayah", playingThis && "is-active", isTarget && "is-target")}
-      data-ayah={ayah.n}
+      data-ayah={`${surahNomor}:${ayah.n}`}
     >
       <header className="ayah__head">
         <AyahMedal nomor={ayah.n} />
@@ -116,7 +116,7 @@ export const AyahCard = memo(function AyahCard({
         playing={playingThis}
         marked={marked}
         onPlay={handlePlay}
-        onOpenTafsir={() => onOpenTafsir(ayah.n)}
+        onOpenTafsir={() => onOpenTafsir(ayah)}
         onToggleBookmark={handleBookmark}
       />
     </article>

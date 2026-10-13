@@ -481,7 +481,7 @@ html[data-tr="0"] .doa__tr {
 .ayah {
   position: relative;
   padding-block: var(--space-6) var(--space-5);
-  scroll-margin-top: calc(var(--nav-h) + var(--toolbar-h) + var(--space-5));
+  scroll-margin-top: calc(var(--chrome-top, var(--nav-h)) + var(--space-5));
 }
 
 /* Garis pemisah antar ayat — muncul di semua KECUALI yang pertama,
@@ -1299,78 +1299,6 @@ html[data-tr="0"] .doa__tr {
   font-size: var(--text-xs);
   font-weight: var(--weight-semibold);
   letter-spacing: 0.04em;
-}
-
-/* ─── pembatas antar surah di dalam juz ─── */
-.juz-surah-divider {
-  margin-block: var(--space-6) var(--space-4);
-  text-align: center;
-}
-
-.juz-surah-divider__body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-  margin-top: var(--space-3);
-}
-
-/* Label "Lanjutan" saat juz mulai di tengah surah. Penting: tanpa ini
-   pembaca mengira juz memuat surah itu dari awal. */
-.juz-surah-divider__tag {
-  display: inline-block;
-  margin-bottom: var(--space-2);
-  padding: 2px 10px;
-  border-radius: var(--radius-full);
-  background: var(--gold-soft);
-  color: var(--gold-text);
-  font-size: var(--text-2xs);
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-}
-
-.juz-surah-divider__ar {
-  font-family: var(--font-arabic);
-  font-size: var(--text-2xl);
-  line-height: 1.5;
-  color: var(--ink);
-}
-
-.juz-surah-divider__name {
-  font-family: var(--font-display);
-  font-size: var(--text-lg);
-  font-weight: var(--weight-semibold);
-  color: var(--accent);
-  text-decoration: none;
-}
-
-.juz-surah-divider__arti {
-  color: var(--muted);
-  font-size: var(--text-xs);
-}
-
-/* ─── penutup halaman juz ─── */
-.juz-foot {
-  margin-top: var(--space-8);
-  padding-top: var(--space-6);
-  border-top: 1px solid var(--rule);
-  text-align: center;
-}
-
-.juz-foot__label {
-  margin: var(--space-4) 0 var(--space-5);
-  font-family: var(--font-display);
-  font-size: var(--text-lg);
-  font-weight: var(--weight-semibold);
-  color: var(--ink-2);
-}
-
-.juz-foot__actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--space-3);
 }
 
 @media (max-width: 640px) {

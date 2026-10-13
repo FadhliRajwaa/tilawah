@@ -239,6 +239,10 @@
   --tab-h: 58px;
   /* area aman bawah (iPhone tanpa tombol home) — 0 di perangkat lain */
   --safe-b: env(safe-area-inset-bottom, 0px);
+  /* jarak bebas bawah dinamis — ditulis ChromeSpace. Nol saat tidak ada
+     pemutar mini dan tabbar tersembunyi. */
+  --chrome-bottom: 0px;
+  --chrome-top: var(--nav-h);
 
   /* Z-index — skala bernama, tidak ada 9999 */
   --z-base: 1;

@@ -22,7 +22,6 @@ export function TafsirSheet({
 }) {
   const [teks, setTeks] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const key = target ? `${target.s}:${target.n}` : "";
 
   useEffect(() => {
     if (!target) return;
@@ -56,7 +55,6 @@ export function TafsirSheet({
 
   return (
     <Sheet
-      key={key}
       open={target !== null}
       onClose={onClose}
       title="Tafsir Kemenag"
@@ -70,8 +68,8 @@ export function TafsirSheet({
         </div>
       ) : teks ? (
         <>
-          <p className="modal__text">{teks}</p>
-          <p className="modal__source">Sumber: Tafsir Kemenag RI — via equran.id</p>
+          <p className="tafsir__text">{teks}</p>
+          <p className="tafsir__source">Sumber: Tafsir Kemenag RI — via equran.id</p>
         </>
       ) : (
         <p className="t-muted">Tafsir untuk ayat ini belum tersedia.</p>
